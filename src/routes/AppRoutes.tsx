@@ -30,8 +30,6 @@ import CheckInPage from '../features/visitors/pages/CheckInPage';
 import CheckOutPage from '../features/visitors/pages/CheckOutPage';
 import VisitorLogPage from '../features/visitors/pages/VisitorLogPage';
 
-// ─── Placeholder pages (replace as you build each module) ─────────
-const ResidentDashboard = () => <div className="p-4">Resident Dashboard — coming soon</div>;
 
 const AppRoutes = () => {
   return (
@@ -66,7 +64,7 @@ const AppRoutes = () => {
         {/* ─── Protected routes (resident only) ───────────────── */}
         <Route element={<ProtectedRoute allowedRoles={['resident']} />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/resident" element={<ResidentDashboard />} />
+            <Route path="/resident" element={<Navigate to="/my-apartment" replace />} />
             <Route path="/my-apartment" element={<MyApartmentPage />} />
             <Route path="/tenant" element={<TenantManagementPage />} />
             <Route path="/tenant/:id" element={<TenantDetailPage />} />

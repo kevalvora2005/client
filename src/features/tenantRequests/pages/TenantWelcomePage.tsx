@@ -26,7 +26,7 @@ const TenantWelcomePage = () => {
   // Redirect anyone who isn't actually a locked tenant away from this page.
   useEffect(() => {
     if (resident && (resident.isOwner || resident.isOccupant)) {
-      navigate('/resident', { replace: true });
+      navigate('/my-apartment', { replace: true });
     }
   }, [resident, navigate]);
 

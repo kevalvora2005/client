@@ -58,7 +58,7 @@ export const useResetPassword = () => {
           updateUser({ ...userObj, mustResetPassword: false, resetToken: undefined });
           const role = userObj.role?.toLowerCase();
           if (role === 'resident') {
-            navigate('/resident', { replace: true });
+            navigate('/my-apartment', { replace: true });
           } else if (role === 'security') {
             navigate('/security', { replace: true });
           } else {

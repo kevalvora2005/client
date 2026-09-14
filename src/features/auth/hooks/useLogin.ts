@@ -44,7 +44,7 @@ const useLogin = () => {
           if (role === 'admin') {
             navigate('/residents', { replace: true });
           } else if (role === 'resident') {
-            navigate('/resident', { replace: true });
+            navigate('/my-apartment', { replace: true });
           } else if (role === 'security') {
             navigate('/security', { replace: true });
           } else {

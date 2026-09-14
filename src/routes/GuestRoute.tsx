@@ -19,7 +19,7 @@ const GuestRoute = () => {
     const role = user.role?.toLowerCase();
 
     if (role === 'resident') {
-      return <Navigate to="/resident" replace />;
+      return <Navigate to="/my-apartment" replace />;
     }
     if (role === 'security') {
       return <Navigate to="/security" replace />;

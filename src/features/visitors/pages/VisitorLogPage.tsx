@@ -22,7 +22,7 @@ const VisitorLogPage = () => {
 
   useEffect(() => {
     if (!residentLoading && role === 'resident' && !isCurrentOccupant) {
-      navigate('/resident', { replace: true });
+      navigate('/my-apartment', { replace: true });
     }
   }, [residentLoading, role, isCurrentOccupant, navigate]);
 
@@ -56,16 +56,12 @@ const VisitorLogPage = () => {
     }
   };
 
-  const { respond, cancel, checkIn, checkOut, loading: mutationLoading } = useVisitorMutations(handleRefresh);
+  const { respond, cancel, checkIn, checkOut } = useVisitorMutations(handleRefresh);
 
   const handleSearchClear = () => {
     setSearchInput('');
     setSearchQuery('');
   };
-
-  const pendingVisitors = role === 'resident'
-    ? visitors.filter((v) => v.status === 'Pending')
-    : [];
 
   return (
     <div className="container-fluid p-3 p-md-4">
