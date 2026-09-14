@@ -31,7 +31,6 @@ import CheckOutPage from '../features/visitors/pages/CheckOutPage';
 import VisitorLogPage from '../features/visitors/pages/VisitorLogPage';
 
 // ─── Placeholder pages (replace as you build each module) ─────────
-const Dashboard = () => <div className="p-4">Admin Dashboard — coming soon</div>;
 const ResidentDashboard = () => <div className="p-4">Resident Dashboard — coming soon</div>;
 
 const AppRoutes = () => {
@@ -51,7 +50,7 @@ const AppRoutes = () => {
         {/* ─── Protected routes (admin only) ───────────────── */}
         <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Navigate to="/residents" replace />} />
             <Route path="/residents" element={<ResidentsPage />} />
             <Route path="/residents/:id" element={<ResidentDetailPage />} />
             <Route path="/apartments" element={<ApartmentsPage />} />

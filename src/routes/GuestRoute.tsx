@@ -25,7 +25,7 @@ const GuestRoute = () => {
       return <Navigate to="/security" replace />;
     }
     // Default fallback for admins
-    return <Navigate to="/" replace />;
+    return <Navigate to="/residents" replace />;
   }
 
   // Not logged in → let them see the login page

@@ -62,7 +62,7 @@ export const useResetPassword = () => {
           } else if (role === 'security') {
             navigate('/security', { replace: true });
           } else {
-            navigate('/', { replace: true });
+            navigate('/residents', { replace: true });
           }
         } else {
           navigate('/login', { replace: true });

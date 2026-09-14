@@ -40,7 +40,16 @@ const useLogin = () => {
         } else if (user?.mustResetPassword) {
           navigate('/reset-password', { replace: true });
         } else {
-          navigate('/', { replace: true });
+          const role = user?.role?.toLowerCase();
+          if (role === 'admin') {
+            navigate('/residents', { replace: true });
+          } else if (role === 'resident') {
+            navigate('/resident', { replace: true });
+          } else if (role === 'security') {
+            navigate('/security', { replace: true });
+          } else {
+            navigate('/residents', { replace: true });
+          }
         }
       } catch (err: unknown) {
         const axiosError = err as { response?: { data?: { error?: string } } };
