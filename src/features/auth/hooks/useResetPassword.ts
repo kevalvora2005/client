@@ -13,7 +13,6 @@ export const useResetPassword = () => {
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
 
-  const token = searchParams.get('token') ?? '';
   const emailParam = searchParams.get('email') ?? '';
 
   const [showPassword, setShowPassword] = useState(false);
@@ -21,12 +20,8 @@ export const useResetPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const validationSchema = Yup.object({
-    email: !token
-      ? Yup.string().trim().email('Please provide a valid email').required('Email is required')
-      : Yup.string(),
-    code: !token
-      ? Yup.string().trim().required('Verification code is required')
-      : Yup.string(),
+    email: Yup.string().trim().email('Please provide a valid email').required('Email is required'),
+    code: Yup.string().trim().required('Verification code is required'),
     newPassword: Yup.string()
       .min(8, 'Password must be at least 8 characters')
       .matches(/[A-Z]/, 'Must contain at least one uppercase letter')
@@ -49,13 +44,11 @@ export const useResetPassword = () => {
     onSubmit: async (values) => {
       try {
         setIsLoading(true);
-        const payload = token
-          ? { token, newPassword: values.newPassword }
-          : {
-              email: values.email.trim(),
-              code: values.code.trim(),
-              newPassword: values.newPassword,
-            };
+        const payload = {
+          email: values.email.trim(),
+          code: values.code.trim(),
+          newPassword: values.newPassword,
+        };
 
         const res = await resetPasswordApi(payload);
         if (res?.accessToken) {
@@ -68,7 +61,7 @@ export const useResetPassword = () => {
 
         const userObj = res?.user || user;
         if (userObj) {
-          updateUser({ ...userObj, mustResetPassword: false, resetToken: undefined });
+          updateUser({ ...userObj, mustResetPassword: false });
           const role = userObj.role?.toLowerCase();
           if (role === 'resident') {
             navigate('/my-apartment', { replace: true });
@@ -89,7 +82,6 @@ export const useResetPassword = () => {
   });
 
   return {
-    token,
     formik,
     showPassword,
     setShowPassword,

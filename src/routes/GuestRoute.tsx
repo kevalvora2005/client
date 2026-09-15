@@ -10,10 +10,7 @@ const GuestRoute = () => {
   // Already logged in → redirect away from login page to their proper home
   if (isAuthenticated && user) {
     if (user.mustResetPassword) {
-      if (user.resetToken) {
-        return <Navigate to={`/reset-password?token=${user.resetToken}`} replace />;
-      }
-      return <Navigate to="/reset-password" replace />;
+      return <Navigate to={`/reset-password?email=${encodeURIComponent(user.email)}`} replace />;
     }
 
     const role = user.role?.toLowerCase();

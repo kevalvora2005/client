@@ -38,12 +38,8 @@ const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Logged in but must reset password → redirect to reset password page
   if (user?.mustResetPassword && location.pathname !== '/reset-password') {
-    if (user.resetToken) {
-      return <Navigate to={`/reset-password?token=${user.resetToken}`} replace />;
-    }
-    return <Navigate to="/reset-password" replace />;
+    return <Navigate to={`/reset-password?email=${encodeURIComponent(user.email)}`} replace />;
   }
 
   // Tenant not yet an occupant → gate everything behind the welcome page

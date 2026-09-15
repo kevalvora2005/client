@@ -35,10 +35,8 @@ const useLogin = () => {
           password: values.password,
         });
         showSuccess('Logged in successfully');
-        if (user?.mustResetPassword && user?.resetToken) {
-          navigate(`/reset-password?token=${user.resetToken}`, { replace: true });
-        } else if (user?.mustResetPassword) {
-          navigate('/reset-password', { replace: true });
+        if (user?.mustResetPassword) {
+          navigate(`/reset-password?email=${encodeURIComponent(user.email)}`, { replace: true });
         } else {
           const role = user?.role?.toLowerCase();
           if (role === 'admin') {

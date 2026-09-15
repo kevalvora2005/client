@@ -4,7 +4,6 @@ import { useResetPassword } from '../hooks/useResetPassword';
 
 const ResetPasswordPage = () => {
   const {
-    token,
     formik,
     showPassword,
     setShowPassword,
@@ -65,80 +64,74 @@ const ResetPasswordPage = () => {
 
         <div className="bg-white p-4 p-sm-5 rounded-4 shadow-sm border-0">
           <h2 className="fw-bold fs-3 mb-1" style={{ color: "#111827" }}>
-            {token ? 'Set new password' : 'Reset password'}
+            Reset password
           </h2>
           <p className="text-body-secondary mb-4">
-            {token
-              ? 'Your new password must be at least 8 characters and contain an uppercase letter, a number, and a special character.'
-              : 'Enter your email, the verification code sent to your inbox, and your new password.'}
+            Enter your email, the verification code sent to your inbox, and your new password.
           </p>
 
           <form onSubmit={formik.handleSubmit}>
-            {!token && (
-              <div className="mb-3">
-                <label htmlFor="email" className="form-label fw-bold text-uppercase mb-2" style={labelStyle}>
-                  Email Address
-                </label>
-                <div className="position-relative">
-                  <Mail
-                    size={18}
-                    className="position-absolute top-50 start-0 translate-middle-y ms-3 pe-none"
-                    style={{ color: "#9ca3af" }}
-                  />
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="name@society.com"
-                    value={formik.values.email}
-                    onChange={formik.handleChange}
-                    onBlur={handleBlur}
-                    disabled={isLoading}
-                    className="form-control ps-5 pe-3 py-3 shadow-none"
-                    style={inputStyle(!!(formik.touched.email && formik.errors.email))}
-                    onFocus={handleFocus}
-                  />
-                </div>
-                {formik.touched.email && formik.errors.email && (
-                  <div className="text-danger mt-1" style={{ fontSize: "0.8rem" }}>
-                    {formik.errors.email}
-                  </div>
-                )}
+            <div className="mb-3">
+              <label htmlFor="email" className="form-label fw-bold text-uppercase mb-2" style={labelStyle}>
+                Email Address
+              </label>
+              <div className="position-relative">
+                <Mail
+                  size={18}
+                  className="position-absolute top-50 start-0 translate-middle-y ms-3 pe-none"
+                  style={{ color: "#9ca3af" }}
+                />
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="name@society.com"
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  onBlur={handleBlur}
+                  disabled={isLoading}
+                  className="form-control ps-5 pe-3 py-3 shadow-none"
+                  style={inputStyle(!!(formik.touched.email && formik.errors.email))}
+                  onFocus={handleFocus}
+                />
               </div>
-            )}
+              {formik.touched.email && formik.errors.email && (
+                <div className="text-danger mt-1" style={{ fontSize: "0.8rem" }}>
+                  {formik.errors.email}
+                </div>
+              )}
+            </div>
 
-            {!token && (
-              <div className="mb-3">
-                <label htmlFor="code" className="form-label fw-bold text-uppercase mb-2" style={labelStyle}>
-                  Verification Code
-                </label>
-                <div className="position-relative">
-                  <KeyRound
-                    size={18}
-                    className="position-absolute top-50 start-0 translate-middle-y ms-3 pe-none"
-                    style={{ color: "#9ca3af" }}
-                  />
-                  <input
-                    type="text"
-                    id="code"
-                    name="code"
-                    placeholder="Enter code from email"
-                    value={formik.values.code}
-                    onChange={formik.handleChange}
-                    onBlur={handleBlur}
-                    disabled={isLoading}
-                    className="form-control ps-5 pe-3 py-3 shadow-none"
-                    style={inputStyle(!!(formik.touched.code && formik.errors.code))}
-                    onFocus={handleFocus}
-                  />
-                </div>
-                {formik.touched.code && formik.errors.code && (
-                  <div className="text-danger mt-1" style={{ fontSize: "0.8rem" }}>
-                    {formik.errors.code}
-                  </div>
-                )}
+            <div className="mb-3">
+              <label htmlFor="code" className="form-label fw-bold text-uppercase mb-2" style={labelStyle}>
+                Verification Code
+              </label>
+              <div className="position-relative">
+                <KeyRound
+                  size={18}
+                  className="position-absolute top-50 start-0 translate-middle-y ms-3 pe-none"
+                  style={{ color: "#9ca3af" }}
+                />
+                <input
+                  type="text"
+                  id="code"
+                  name="code"
+                  placeholder="Enter code from email"
+                  value={formik.values.code}
+                  onChange={formik.handleChange}
+                  onBlur={handleBlur}
+                  disabled={isLoading}
+                  className="form-control ps-5 pe-3 py-3 shadow-none"
+                  style={inputStyle(!!(formik.touched.code && formik.errors.code))}
+                  onFocus={handleFocus}
+                />
               </div>
-            )}
+              {formik.touched.code && formik.errors.code && (
+                <div className="text-danger mt-1" style={{ fontSize: "0.8rem" }}>
+                  {formik.errors.code}
+                </div>
+              )}
+            </div>
 
             <div className="mb-3">
               <label htmlFor="newPassword" className="form-label fw-bold text-uppercase mb-2" style={labelStyle}>
