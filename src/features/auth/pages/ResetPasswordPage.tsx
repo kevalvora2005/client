@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Lock, Eye, EyeOff, Home, ArrowLeft } from 'lucide-react';
+import { Lock, Eye, EyeOff, Home, ArrowLeft, Mail, KeyRound } from 'lucide-react';
 import { useResetPassword } from '../hooks/useResetPassword';
 
 const ResetPasswordPage = () => {
@@ -46,51 +46,9 @@ const ResetPasswordPage = () => {
     borderRadius: "8px",
   });
 
-  // ── Render Case 1: Invalid/Missing Token ──
-  if (!token) {
-    return (
-      <div className="d-flex align-items-center justify-content-center min-vh-100 bg-body-tertiary px-3 py-4">
-        <div className="w-100" style={{ maxWidth: "480px" }}>
-          <div className="bg-white p-4 p-sm-5 rounded-4 shadow-sm border-0 text-center">
-            <div
-              className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
-              style={{ width: "64px", height: "64px", backgroundColor: "#fef2f2", color: "#dc2626" }}
-            >
-              <Lock size={28} strokeWidth={1.75} />
-            </div>
-            <h2 className="fw-bold fs-3 mb-1" style={{ color: "#111827" }}>Invalid reset link</h2>
-            <p className="text-body-secondary mb-4">
-              This password reset link is invalid or has expired. Please request a new one.
-            </p>
-            <Link
-              to="/forgot-password"
-              className="btn w-100 fw-bold py-3 d-flex align-items-center justify-content-center border-0 text-decoration-none mb-3"
-              style={submitBtnStyle()}
-            >
-              REQUEST NEW LINK
-            </Link>
-            <div>
-              <Link
-                to="/login"
-                className="d-inline-flex align-items-center gap-2 fw-semibold text-decoration-none"
-                style={linkStyle}
-                onMouseEnter={(e) => e.currentTarget.style.color = "#111827"}
-                onMouseLeave={(e) => e.currentTarget.style.color = "#374151"}
-              >
-                <ArrowLeft size={16} strokeWidth={2} /> Back to login
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Render Case 2: Valid Token / Password Form ──
   return (
     <div className="d-flex align-items-center justify-content-center min-vh-100 bg-body-tertiary px-3 py-4">
       <div className="w-100" style={{ maxWidth: "480px" }}>
-        {/* Brand */}
         <div className="text-center mb-4">
           <div className="d-inline-flex align-items-center gap-2 mb-2">
             <div
@@ -106,13 +64,82 @@ const ResetPasswordPage = () => {
         </div>
 
         <div className="bg-white p-4 p-sm-5 rounded-4 shadow-sm border-0">
-          <h2 className="fw-bold fs-3 mb-1" style={{ color: "#111827" }}>Set new password</h2>
+          <h2 className="fw-bold fs-3 mb-1" style={{ color: "#111827" }}>
+            {token ? 'Set new password' : 'Reset password'}
+          </h2>
           <p className="text-body-secondary mb-4">
-            Your new password must be at least 8 characters and contain an uppercase letter, a number, and a special character.
+            {token
+              ? 'Your new password must be at least 8 characters and contain an uppercase letter, a number, and a special character.'
+              : 'Enter your email, the verification code sent to your inbox, and your new password.'}
           </p>
 
           <form onSubmit={formik.handleSubmit}>
-            {/* New Password */}
+            {!token && (
+              <div className="mb-3">
+                <label htmlFor="email" className="form-label fw-bold text-uppercase mb-2" style={labelStyle}>
+                  Email Address
+                </label>
+                <div className="position-relative">
+                  <Mail
+                    size={18}
+                    className="position-absolute top-50 start-0 translate-middle-y ms-3 pe-none"
+                    style={{ color: "#9ca3af" }}
+                  />
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="name@society.com"
+                    value={formik.values.email}
+                    onChange={formik.handleChange}
+                    onBlur={handleBlur}
+                    disabled={isLoading}
+                    className="form-control ps-5 pe-3 py-3 shadow-none"
+                    style={inputStyle(!!(formik.touched.email && formik.errors.email))}
+                    onFocus={handleFocus}
+                  />
+                </div>
+                {formik.touched.email && formik.errors.email && (
+                  <div className="text-danger mt-1" style={{ fontSize: "0.8rem" }}>
+                    {formik.errors.email}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!token && (
+              <div className="mb-3">
+                <label htmlFor="code" className="form-label fw-bold text-uppercase mb-2" style={labelStyle}>
+                  Verification Code
+                </label>
+                <div className="position-relative">
+                  <KeyRound
+                    size={18}
+                    className="position-absolute top-50 start-0 translate-middle-y ms-3 pe-none"
+                    style={{ color: "#9ca3af" }}
+                  />
+                  <input
+                    type="text"
+                    id="code"
+                    name="code"
+                    placeholder="Enter code from email"
+                    value={formik.values.code}
+                    onChange={formik.handleChange}
+                    onBlur={handleBlur}
+                    disabled={isLoading}
+                    className="form-control ps-5 pe-3 py-3 shadow-none"
+                    style={inputStyle(!!(formik.touched.code && formik.errors.code))}
+                    onFocus={handleFocus}
+                  />
+                </div>
+                {formik.touched.code && formik.errors.code && (
+                  <div className="text-danger mt-1" style={{ fontSize: "0.8rem" }}>
+                    {formik.errors.code}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="mb-3">
               <label htmlFor="newPassword" className="form-label fw-bold text-uppercase mb-2" style={labelStyle}>
                 New Password
@@ -130,7 +157,7 @@ const ResetPasswordPage = () => {
                   placeholder="Min 8 characters"
                   value={formik.values.newPassword}
                   onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
+                  onBlur={handleBlur}
                   disabled={isLoading}
                   className="form-control ps-5 pe-5 py-3 shadow-none"
                   style={inputStyle(!!(formik.touched.newPassword && formik.errors.newPassword))}
@@ -152,7 +179,6 @@ const ResetPasswordPage = () => {
               )}
             </div>
 
-            {/* Confirm Password */}
             <div className="mb-4">
               <label htmlFor="confirmPassword" className="form-label fw-bold text-uppercase mb-2" style={labelStyle}>
                 Confirm Password
@@ -170,7 +196,7 @@ const ResetPasswordPage = () => {
                   placeholder="Re-enter new password"
                   value={formik.values.confirmPassword}
                   onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
+                  onBlur={handleBlur}
                   disabled={isLoading}
                   className="form-control ps-5 pe-5 py-3 shadow-none"
                   style={inputStyle(!!(formik.touched.confirmPassword && formik.errors.confirmPassword))}
@@ -192,7 +218,6 @@ const ResetPasswordPage = () => {
               )}
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={isLoading}
@@ -206,7 +231,6 @@ const ResetPasswordPage = () => {
               ) : 'RESET PASSWORD'}
             </button>
 
-            {/* Back to login */}
             <div className="text-center">
               <Link
                 to="/login"

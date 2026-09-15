@@ -46,8 +46,22 @@ export const forgotPasswordApi = async (email: string): Promise<void> => {
   await api.post('/auth/forgot-password', { email });
 };
 
+export interface ResetPasswordPayload {
+  email?: string;
+  code?: string;
+  token?: string;
+  newPassword: string;
+}
+
 // ─── Reset password ───────────────────────────────────────────────
-export const resetPasswordApi = async (token: string, newPassword: string): Promise<AuthResponse> => {
-  const response = await api.post<ApiResponse<AuthResponse>>('/auth/reset-password', { token, newPassword });
+export const resetPasswordApi = async (
+  payloadOrToken: ResetPasswordPayload | string,
+  newPassword?: string
+): Promise<AuthResponse> => {
+  const payload =
+    typeof payloadOrToken === 'string'
+      ? { token: payloadOrToken, newPassword: newPassword! }
+      : payloadOrToken;
+  const response = await api.post<ApiResponse<AuthResponse>>('/auth/reset-password', payload);
   return response.data.data;
 };

@@ -9,7 +9,6 @@ const ForgotPasswordPage = () => {
     <div className="d-flex align-items-center justify-content-center min-vh-100 bg-body-tertiary px-3 py-4">
       <div className="w-100" style={{ maxWidth: "480px" }}>
 
-        {/* Brand */}
         <div className="text-center mb-4">
           <div className="d-inline-flex align-items-center gap-2 mb-2">
             <div
@@ -24,11 +23,8 @@ const ForgotPasswordPage = () => {
           </div>
         </div>
 
-        {/* Card */}
         <div className="bg-white p-4 p-sm-5 rounded-4 shadow-sm border-0">
           {isSubmitted ? (
-
-            /* ── Success state ── */
             <div className="d-flex flex-column align-items-center text-center">
               <div
                 className="rounded-circle d-flex align-items-center justify-content-center mb-3"
@@ -39,17 +35,32 @@ const ForgotPasswordPage = () => {
               <h2 className="fw-bold fs-3 mb-1" style={{ color: "#111827" }}>Check your email</h2>
               <p className="text-body-secondary mb-4">
                 If an account exists for <strong>{formik.values.email}</strong>, we've sent
-                a password reset link. Check your inbox and spam folder.
+                a verification code. Check your inbox and spam folder.
               </p>
               <p
                 className="m-0 border rounded-2 px-3 py-2 text-body-secondary"
                 style={{ fontSize: "0.85rem", backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
               >
-                The link expires in <strong>10 minutes</strong>.
+                The verification code expires in <strong>10 minutes</strong>.
               </p>
               <Link
+                to={`/reset-password?email=${encodeURIComponent(formik.values.email.trim())}`}
+                className="btn w-100 fw-bold py-3 mt-4 border-0 d-flex align-items-center justify-content-center"
+                style={{
+                  backgroundColor: "#111827",
+                  color: "#ffffff",
+                  fontSize: "0.875rem",
+                  letterSpacing: "0.08em",
+                  borderRadius: "8px",
+                  height: "38px",
+                  textDecoration: "none"
+                }}
+              >
+                ENTER VERIFICATION CODE
+              </Link>
+              <Link
                 to="/login"
-                className="d-inline-flex align-items-center gap-2 mt-4 fw-semibold text-decoration-none"
+                className="d-inline-flex align-items-center gap-2 mt-3 fw-semibold text-decoration-none"
                 style={{ fontSize: "0.875rem", color: "#374151", transition: "color 0.15s ease" }}
                 onMouseEnter={(e) => e.currentTarget.style.color = "#111827"}
                 onMouseLeave={(e) => e.currentTarget.style.color = "#374151"}
@@ -58,19 +69,14 @@ const ForgotPasswordPage = () => {
                 Back to login
               </Link>
             </div>
-
           ) : (
-
-            /* ── Form state ── */
             <>
               <h2 className="fw-bold fs-3 mb-1" style={{ color: "#111827" }}>Forgot password?</h2>
               <p className="text-body-secondary mb-4">
-                Enter your email and we'll send you a link to reset your password.
+                Enter your email and we'll send you a verification code to reset your password.
               </p>
 
               <form onSubmit={formik.handleSubmit}>
-
-                {/* Email */}
                 <div className="mb-4">
                   <label
                     htmlFor="email"
@@ -123,7 +129,6 @@ const ForgotPasswordPage = () => {
                   )}
                 </div>
 
-                {/* Submit */}
                 <button
                   type="submit"
                   disabled={isLoading}
@@ -152,11 +157,10 @@ const ForgotPasswordPage = () => {
                   {isLoading ? (
                     <span className="spinner-border spinner-border-sm mx-auto" role="status" aria-hidden="true" />
                   ) : (
-                    'SEND RESET LINK'
+                    'SEND VERIFICATION CODE'
                   )}
                 </button>
 
-                {/* Back to login */}
                 <div className="text-center">
                   <Link
                     to="/login"

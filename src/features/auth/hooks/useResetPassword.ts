@@ -8,43 +8,56 @@ import { showSuccess, showError } from '../../../utils/toast';
 import useAuth from '../../../hooks/useAuth';
 import { setAccessToken, setRefreshToken } from '../../../config/api';
 
-const validationSchema = Yup.object({
-  newPassword: Yup.string()
-    .min(8, 'Password must be at least 8 characters')
-    .matches(/[A-Z]/, 'Must contain at least one uppercase letter')
-    .matches(/[0-9]/, 'Must contain at least one number')
-    .matches(/[\W_]/, 'Must contain at least one special character')
-    .required('Password is required'),
-  confirmPassword: Yup.string()
-    .oneOf([Yup.ref('newPassword')], 'Passwords do not match')
-    .required('Please confirm your password'),
-});
-
 export const useResetPassword = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
 
   const token = searchParams.get('token') ?? '';
+  const emailParam = searchParams.get('email') ?? '';
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const validationSchema = Yup.object({
+    email: !token
+      ? Yup.string().trim().email('Please provide a valid email').required('Email is required')
+      : Yup.string(),
+    code: !token
+      ? Yup.string().trim().required('Verification code is required')
+      : Yup.string(),
+    newPassword: Yup.string()
+      .min(8, 'Password must be at least 8 characters')
+      .matches(/[A-Z]/, 'Must contain at least one uppercase letter')
+      .matches(/[0-9]/, 'Must contain at least one number')
+      .matches(/[\W_]/, 'Must contain at least one special character')
+      .required('Password is required'),
+    confirmPassword: Yup.string()
+      .oneOf([Yup.ref('newPassword')], 'Passwords do not match')
+      .required('Please confirm your password'),
+  });
+
   const formik = useFormik({
     initialValues: {
+      email: emailParam || user?.email || '',
+      code: '',
       newPassword: '',
       confirmPassword: '',
     },
     validationSchema,
     onSubmit: async (values) => {
-      if (!token) {
-        showError('Invalid or missing reset token. Please request a new reset link.');
-        return;
-      }
       try {
         setIsLoading(true);
-        const res = await resetPasswordApi(token, values.newPassword);
+        const payload = token
+          ? { token, newPassword: values.newPassword }
+          : {
+              email: values.email.trim(),
+              code: values.code.trim(),
+              newPassword: values.newPassword,
+            };
+
+        const res = await resetPasswordApi(payload);
         if (res?.accessToken) {
           setAccessToken(res.accessToken);
         }
@@ -85,3 +98,4 @@ export const useResetPassword = () => {
     isLoading,
   };
 };
+
