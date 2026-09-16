@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Mail, Home, ArrowLeft } from 'lucide-react';
 import { useForgotPassword } from '../hooks/useForgotPassword';
 
 const ForgotPasswordPage = () => {
+  const { t } = useTranslation();
   const { formik, isLoading, isSubmitted } = useForgotPassword();
 
   return (
@@ -32,16 +34,17 @@ const ForgotPasswordPage = () => {
               >
                 <Mail size={28} strokeWidth={1.75} />
               </div>
-              <h2 className="fw-bold fs-3 mb-1" style={{ color: "#111827" }}>Check your email</h2>
+              <h2 className="fw-bold fs-3 mb-1" style={{ color: "#111827" }}>
+                {t('auth.check_email_title')}
+              </h2>
               <p className="text-body-secondary mb-4">
-                If an account exists for <strong>{formik.values.email}</strong>, we've sent
-                a verification code. Check your inbox and spam folder.
+                {t('auth.check_email_desc', { email: formik.values.email })}
               </p>
               <p
                 className="m-0 border rounded-2 px-3 py-2 text-body-secondary"
                 style={{ fontSize: "0.85rem", backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
               >
-                The verification code expires in <strong>10 minutes</strong>.
+                {t('auth.code_expires_notice')}
               </p>
               <Link
                 to={`/reset-password?email=${encodeURIComponent(formik.values.email.trim())}`}
@@ -56,7 +59,7 @@ const ForgotPasswordPage = () => {
                   textDecoration: "none"
                 }}
               >
-                ENTER VERIFICATION CODE
+                {t('auth.enter_code_btn')}
               </Link>
               <Link
                 to="/login"
@@ -66,14 +69,16 @@ const ForgotPasswordPage = () => {
                 onMouseLeave={(e) => e.currentTarget.style.color = "#374151"}
               >
                 <ArrowLeft size={16} strokeWidth={2} />
-                Back to login
+                {t('auth.back_to_login')}
               </Link>
             </div>
           ) : (
             <>
-              <h2 className="fw-bold fs-3 mb-1" style={{ color: "#111827" }}>Forgot password?</h2>
+              <h2 className="fw-bold fs-3 mb-1" style={{ color: "#111827" }}>
+                {t('auth.forgot_password_title')}
+              </h2>
               <p className="text-body-secondary mb-4">
-                Enter your email and we'll send you a verification code to reset your password.
+                {t('auth.forgot_password_desc')}
               </p>
 
               <form onSubmit={formik.handleSubmit}>
@@ -83,7 +88,7 @@ const ForgotPasswordPage = () => {
                     className="form-label fw-bold text-uppercase mb-2"
                     style={{ fontSize: "0.72rem", letterSpacing: "0.06em", color: "#374151" }}
                   >
-                    Email Address
+                    {t('auth.email_address')}
                   </label>
                   <div className="position-relative">
                     <Mail
@@ -94,7 +99,7 @@ const ForgotPasswordPage = () => {
                     <input
                       type="email"
                       id="email"
-                      placeholder="name@society.com"
+                      placeholder={t('auth.email_placeholder')}
                       {...formik.getFieldProps('email')}
                       autoComplete="email"
                       disabled={isLoading}
@@ -157,7 +162,7 @@ const ForgotPasswordPage = () => {
                   {isLoading ? (
                     <span className="spinner-border spinner-border-sm mx-auto" role="status" aria-hidden="true" />
                   ) : (
-                    'SEND VERIFICATION CODE'
+                    t('auth.send_code_btn')
                   )}
                 </button>
 
@@ -170,7 +175,7 @@ const ForgotPasswordPage = () => {
                     onMouseLeave={(e) => e.currentTarget.style.color = "#374151"}
                   >
                     <ArrowLeft size={16} strokeWidth={2} />
-                    Back to login
+                    {t('auth.back_to_login')}
                   </Link>
                 </div>
 

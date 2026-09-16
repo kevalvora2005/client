@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Lock, Eye, EyeOff, Home, ArrowLeft, Mail, KeyRound } from 'lucide-react';
 import { useResetPassword } from '../hooks/useResetPassword';
 
 const ResetPasswordPage = () => {
+  const { t } = useTranslation();
   const {
     formik,
     showPassword,
@@ -64,16 +66,16 @@ const ResetPasswordPage = () => {
 
         <div className="bg-white p-4 p-sm-5 rounded-4 shadow-sm border-0">
           <h2 className="fw-bold fs-3 mb-1" style={{ color: "#111827" }}>
-            Reset password
+            {t('auth.reset_password_title')}
           </h2>
           <p className="text-body-secondary mb-4">
-            Enter your email, the verification code sent to your inbox, and your new password.
+            {t('auth.reset_password_desc')}
           </p>
 
           <form onSubmit={formik.handleSubmit}>
             <div className="mb-3">
               <label htmlFor="email" className="form-label fw-bold text-uppercase mb-2" style={labelStyle}>
-                Email Address
+                {t('auth.email_address')}
               </label>
               <div className="position-relative">
                 <Mail
@@ -85,7 +87,7 @@ const ResetPasswordPage = () => {
                   type="email"
                   id="email"
                   name="email"
-                  placeholder="name@society.com"
+                  placeholder={t('auth.email_placeholder')}
                   value={formik.values.email}
                   onChange={formik.handleChange}
                   onBlur={handleBlur}
@@ -104,7 +106,7 @@ const ResetPasswordPage = () => {
 
             <div className="mb-3">
               <label htmlFor="code" className="form-label fw-bold text-uppercase mb-2" style={labelStyle}>
-                Verification Code
+                {t('auth.verification_code')}
               </label>
               <div className="position-relative">
                 <KeyRound
@@ -116,7 +118,7 @@ const ResetPasswordPage = () => {
                   type="text"
                   id="code"
                   name="code"
-                  placeholder="Enter code from email"
+                  placeholder={t('auth.verification_code_placeholder')}
                   value={formik.values.code}
                   onChange={formik.handleChange}
                   onBlur={handleBlur}
@@ -135,7 +137,7 @@ const ResetPasswordPage = () => {
 
             <div className="mb-3">
               <label htmlFor="newPassword" className="form-label fw-bold text-uppercase mb-2" style={labelStyle}>
-                New Password
+                {t('auth.new_password')}
               </label>
               <div className="position-relative">
                 <Lock
@@ -147,7 +149,7 @@ const ResetPasswordPage = () => {
                   type={showPassword ? 'text' : 'password'}
                   id="newPassword"
                   name="newPassword"
-                  placeholder="Min 8 characters"
+                  placeholder={t('auth.new_password_placeholder')}
                   value={formik.values.newPassword}
                   onChange={formik.handleChange}
                   onBlur={handleBlur}
@@ -174,7 +176,7 @@ const ResetPasswordPage = () => {
 
             <div className="mb-4">
               <label htmlFor="confirmPassword" className="form-label fw-bold text-uppercase mb-2" style={labelStyle}>
-                Confirm Password
+                {t('auth.confirm_password')}
               </label>
               <div className="position-relative">
                 <Lock
@@ -186,7 +188,7 @@ const ResetPasswordPage = () => {
                   type={showConfirmPassword ? 'text' : 'password'}
                   id="confirmPassword"
                   name="confirmPassword"
-                  placeholder="Re-enter new password"
+                  placeholder={t('auth.confirm_password_placeholder')}
                   value={formik.values.confirmPassword}
                   onChange={formik.handleChange}
                   onBlur={handleBlur}
@@ -221,7 +223,7 @@ const ResetPasswordPage = () => {
             >
               {isLoading ? (
                 <span className="spinner-border spinner-border-sm mx-auto" role="status" aria-hidden="true" />
-              ) : 'RESET PASSWORD'}
+              ) : t('auth.reset_password_btn')}
             </button>
 
             <div className="text-center">
@@ -232,7 +234,7 @@ const ResetPasswordPage = () => {
                 onMouseEnter={(e) => e.currentTarget.style.color = "#111827"}
                 onMouseLeave={(e) => e.currentTarget.style.color = "#374151"}
               >
-                <ArrowLeft size={16} strokeWidth={2} /> Back to login
+                <ArrowLeft size={16} strokeWidth={2} /> {t('auth.back_to_login')}
               </Link>
             </div>
           </form>

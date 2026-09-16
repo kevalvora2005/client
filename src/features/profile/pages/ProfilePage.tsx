@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import useAuth from '../../../hooks/useAuth';
 import { useProfile } from '../hooks/useProfile';
 import PersonalInfoForm from '../components/PersonalInfoForm';
@@ -5,6 +6,7 @@ import ChangePasswordForm from '../components/ChangePasswordForm';
 import { getAvatarColor, getInitials } from '../../residents/components/residentTableHelpers';
 
 const ProfilePage = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { updateProfile, updateLoading, changePassword, passwordLoading } = useProfile();
 
@@ -50,12 +52,12 @@ const ProfilePage = () => {
           <div className="d-flex gap-2">
             {/* Role Badge */}
             <span className="badge rounded-pill text-capitalize bg-primary-subtle text-primary px-2.5 py-1.5 fw-medium">
-              {user.role}
+              {t(`roles.${user.role?.toLowerCase()}`)}
             </span>
             {/* Status Badge */}
             <span className={`badge rounded-pill text-capitalize px-2.5 py-1.5 fw-medium ${user.isActive ? 'bg-success-subtle text-success' : 'bg-light text-secondary border'
               }`}>
-              {user.isActive ? 'Active' : 'Inactive'}
+              {user.isActive ? t('common.active') : t('common.inactive')}
             </span>
           </div>
         </div>

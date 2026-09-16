@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { profileApi } from "../api/profileApi";
 import type { UpdateProfilePayload, ChangePasswordPayload } from "../types/profile.types";
 import { getErrorMessage } from "../../../utils/getErrorMessage";
@@ -6,6 +7,7 @@ import { showSuccess, showError } from "../../../utils/toast";
 import useAuth from "../../../hooks/useAuth";
 
 export const useProfile = () => {
+  const { t } = useTranslation();
   const { updateUser } = useAuth(); 
   const [updateLoading, setUpdateLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
@@ -15,10 +17,10 @@ export const useProfile = () => {
       setUpdateLoading(true);
       await profileApi.updateProfile(payload);
       updateUser(payload); 
-      showSuccess("Profile updated successfully");
+      showSuccess('profile.profile_updated');
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to update profile"));
+      showError(getErrorMessage(err, t('profile.update_profile_failed')));
       return false;
     } finally {
       setUpdateLoading(false);
@@ -29,10 +31,10 @@ export const useProfile = () => {
     try {
       setPasswordLoading(true);
       await profileApi.changePassword(payload);
-      showSuccess("Password changed successfully");
+      showSuccess('profile.password_changed');
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to change password"));
+      showError(getErrorMessage(err, t('profile.change_password_failed')));
       return false;
     } finally {
       setPasswordLoading(false);

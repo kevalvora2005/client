@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { PaginatedResult } from '../../types/pagination.types';
 import Select from '../Select/Select';
 
@@ -14,12 +15,16 @@ const Pagination = ({
   onPageSizeChange,
   pageSizeOptions = [5, 10, 20, 50],
 }: PaginationProps) => {
+  const { t, i18n } = useTranslation();
+  const formatNumber = (num: number) => new Intl.NumberFormat(i18n.language || 'en').format(num);
+
   const { hasNextPage, hasPreviousPage } = pagination || {};
 
   const safePageNumber = Number(pagination?.pageNumber) || 1;
   const safePageSize = Number(pagination?.pageSize) || 10;
   const safeTotalCount = Number(pagination?.totalCount) || 0;
   const safeTotalPages = Number(pagination?.totalPages) || 0;
+
 
   if (safeTotalPages === 0 || safeTotalCount === 0) return null;
 
@@ -70,14 +75,16 @@ const Pagination = ({
       style={{ gap: "12px" }}
     >
       <span className="text-muted" style={{ fontSize: "0.875rem" }}>
-        Showing <strong className="text-dark">{from}</strong>–
-        <strong className="text-dark">{to}</strong> of{" "}
-        <strong className="text-dark">{safeTotalCount}</strong>
+        {t('pagination.showing')}{' '}
+        <strong className="text-dark">{formatNumber(from)}</strong>–
+        <strong className="text-dark">{formatNumber(to)}</strong>{' '}
+        {t('pagination.of')}{' '}
+        <strong className="text-dark">{formatNumber(safeTotalCount)}</strong>
       </span>
 
       {onPageSizeChange && (
         <label className="d-flex align-items-center gap-2 text-muted" style={{ fontSize: "0.875rem" }}>
-          Rows per page
+          {t('pagination.rows_per_page')}
           <Select
             name="pageSize"
             value={String(safePageSize)}
@@ -93,8 +100,8 @@ const Pagination = ({
           style={{ ...navBtnStyle, ...(!hasPreviousPage ? disabledStyle : {}) }}
           onClick={() => onPageChange(1)}
           disabled={!hasPreviousPage}
-          aria-label="First page"
-          title="First page"
+          aria-label={t('pagination.first_page')}
+          title={t('pagination.first_page')}
         >
           «
         </button>
@@ -104,8 +111,8 @@ const Pagination = ({
           style={{ ...navBtnStyle, ...(!hasPreviousPage ? disabledStyle : {}) }}
           onClick={() => onPageChange(safePageNumber - 1)}
           disabled={!hasPreviousPage}
-          aria-label="Previous page"
-          title="Previous page"
+          aria-label={t('pagination.previous_page')}
+          title={t('pagination.previous_page')}
         >
           ‹
         </button>
@@ -126,7 +133,7 @@ const Pagination = ({
               style={btnStyle}
               onClick={() => onPageChange(page as number)}
             >
-              {page}
+              {formatNumber(page as number)}
             </button>
           )
         )}
@@ -136,8 +143,8 @@ const Pagination = ({
           style={{ ...navBtnStyle, ...(!hasNextPage ? disabledStyle : {}) }}
           onClick={() => onPageChange(safePageNumber + 1)}
           disabled={!hasNextPage}
-          aria-label="Next page"
-          title="Next page"
+          aria-label={t('pagination.next_page')}
+          title={t('pagination.next_page')}
         >
           ›
         </button>
@@ -147,8 +154,8 @@ const Pagination = ({
           style={{ ...navBtnStyle, ...(!hasNextPage ? disabledStyle : {}) }}
           onClick={() => onPageChange(safeTotalPages)}
           disabled={!hasNextPage}
-          aria-label="Last page"
-          title="Last page"
+          aria-label={t('pagination.last_page')}
+          title={t('pagination.last_page')}
         >
           »
         </button>

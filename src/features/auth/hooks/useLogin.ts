@@ -5,16 +5,11 @@ import * as Yup from 'yup';
 import useAuth from '../../../hooks/useAuth';
 import { showError, showSuccess } from '../../../utils/toast';
 
-const validationSchema = Yup.object({
-  identifier: Yup.string()
-    .trim()
-    .required('Email or phone number is required'),
-  password: Yup.string()
-    .min(1, 'Password is required')
-    .required('Password is required'),
-});
+import { getErrorMessage } from '../../../utils/getErrorMessage';
+import { useTranslation } from 'react-i18next';
 
 const useLogin = () => {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -26,7 +21,14 @@ const useLogin = () => {
       identifier: '',
       password: '',
     },
-    validationSchema,
+    validationSchema: Yup.object({
+      identifier: Yup.string()
+        .trim()
+        .required(t('validation.identifier_req')),
+      password: Yup.string()
+        .min(1, t('validation.password_req'))
+        .required(t('validation.password_req')),
+    }),
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
@@ -34,7 +36,7 @@ const useLogin = () => {
           identifier: values.identifier.trim(),
           password: values.password,
         });
-        showSuccess('Logged in successfully');
+        showSuccess('auth.login_success');
         if (user?.mustResetPassword) {
           navigate(`/reset-password?email=${encodeURIComponent(user.email)}`, { replace: true });
         } else {
@@ -50,10 +52,7 @@ const useLogin = () => {
           }
         }
       } catch (err: unknown) {
-        const axiosError = err as { response?: { data?: { error?: string } } };
-        showError(
-          axiosError?.response?.data?.error || 'Invalid credentials.'
-        );
+        showError(getErrorMessage(err, t('auth.invalid_credentials')));
       } finally {
         setIsLoading(false);
       }

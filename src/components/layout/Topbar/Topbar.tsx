@@ -1,6 +1,8 @@
 import { Menu } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import useAuth from '../../../hooks/useAuth';
 import NotificationBell from './NotificationBell';
+import LanguageSelector from './LanguageSelector';
 
 interface TopbarProps {
   onMenuClick: () => void;
@@ -8,6 +10,7 @@ interface TopbarProps {
 
 const Topbar = ({ onMenuClick }: TopbarProps) => {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <div
@@ -24,11 +27,15 @@ const Topbar = ({ onMenuClick }: TopbarProps) => {
           <Menu size={20} strokeWidth={1.8} />
         </button>
         <p className="mb-0" style={{ fontSize: '0.9rem', color: '#374151' }}>
-          Welcome back, <span className="fw-semibold" style={{ color: '#1a1f36' }}>{user?.name ?? 'User'}</span>
+          {t('common.welcome_back_user')}{' '}
+          <span className="fw-semibold" style={{ color: '#1a1f36' }}>
+            {user?.name ?? 'User'}
+          </span>
         </p>
       </div>
 
-      <div className="d-flex align-items-center gap-2">
+      <div className="d-flex align-items-center gap-3">
+        <LanguageSelector />
         <NotificationBell />
       </div>
     </div>

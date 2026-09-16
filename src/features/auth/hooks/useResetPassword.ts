@@ -8,7 +8,10 @@ import { showSuccess, showError } from '../../../utils/toast';
 import useAuth from '../../../hooks/useAuth';
 import { setAccessToken, setRefreshToken } from '../../../config/api';
 
+import { useTranslation } from 'react-i18next';
+
 export const useResetPassword = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
@@ -19,20 +22,6 @@ export const useResetPassword = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const validationSchema = Yup.object({
-    email: Yup.string().trim().email('Please provide a valid email').required('Email is required'),
-    code: Yup.string().trim().required('Verification code is required'),
-    newPassword: Yup.string()
-      .min(8, 'Password must be at least 8 characters')
-      .matches(/[A-Z]/, 'Must contain at least one uppercase letter')
-      .matches(/[0-9]/, 'Must contain at least one number')
-      .matches(/[\W_]/, 'Must contain at least one special character')
-      .required('Password is required'),
-    confirmPassword: Yup.string()
-      .oneOf([Yup.ref('newPassword')], 'Passwords do not match')
-      .required('Please confirm your password'),
-  });
-
   const formik = useFormik({
     initialValues: {
       email: emailParam || user?.email || '',
@@ -40,7 +29,24 @@ export const useResetPassword = () => {
       newPassword: '',
       confirmPassword: '',
     },
-    validationSchema,
+    validationSchema: Yup.object({
+      email: Yup.string()
+        .trim()
+        .email(t('validation.email_invalid'))
+        .required(t('validation.email_req')),
+      code: Yup.string()
+        .trim()
+        .required(t('validation.code_req')),
+      newPassword: Yup.string()
+        .min(8, t('validation.password_min8'))
+        .matches(/[A-Z]/, t('validation.password_uppercase'))
+        .matches(/[0-9]/, t('validation.password_number'))
+        .matches(/[\W_]/, t('validation.password_special'))
+        .required(t('validation.new_password_req')),
+      confirmPassword: Yup.string()
+        .oneOf([Yup.ref('newPassword')], t('validation.password_match'))
+        .required(t('validation.confirm_password_req')),
+    }),
     onSubmit: async (values) => {
       try {
         setIsLoading(true);
@@ -57,7 +63,7 @@ export const useResetPassword = () => {
         if (res?.refreshToken) {
           setRefreshToken(res.refreshToken);
         }
-        showSuccess('Password updated successfully!');
+        showSuccess('auth.password_reset_success');
 
         const userObj = res?.user || user;
         if (userObj) {
@@ -74,7 +80,7 @@ export const useResetPassword = () => {
           navigate('/login', { replace: true });
         }
       } catch (err: unknown) {
-        showError(getErrorMessage(err, 'Failed to reset password. Please try again.'));
+        showError(getErrorMessage(err, t('auth.reset_password_failed')));
       } finally {
         setIsLoading(false);
       }

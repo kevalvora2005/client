@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Download, UploadCloud, FileSpreadsheet } from "lucide-react";
 import { useScrollLock } from "../../hooks/useScrollLock";
 import { showError } from "../../utils/toast";
@@ -22,6 +23,7 @@ export const ImportModal = ({
   onUpload,
   loading,
 }: ImportModalProps) => {
+  const { t } = useTranslation();
   useScrollLock(isOpen);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -65,7 +67,7 @@ export const ImportModal = ({
   const validateAndSetFile = (file: File) => {
     const ext = file.name.split(".").pop()?.toLowerCase();
     if (ext !== "xlsx" && ext !== "xls") {
-      showError("Please select a valid Excel spreadsheet file (.xlsx or .xls)");
+      showError(t('import.invalid_file'));
       setSelectedFile(null);
       return;
     }
@@ -80,7 +82,7 @@ export const ImportModal = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFile) {
-      showError("Please select or drop a file to import");
+      showError(t('import.no_file_selected'));
       return;
     }
     try {
@@ -122,7 +124,7 @@ export const ImportModal = ({
               style={{ top: 18, right: 20, width: 28, height: 28, border: '1px solid #e9ecef', background: '#fff', fontSize: '1.1rem', borderRadius: '6px' }}
               onClick={onClose}
               disabled={isBusy}
-              aria-label="Close"
+              aria-label={t('common.close')}
             >
               <i className="bi bi-x" />
             </button>
@@ -134,10 +136,10 @@ export const ImportModal = ({
               {/* Step 1: Download Template */}
               <div className="mb-4">
                 <h6 className="fw-bold text-dark mb-2" style={{ fontSize: "0.95rem" }}>
-                  1. Download Template Spreadsheet
+                  {t('import.step1_title')}
                 </h6>
                 <p className="text-muted small mb-3">
-                  Download our formatted spreadsheet template to ensure your column headers and data align perfectly.
+                  {t('import.step1_desc')}
                 </p>
                 <a
                   href={templateUrl}
@@ -165,7 +167,7 @@ export const ImportModal = ({
                   }}
                 >
                   <Download size={16} />
-                  Download Excel Template
+                  {t('import.download_template')}
                 </a>
               </div>
 
@@ -174,10 +176,10 @@ export const ImportModal = ({
               {/* Step 2: Upload Excel File */}
               <div>
                 <h6 className="fw-bold text-dark mb-2" style={{ fontSize: "0.95rem" }}>
-                  2. Upload Completed Spreadsheet
+                  {t('import.step2_title')}
                 </h6>
                 <p className="text-muted small mb-3">
-                  Select or drag your filled .xlsx or .xls spreadsheet file below.
+                  {t('import.step2_desc')}
                 </p>
 
                 <input
@@ -236,17 +238,20 @@ export const ImportModal = ({
                           }}
                           className="btn btn-link btn-sm text-danger mt-2 p-0 border-0 fw-medium text-decoration-none"
                         >
-                          Remove file
+                          {t('import.remove_file')}
                         </button>
                       )}
                     </div>
                   ) : (
                     <>
                       <p className="fw-semibold text-dark m-0" style={{ fontSize: "0.9rem" }}>
-                        Drag & drop file here or <span className="text-primary text-decoration-underline">browse</span>
+                        {t('import.drag_drop')}{' '}
+                        <span className="text-primary text-decoration-underline">
+                          {t('import.browse')}
+                        </span>
                       </p>
                       <p className="text-muted small m-0 mt-1">
-                        Supported formats: .xlsx, .xls
+                        {t('import.supported_formats')}
                       </p>
                     </>
                   )}
@@ -263,7 +268,7 @@ export const ImportModal = ({
                 onClick={onClose}
                 disabled={isBusy}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
@@ -272,7 +277,7 @@ export const ImportModal = ({
                 style={{ borderRadius: "8px", fontSize: "0.875rem", backgroundColor: "#1a1f36", borderColor: "#1a1f36" }}
               >
                 {isBusy && <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />}
-                {isBusy ? "Importing Excel..." : "Import Data"}
+                {isBusy ? t('import.importing') : t('import.import_data')}
               </button>
             </div>
           </form>

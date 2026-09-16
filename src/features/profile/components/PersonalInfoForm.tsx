@@ -1,5 +1,6 @@
 import { Mail, Phone, User } from 'lucide-react';
 import { useFormik } from 'formik';
+import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import type { ProfileUser, UpdateProfilePayload } from "../types/profile.types";
 
@@ -10,6 +11,8 @@ interface PersonalInfoFormProps {
 }
 
 const PersonalInfoForm = ({ user, loading, onSubmit }: PersonalInfoFormProps) => {
+  const { t } = useTranslation();
+
   const formik = useFormik({
     initialValues: {
       name: user.name,
@@ -18,14 +21,14 @@ const PersonalInfoForm = ({ user, loading, onSubmit }: PersonalInfoFormProps) =>
     validationSchema: Yup.object({
       name: Yup.string()
         .trim()
-        .min(2, 'Name must be at least 2 characters')
-        .max(100, 'Name must be at most 100 characters')
-        .required('Name is required'),
+        .min(2, t('validation.name_min2'))
+        .max(100, t('validation.name_max100'))
+        .required(t('validation.name_req')),
       phone: Yup.string()
         .trim()
-        .length(10, 'Phone must be exactly 10 digits')
-        .matches(/^\d+$/, 'Phone must contain only digits')
-        .required('Phone is required'),
+        .length(10, t('validation.phone_10'))
+        .matches(/^\d+$/, t('validation.phone_digits'))
+        .required(t('validation.phone_req')),
     }),
     onSubmit: async (values) => {
       await onSubmit(values);
@@ -59,7 +62,7 @@ const PersonalInfoForm = ({ user, loading, onSubmit }: PersonalInfoFormProps) =>
       <div className="d-flex align-items-center justify-content-between border-bottom pb-2 mb-4">
         <h5 className="fs-6 fw-bold text-dark m-0 d-flex align-items-center gap-2">
           <i className="bi bi-person text-secondary" />
-          <span className="ms-1">Personal info</span>
+          <span className="ms-1">{t('profile.personal_info')}</span>
         </h5>
       </div>
 
@@ -71,7 +74,7 @@ const PersonalInfoForm = ({ user, loading, onSubmit }: PersonalInfoFormProps) =>
             htmlFor="name"
             style={{ fontSize: "0.72rem", letterSpacing: "0.06em", color: "#374151" }}
           >
-            Full name
+            {t('profile.full_name')}
           </label>
           <div className="position-relative d-flex align-items-center">
             <User
@@ -82,7 +85,7 @@ const PersonalInfoForm = ({ user, loading, onSubmit }: PersonalInfoFormProps) =>
             <input
               type="text"
               id="name"
-              placeholder="Enter your name"
+              placeholder={t('profile.full_name_placeholder')}
               {...formik.getFieldProps('name')}
               className="form-control shadow-none border"
               style={getInputStyle('name')}
@@ -114,7 +117,7 @@ const PersonalInfoForm = ({ user, loading, onSubmit }: PersonalInfoFormProps) =>
             htmlFor="phone"
             style={{ fontSize: "0.72rem", letterSpacing: "0.06em", color: "#374151" }}
           >
-            Phone
+            {t('profile.phone')}
           </label>
           <div className="position-relative d-flex align-items-center">
             <Phone
@@ -125,7 +128,7 @@ const PersonalInfoForm = ({ user, loading, onSubmit }: PersonalInfoFormProps) =>
             <input
               type="text"
               id="phone"
-              placeholder="10 digit number"
+              placeholder={t('profile.phone_placeholder')}
               {...formik.getFieldProps('phone')}
               onChange={(e) => {
                 const val = e.target.value.replace(/\D/g, '');
@@ -161,7 +164,7 @@ const PersonalInfoForm = ({ user, loading, onSubmit }: PersonalInfoFormProps) =>
             htmlFor="email"
             style={{ fontSize: "0.72rem", letterSpacing: "0.06em", color: "#374151" }}
           >
-            Email address
+            {t('profile.email_address')}
           </label>
           <div className="position-relative d-flex align-items-center">
             <Mail
@@ -172,7 +175,7 @@ const PersonalInfoForm = ({ user, loading, onSubmit }: PersonalInfoFormProps) =>
             <input
               type="text"
               id="email"
-              placeholder="Email address"
+              placeholder={t('profile.email_address')}
               value={user.email}
               readOnly
               className="form-control shadow-none border bg-light text-muted"
@@ -188,7 +191,7 @@ const PersonalInfoForm = ({ user, loading, onSubmit }: PersonalInfoFormProps) =>
             />
           </div>
           <div className="text-muted small mt-1" style={{ fontSize: '0.75rem' }}>
-            Email cannot be changed. Contact support if needed.
+            {t('profile.email_readonly_note')}
           </div>
         </div>
 
@@ -205,7 +208,7 @@ const PersonalInfoForm = ({ user, loading, onSubmit }: PersonalInfoFormProps) =>
             <span className="spinner-border spinner-border-sm mx-auto" role="status" aria-hidden="true" />
           ) : (
             <>
-              <i className="bi bi-floppy" /> Save changes
+              <i className="bi bi-floppy" /> {t('profile.save_changes')}
             </>
           )}
         </button>

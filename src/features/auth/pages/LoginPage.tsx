@@ -1,8 +1,10 @@
 import { Mail, Lock, Eye, EyeOff, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import useLogin from '../hooks/useLogin';
 
 const LoginPage = () => {
+  const { t } = useTranslation();
   const {
     formik,
     showPassword, setShowPassword,
@@ -41,9 +43,11 @@ const LoginPage = () => {
 
         {/* Card */}
         <div className="bg-white p-4 p-sm-5 rounded-4 shadow-sm border-0">
-          <h2 className="fw-bold fs-3 mb-1" style={{ color: "#111827" }}>Welcome Back</h2>
+          <h2 className="fw-bold fs-3 mb-1" style={{ color: "#111827" }}>
+            {t('auth.welcome_back')}
+          </h2>
           <p className="text-body-secondary mb-4">
-            Enter your credentials to access your dashboard.
+            {t('auth.enter_credentials')}
           </p>
 
           <form onSubmit={handleSubmit}>
@@ -55,7 +59,7 @@ const LoginPage = () => {
                 className="form-label fw-bold text-uppercase mb-2"
                 style={{ fontSize: "0.72rem", letterSpacing: "0.06em", color: "#374151" }}
               >
-                Email or Mobile Number
+                {t('auth.email_or_mobile')}
               </label>
               <div className="position-relative">
                 <Mail
@@ -67,13 +71,13 @@ const LoginPage = () => {
                   type="text"
                   id="identifier"
                   name="identifier"
-                  placeholder="Email or Phone number"
+                  placeholder={t('auth.email_or_mobile_placeholder')}
                   value={formik.values.identifier}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   disabled={isLoading}
                   className="form-control ps-5 py-3 shadow-none"
-                  style={getInputBorder(hasIdentifierError)}
+                  style={getInputBorder(Boolean(hasIdentifierError))}
                   onFocus={(e) => {
                     if (!hasIdentifierError) {
                       e.target.style.backgroundColor = "#ffffff";
@@ -106,7 +110,7 @@ const LoginPage = () => {
                   className="fw-bold text-uppercase mb-0"
                   style={{ fontSize: "0.72rem", letterSpacing: "0.06em", color: "#374151" }}
                 >
-                  Password
+                  {t('auth.password')}
                 </label>
                 <Link
                   to="/forgot-password"
@@ -115,7 +119,7 @@ const LoginPage = () => {
                   onMouseEnter={(e) => { e.currentTarget.style.color = "#111827"; e.currentTarget.style.textDecoration = "underline"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = "#1f2937"; e.currentTarget.style.textDecoration = "none"; }}
                 >
-                  Forgot?
+                  {t('auth.forgot_link')}
                 </Link>
               </div>
               <div className="position-relative">
@@ -128,13 +132,13 @@ const LoginPage = () => {
                   type={showPassword ? 'text' : 'password'}
                   id="password"
                   name="password"
-                  placeholder="••••••••"
+                  placeholder={t('auth.password_placeholder')}
                   value={formik.values.password}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   disabled={isLoading}
                   className="form-control ps-5 pe-5 py-3 shadow-none"
-                  style={getInputBorder(hasPasswordError)}
+                  style={getInputBorder(Boolean(hasPasswordError))}
                   onFocus={(e) => {
                     if (!hasPasswordError) {
                       e.target.style.backgroundColor = "#ffffff";
@@ -198,7 +202,7 @@ const LoginPage = () => {
               {isLoading ? (
                 <span className="spinner-border spinner-border-sm mx-auto" role="status" aria-hidden="true" />
               ) : (
-                'SIGN IN TO PORTAL'
+                t('auth.sign_in_btn')
               )}
             </button>
 

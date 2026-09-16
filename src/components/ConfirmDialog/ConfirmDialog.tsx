@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import { useScrollLock } from "../../hooks/useScrollLock";
 
 type ConfirmVariant = "danger" | "warning" | "info" | "success" | "dark";
@@ -53,13 +54,14 @@ const ConfirmDialog = ({
   show,
   title,
   message,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   variant = "danger",
   loading = false,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) => {
+  const { t } = useTranslation();
   const config = VARIANT_CONFIG[variant];
 
   useScrollLock(show);
@@ -71,6 +73,11 @@ const ConfirmDialog = ({
   }, [onCancel]);
 
   if (!show) return null;
+
+  const resolvedTitle = t(title);
+  const resolvedMessage = t(message);
+  const effectiveConfirm = confirmLabel ? t(confirmLabel) : t('common.confirm');
+  const effectiveCancel = cancelLabel ? t(cancelLabel) : t('common.cancel');
 
   return createPortal(
     <div
@@ -88,7 +95,7 @@ const ConfirmDialog = ({
           className="btn position-absolute d-flex align-items-center justify-content-center p-0 text-secondary"
           style={{ top: 22, right: 22, width: 28, height: 28, border: '1px solid #e9ecef', background: '#fff', fontSize: '1.1rem' }}
           onClick={onCancel}
-          aria-label="Close"
+          aria-label={t('common.close')}
         >
           <i className="bi bi-x" />
         </button>
@@ -102,19 +109,19 @@ const ConfirmDialog = ({
         </div>
 
         {/* Text */}
-        <h6 className="fw-bold mb-1" style={{ color: '#1a1f36' }}>{title}</h6>
-        <p className="text-muted mb-4" style={{ fontSize: '0.875rem', lineHeight: 1.5 }}>{message}</p>
+        <h6 className="fw-bold mb-1" style={{ color: '#1a1f36' }}>{resolvedTitle}</h6>
+        <p className="text-muted mb-4" style={{ fontSize: '0.875rem', lineHeight: 1.5 }}>{resolvedMessage}</p>
 
         {/* Actions */}
         <div className="d-flex gap-2 w-100">
           <button className="btn btn-outline-secondary flex-fill" onClick={onCancel} disabled={loading}>
-            {cancelLabel}
+            {effectiveCancel}
           </button>
           <button className={`btn ${config.btnClass} flex-fill text-white`} onClick={onConfirm} disabled={loading}>
             {loading ? (
               <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
             ) : (
-              confirmLabel
+              effectiveConfirm
             )}
           </button>
         </div>

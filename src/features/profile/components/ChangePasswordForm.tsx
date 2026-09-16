@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useFormik } from "formik";
+import { useTranslation } from 'react-i18next';
 import * as Yup from "yup";
 import { Eye, EyeOff } from 'lucide-react';
 import type { ChangePasswordPayload } from "../types/profile.types";
@@ -9,22 +10,8 @@ interface ChangePasswordFormProps {
   onSubmit: (payload: ChangePasswordPayload) => Promise<boolean>;
 }
 
-const validationSchema = Yup.object({
-  currentPassword: Yup.string()
-    .min(1, "Current password is required")
-    .required("Current password is required"),
-  newPassword: Yup.string()
-    .min(8, "Password must be at least 8 characters")
-    .matches(/[A-Z]/, "must contain at least one uppercase letter")
-    .matches(/[0-9]/, "must contain at least one number")
-    .matches(/[\W_]/, "must contain at least one special character")
-    .required("New password is required"),
-  confirmPassword: Yup.string()
-    .oneOf([Yup.ref('newPassword')], "Passwords do not match")
-    .required("Please confirm your password"),
-});
-
 const ChangePasswordForm = ({ loading, onSubmit }: ChangePasswordFormProps) => {
+  const { t } = useTranslation();
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -35,7 +22,20 @@ const ChangePasswordForm = ({ loading, onSubmit }: ChangePasswordFormProps) => {
       newPassword: "",
       confirmPassword: "",
     },
-    validationSchema,
+    validationSchema: Yup.object({
+      currentPassword: Yup.string()
+        .min(1, t('validation.current_password_req'))
+        .required(t('validation.current_password_req')),
+      newPassword: Yup.string()
+        .min(8, t('validation.password_min8'))
+        .matches(/[A-Z]/, t('validation.password_uppercase'))
+        .matches(/[0-9]/, t('validation.password_number'))
+        .matches(/[\W_]/, t('validation.password_special'))
+        .required(t('validation.new_password_req')),
+      confirmPassword: Yup.string()
+        .oneOf([Yup.ref('newPassword')], t('validation.password_match'))
+        .required(t('validation.confirm_password_req')),
+    }),
     onSubmit: async (values, { resetForm }) => {
       const success = await onSubmit({
         currentPassword: values.currentPassword,
@@ -53,7 +53,7 @@ const ChangePasswordForm = ({ loading, onSubmit }: ChangePasswordFormProps) => {
       {/* ── Card Header ── */}
       <div className="d-flex align-items-center justify-content-between border-bottom pb-2 mb-4">
         <h5 className="fs-6 fw-bold text-dark m-0 d-flex align-items-center gap-2">
-          <i className="bi bi-lock text-secondary" /> Change password
+          <i className="bi bi-lock text-secondary" /> {t('profile.change_password')}
         </h5>
       </div>
 
@@ -67,7 +67,7 @@ const ChangePasswordForm = ({ loading, onSubmit }: ChangePasswordFormProps) => {
             htmlFor="currentPassword"
             style={{ fontSize: "0.72rem", letterSpacing: "0.06em", color: "#374151" }}
           >
-            Current Password
+            {t('profile.current_password')}
           </label>
           <div className="position-relative d-flex align-items-center">
             <i
@@ -77,7 +77,7 @@ const ChangePasswordForm = ({ loading, onSubmit }: ChangePasswordFormProps) => {
             <input
               type={showCurrent ? "text" : "password"}
               id="currentPassword"
-              placeholder="Current password"
+              placeholder={t('profile.current_password_placeholder')}
               value={formik.values.currentPassword}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -128,7 +128,7 @@ const ChangePasswordForm = ({ loading, onSubmit }: ChangePasswordFormProps) => {
             htmlFor="newPassword"
             style={{ fontSize: "0.72rem", letterSpacing: "0.06em", color: "#374151" }}
           >
-            New Password
+            {t('profile.new_password')}
           </label>
           <div className="position-relative d-flex align-items-center">
             <i
@@ -138,7 +138,7 @@ const ChangePasswordForm = ({ loading, onSubmit }: ChangePasswordFormProps) => {
             <input
               type={showNew ? "text" : "password"}
               id="newPassword"
-              placeholder="New password"
+              placeholder={t('profile.new_password_placeholder')}
               value={formik.values.newPassword}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -189,7 +189,7 @@ const ChangePasswordForm = ({ loading, onSubmit }: ChangePasswordFormProps) => {
             htmlFor="confirmPassword"
             style={{ fontSize: "0.72rem", letterSpacing: "0.06em", color: "#374151" }}
           >
-            Confirm New Password
+            {t('profile.confirm_new_password')}
           </label>
           <div className="position-relative d-flex align-items-center">
             <i
@@ -199,7 +199,7 @@ const ChangePasswordForm = ({ loading, onSubmit }: ChangePasswordFormProps) => {
             <input
               type={showConfirm ? "text" : "password"}
               id="confirmPassword"
-              placeholder="Confirm new password"
+              placeholder={t('profile.confirm_new_password_placeholder')}
               value={formik.values.confirmPassword}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -258,7 +258,7 @@ const ChangePasswordForm = ({ loading, onSubmit }: ChangePasswordFormProps) => {
             <span className="spinner-border spinner-border-sm mx-auto" role="status" aria-hidden="true" />
           ) : (
             <>
-              <i className="bi bi-lock-fill" /> Update password
+              <i className="bi bi-lock-fill" /> {t('profile.update_password')}
             </>
           )}
         </button>

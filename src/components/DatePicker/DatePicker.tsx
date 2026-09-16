@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X } from 'lucide-react';
 
 export interface DatePickerProps {
@@ -21,24 +22,32 @@ export interface DatePickerProps {
   align?: 'left' | 'right' | 'auto';
 }
 
-const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
-
-const DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-
 const padZero = (n: number) => String(n).padStart(2, '0');
 
 const formatIso = (year: number, month: number, day: number) =>
   `${year}-${padZero(month + 1)}-${padZero(day)}`;
 
-const formatDisplay = (isoStr: string): string => {
+const getLocalizedMonths = (locale: string): string[] => {
+  return Array.from({ length: 12 }, (_, i) => {
+    const d = new Date(2026, i, 15);
+    return new Intl.DateTimeFormat(locale, { month: 'long' }).format(d);
+  });
+};
+
+const getLocalizedDays = (locale: string): string[] => {
+  // Sunday = 2026-01-04
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(2026, 0, 4 + i);
+    return new Intl.DateTimeFormat(locale, { weekday: 'narrow' }).format(d);
+  });
+};
+
+const formatDisplay = (isoStr: string, locale: string): string => {
   if (!isoStr) return '';
   const [y, m, d] = isoStr.split('-').map(Number);
   if (!y || !m || !d) return isoStr;
-  const monthName = MONTHS[m - 1]?.slice(0, 3);
-  return `${monthName} ${d}, ${y}`;
+  const dateObj = new Date(y, m - 1, d);
+  return new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric', year: 'numeric' }).format(dateObj);
 };
 
 const DatePicker = ({
@@ -47,7 +56,7 @@ const DatePicker = ({
   onChange,
   minDate,
   maxDate,
-  placeholder = 'Select date...',
+  placeholder,
   required = false,
   error,
   touched,
@@ -60,6 +69,13 @@ const DatePicker = ({
   direction = 'auto',
   align = 'auto',
 }: DatePickerProps) => {
+  const { t, i18n } = useTranslation();
+  const currentLocale = i18n.language || 'en';
+  const effectivePlaceholder = placeholder || t('common.select_date');
+
+  const months = useMemo(() => getLocalizedMonths(currentLocale), [currentLocale]);
+  const days = useMemo(() => getLocalizedDays(currentLocale), [currentLocale]);
+
   const [isOpen, setIsOpen] = useState(false);
   const [openUp, setOpenUp] = useState(false);
   const [alignRight, setAlignRight] = useState(false);
@@ -73,17 +89,18 @@ const DatePicker = ({
     return new Date();
   }, [value]);
 
+  const [prevValue, setPrevValue] = useState(value);
   const [currentYear, setCurrentYear] = useState<number>(() => parsedDate.getFullYear());
   const [currentMonth, setCurrentMonth] = useState<number>(() => parsedDate.getMonth());
 
-  // Sync internal view when value changes
-  useEffect(() => {
+  if (value !== prevValue) {
+    setPrevValue(value);
     if (value && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
       const [y, m] = value.split('-').map(Number);
       setCurrentYear(y);
       setCurrentMonth(m - 1);
     }
-  }, [value]);
+  }
 
   const showError = touched && error;
 
@@ -226,7 +243,7 @@ const DatePicker = ({
               className={`text-truncate ${value ? 'text-dark fw-medium' : 'text-muted'}`}
               style={{ fontSize: '0.875rem' }}
             >
-              {value ? formatDisplay(value) : placeholder}
+              {value ? formatDisplay(value, currentLocale) : effectivePlaceholder}
             </span>
           </div>
 
@@ -237,7 +254,7 @@ const DatePicker = ({
                 onClick={handleClear}
                 className="text-muted p-1 hover-text-dark"
                 style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                title="Clear date"
+                title={t('common.clear_date')}
               >
                 <X size={14} />
               </span>
@@ -261,7 +278,7 @@ const DatePicker = ({
             {/* ── Header: Month & Year Navigator ── */}
             <div className="d-flex align-items-center justify-content-between mb-2">
               <span className="fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
-                {MONTHS[currentMonth]} {currentYear}
+                {months[currentMonth]} {currentYear}
               </span>
               <div className="d-flex align-items-center gap-1">
                 <button
@@ -269,7 +286,7 @@ const DatePicker = ({
                   onClick={handlePrevMonth}
                   className="btn btn-sm btn-light p-1 rounded-circle d-flex align-items-center justify-content-center"
                   style={{ width: '28px', height: '28px', border: '1px solid #e5e7eb' }}
-                  title="Previous Month"
+                  title={t('common.prev_month')}
                 >
                   <ChevronLeft size={15} />
                 </button>
@@ -278,7 +295,7 @@ const DatePicker = ({
                   onClick={handleNextMonth}
                   className="btn btn-sm btn-light p-1 rounded-circle d-flex align-items-center justify-content-center"
                   style={{ width: '28px', height: '28px', border: '1px solid #e5e7eb' }}
-                  title="Next Month"
+                  title={t('common.next_month')}
                 >
                   <ChevronRight size={15} />
                 </button>
@@ -290,9 +307,9 @@ const DatePicker = ({
               className="d-grid text-center mb-1"
               style={{ gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}
             >
-              {DAYS.map((d) => (
+              {days.map((d, index) => (
                 <span
-                  key={d}
+                  key={`${d}-${index}`}
                   className="text-secondary fw-semibold"
                   style={{ fontSize: '0.72rem', padding: '4px 0' }}
                 >
@@ -380,7 +397,7 @@ const DatePicker = ({
                 onClick={handleSelectToday}
                 disabled={minDate ? todayStr < minDate : false}
               >
-                Today
+                {t('common.today')}
               </button>
               {value && (
                 <button
@@ -389,7 +406,7 @@ const DatePicker = ({
                   style={{ fontSize: '0.78rem' }}
                   onClick={handleClear}
                 >
-                  Clear
+                  {t('common.clear')}
                 </button>
               )}
             </div>

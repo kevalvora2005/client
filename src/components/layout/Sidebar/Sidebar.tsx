@@ -16,6 +16,7 @@ import {
   CalendarCheck,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import useAuth from '../../../hooks/useAuth';
 import useMyResident from '../../../features/residents/hooks/useMyResident';
 import type { UserRole } from '../../../features/auth/types/auth.types';
@@ -26,7 +27,7 @@ import { getAvatarColor, getInitials } from '../../../features/residents/compone
 
 // ─── Types ────────────────────────────────────────────────────────
 interface NavItem {
-  label: string;
+  key: string;
   icon?: LucideIcon;
   bootstrapIcon?: string;
   path: string;
@@ -39,44 +40,38 @@ interface SidebarProps {
 // ─── Nav config per role ──────────────────────────────────────────
 const navConfig: Record<UserRole, NavItem[]> = {
   admin: [
-    { label: 'Residents', icon: Users, path: '/residents' },
-    { label: 'Apartments', icon: Building2, path: '/apartments' },
-    { label: 'Tenant Requests', bootstrapIcon: 'bi-clipboard-data', path: '/tenant-requests' },
-    { label: 'Notices', icon: Megaphone, path: '/notices' },
-    { label: 'Complaints', icon: MessageSquareWarning, path: '/complaints' },
-    { label: 'maintenance', icon: ReceiptText, path: '/maintenance' },
-    { label: 'Documents', icon: FileText, path: '/documents' },
-    { label: 'Amenities', icon: Sparkles, path: '/amenities' },
-    { label: 'Bookings', icon: CalendarCheck, path: '/bookings' },
-    { label: 'Visitor Logs', icon: History, path: '/visitor-logs' },
+    { key: 'residents', icon: Users, path: '/residents' },
+    { key: 'apartments', icon: Building2, path: '/apartments' },
+    { key: 'tenantRequests', bootstrapIcon: 'bi-clipboard-data', path: '/tenant-requests' },
+    { key: 'notices', icon: Megaphone, path: '/notices' },
+    { key: 'complaints', icon: MessageSquareWarning, path: '/complaints' },
+    { key: 'maintenance', icon: ReceiptText, path: '/maintenance' },
+    { key: 'documents', icon: FileText, path: '/documents' },
+    { key: 'amenities', icon: Sparkles, path: '/amenities' },
+    { key: 'bookings', icon: CalendarCheck, path: '/bookings' },
+    { key: 'visitorLogs', icon: History, path: '/visitor-logs' },
   ],
   resident: [
-    { label: 'My Apartment', icon: Home, path: '/my-apartment' },
-    { label: 'Notices', icon: Megaphone, path: '/notices' },
-    { label: 'My Complaints', icon: MessageSquareWarning, path: '/complaints' },
-    { label: 'maintenance', icon: ReceiptText, path: '/maintenance' },
-    { label: 'Documents', icon: FileText, path: '/documents' },
-    { label: 'Amenities', icon: Sparkles, path: '/amenities' },
-    { label: 'My Bookings', icon: CalendarCheck, path: '/bookings/me' },
-    { label: 'My Visitors', icon: UserCheck, path: '/my-visitors' },
+    { key: 'myApartment', icon: Home, path: '/my-apartment' },
+    { key: 'notices', icon: Megaphone, path: '/notices' },
+    { key: 'myComplaints', icon: MessageSquareWarning, path: '/complaints' },
+    { key: 'maintenance', icon: ReceiptText, path: '/maintenance' },
+    { key: 'documents', icon: FileText, path: '/documents' },
+    { key: 'amenities', icon: Sparkles, path: '/amenities' },
+    { key: 'myBookings', icon: CalendarCheck, path: '/bookings/me' },
+    { key: 'myVisitors', icon: UserCheck, path: '/my-visitors' },
   ],
   security: [
-    { label: 'Visitor Check-In', icon: UserCheck, path: '/checkin' },
-    { label: 'Visitor Check-Out', icon: UserMinus, path: '/checkout' },
-    { label: 'Visitor Logs', icon: History, path: '/visitor-logs' },
+    { key: 'visitorCheckIn', icon: UserCheck, path: '/checkin' },
+    { key: 'visitorCheckOut', icon: UserMinus, path: '/checkout' },
+    { key: 'visitorLogs', icon: History, path: '/visitor-logs' },
   ],
-};
-
-// ─── Role subtitle ────────────────────────────────────────────────
-const roleLabel: Record<UserRole, string> = {
-  admin: 'Admin',
-  resident: 'Resident',
-  security: 'Security',
 };
 
 const Sidebar = ({ onClose }: SidebarProps) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const role: UserRole = user?.role ?? 'resident';
@@ -88,7 +83,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
   const baseNav = role === 'resident' && effectiveIsOwner
     ? [
       navConfig.resident[0],
-      { label: 'Tenant Management', icon: Users, path: '/tenant' },
+      { key: 'tenantManagement', icon: Users, path: '/tenant' },
       ...navConfig.resident.slice(1),
     ]
     : navConfig[role];
@@ -98,8 +93,8 @@ const Sidebar = ({ onClose }: SidebarProps) => {
     : baseNav;
 
   const residentLabel = role !== 'resident'
-    ? roleLabel[role]
-    : (effectiveIsOwner === undefined ? (loading ? '' : 'Resident') : (effectiveIsOwner ? 'Owner' : 'Tenant'));
+    ? t(`roles.${role}`)
+    : (effectiveIsOwner === undefined ? (loading ? '' : t('roles.resident')) : (effectiveIsOwner ? t('roles.owner') : t('roles.tenant')));
 
   return (
     <>
@@ -138,7 +133,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
         {/* ── Nav ── */}
         <nav className="flex-grow-1 px-2 py-2">
           <ul className="list-unstyled mb-0 d-flex flex-column gap-1">
-            {navItems.map(({ label, icon: Icon, bootstrapIcon, path }) => (
+            {navItems.map(({ key, icon: Icon, bootstrapIcon, path }) => (
               <li key={path}>
                 <NavLink
                   to={path}
@@ -155,7 +150,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
                   ) : (
                     Icon && <Icon size={20} strokeWidth={1.8} className="flex-shrink-0" />
                   )}
-                  <span className="fw-medium">{label}</span>
+                  <span className="fw-medium">{t(`nav.${key}`)}</span>
                 </NavLink>
               </li>
             ))}
@@ -188,7 +183,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
                 {user?.name ?? 'User'}
               </p>
               <p className="text-uppercase mb-0 text-truncate text-secondary" style={{ fontSize: "0.65rem", letterSpacing: "0.06em" }}>
-                {roleLabel[role]}
+                {residentLabel}
               </p>
             </div>
           </div>
@@ -203,12 +198,16 @@ const Sidebar = ({ onClose }: SidebarProps) => {
 
           <ConfirmDialog
             show={showLogoutConfirm}
-            title="Log Out"
-            message="Are you sure you want to log out of your account?"
-            confirmLabel="Log Out"
-            cancelLabel="Stay"
+            title={t('auth.logout_title')}
+            message={t('auth.logout_confirm_msg')}
+            confirmLabel={t('auth.logout_btn')}
+            cancelLabel={t('auth.logout_stay')}
             variant="danger"
-            onConfirm={async () => { setShowLogoutConfirm(false); await logout(); showSuccess('Logged out successfully'); }}
+            onConfirm={async () => {
+              setShowLogoutConfirm(false);
+              await logout();
+              showSuccess('auth.logout_success');
+            }}
             onCancel={() => setShowLogoutConfirm(false)}
           />
         </div>
