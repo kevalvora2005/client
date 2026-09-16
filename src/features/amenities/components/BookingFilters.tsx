@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import Select from '../../../components/Select/Select';
 import DatePicker from '../../../components/DatePicker/DatePicker';
 import type { Amenity, BookingListFilters, BookingStatus } from '../types/amenity.types';
@@ -11,6 +12,7 @@ interface BookingFiltersProps {
 const STATUSES: BookingStatus[] = ['Pending', 'Confirmed', 'Rejected', 'Cancelled'];
 
 const BookingFilters = ({ amenities, filters, onChange }: BookingFiltersProps) => {
+  const { t } = useTranslation();
   const update = (patch: Partial<BookingListFilters>) => onChange({ ...filters, ...patch });
 
   const hasActiveFilters = !!filters.amenityId || !!filters.date || !!filters.status;
@@ -24,13 +26,13 @@ const BookingFilters = ({ amenities, filters, onChange }: BookingFiltersProps) =
   };
 
   const amenityOptions = [
-    { value: '', label: 'All Amenities' },
+    { value: '', label: t('amenities.all_amenities') },
     ...amenities.map((a) => ({ value: String(a.id), label: a.name })),
   ];
 
   const statusOptions = [
-    { value: '', label: 'All Statuses' },
-    ...STATUSES.map((s) => ({ value: s, label: s })),
+    { value: '', label: t('amenities.all_statuses') },
+    ...STATUSES.map((s) => ({ value: s, label: t(`status.${s.toLowerCase()}`) })),
   ];
 
   return (
@@ -38,7 +40,7 @@ const BookingFilters = ({ amenities, filters, onChange }: BookingFiltersProps) =
       <div className={hasActiveFilters ? "col-12 col-md-4" : "col-12 col-md-4"}>
         <Select
           options={amenityOptions}
-          placeholder="All Amenities"
+          placeholder={t('amenities.all_amenities')}
           value={filters.amenityId ? String(filters.amenityId) : ''}
           onChange={(e) => update({ amenityId: e.target.value ? Number(e.target.value) : undefined })}
           className="fw-medium text-secondary"
@@ -48,7 +50,7 @@ const BookingFilters = ({ amenities, filters, onChange }: BookingFiltersProps) =
 
       <div className={hasActiveFilters ? "col-12 col-md-3" : "col-12 col-md-4"}>
         <DatePicker
-          placeholder="Filter by date"
+          placeholder={t('amenities.filter_by_date')}
           value={filters.date ?? ''}
           onChange={(e) => {
             const val = typeof e === 'string' ? e : e?.target?.value;
@@ -61,7 +63,7 @@ const BookingFilters = ({ amenities, filters, onChange }: BookingFiltersProps) =
       <div className={hasActiveFilters ? "col-12 col-md-3" : "col-12 col-md-4"}>
         <Select
           options={statusOptions}
-          placeholder="All Statuses"
+          placeholder={t('amenities.all_statuses')}
           value={filters.status ?? ''}
           onChange={(e) => update({ status: (e.target.value || undefined) as BookingStatus | undefined })}
           className="fw-medium text-secondary"
@@ -77,7 +79,7 @@ const BookingFilters = ({ amenities, filters, onChange }: BookingFiltersProps) =
             onClick={handleReset}
             style={{ height: '40px', fontSize: '0.875rem', borderRadius: '8px' }}
           >
-            <i className="bi bi-x-circle me-1" /> Clear
+            <i className="bi bi-x-circle me-1" /> {t('common.clear')}
           </button>
         </div>
       )}

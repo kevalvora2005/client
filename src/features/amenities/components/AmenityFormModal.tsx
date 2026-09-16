@@ -1,4 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { UploadCloud, Trash2, Users, Lock } from 'lucide-react';
@@ -6,16 +8,25 @@ import type { Amenity, AmenityBookingType } from '../types/amenity.types';
 
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-const schema = Yup.object({
-  name: Yup.string().trim().min(2, 'Min 2 characters').max(100, 'Max 100 characters').required('Name is required'),
-  description: Yup.string().nullable(),
-  capacity: Yup.number().nullable().min(1, 'Capacity must be at least 1 person'),
-  operatingStart: Yup.string().matches(TIME_RE, 'HH:MM required').required('Operating start is required'),
-  operatingEnd: Yup.string().matches(TIME_RE, 'HH:MM required').required('Operating end is required'),
-  bookingType: Yup.string().oneOf(['EXCLUSIVE', 'SHARED_CAPACITY']).default('EXCLUSIVE'),
-  price: Yup.number().min(0, 'Price cannot be negative').default(0),
-  isActive: Yup.boolean(),
-});
+const createSchema = (t: TFunction) =>
+  Yup.object({
+    name: Yup.string()
+      .trim()
+      .min(2, t('validation.name_min2'))
+      .max(100, t('validation.name_max100'))
+      .required(t('validation.name_req')),
+    description: Yup.string().nullable(),
+    capacity: Yup.number().nullable().min(1, t('validation.capacity_min1')),
+    operatingStart: Yup.string()
+      .matches(TIME_RE, t('validation.hhmm_req'))
+      .required(t('validation.operating_start_req')),
+    operatingEnd: Yup.string()
+      .matches(TIME_RE, t('validation.hhmm_req'))
+      .required(t('validation.operating_end_req')),
+    bookingType: Yup.string().oneOf(['EXCLUSIVE', 'SHARED_CAPACITY']).default('EXCLUSIVE'),
+    price: Yup.number().min(0, t('validation.price_min0')).default(0),
+    isActive: Yup.boolean(),
+  });
 
 interface AmenityFormModalProps {
   amenity?: Amenity | null;
@@ -32,6 +43,8 @@ interface ImageItem {
 }
 
 const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormModalProps) => {
+  const { t } = useTranslation();
+  const schema = useMemo(() => createSchema(t), [t]);
   const isEdit = !!amenity;
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -51,12 +64,12 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
     setImageError('');
     const validImageFiles = files.filter((f) => f.type.startsWith('image/'));
     if (!validImageFiles.length) {
-      setImageError('Please select valid image files (JPG, PNG, WEBP, etc.)');
+      setImageError(t('validation.select_valid_images'));
       return;
     }
 
     if (images.length + validImageFiles.length > 5) {
-      setImageError(`Maximum 5 images allowed. You can only add ${5 - images.length} more.`);
+      setImageError(t('validation.max_5_images', { remaining: 5 - images.length }));
       return;
     }
 
@@ -147,10 +160,10 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
           <div className="modal-header border-bottom border-light-subtle px-3 px-sm-4 pt-4 pb-3 align-items-start position-relative">
             <div>
               <h5 className="modal-title fw-bold fs-6" style={{ color: '#1a1f36' }}>
-                {isEdit ? 'Edit Amenity' : 'Add Amenity'}
+                {isEdit ? t('amenities.edit_amenity') : t('amenities.add_amenity')}
               </h5>
               <p className="text-muted mb-0" style={{ fontSize: '0.8rem' }}>
-                Configure facility access type, capacity, hours, and photos.
+                {t('amenities.configure_modal_desc')}
               </p>
             </div>
             <button
@@ -159,7 +172,7 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
               style={{ top: 22, right: 22, width: 28, height: 28, border: '1px solid #e9ecef', background: '#fff', fontSize: '1.1rem', borderRadius: '6px' }}
               onClick={onCancel}
               disabled={loading}
-              aria-label="Close"
+              aria-label={t('common.close')}
             >
               <i className="bi bi-x" />
             </button>
@@ -171,7 +184,7 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
                 {/* ── Facility Booking Type Selector ── */}
                 <div className="col-12">
                   <label className="form-label fw-medium text-secondary small mb-2">
-                    Facility Access Type <span className="text-danger">*</span>
+                    {t('amenities.facility_access_type')} <span className="text-danger">*</span>
                   </label>
                   <div className="row g-2">
                     <div className="col-12 col-md-6">
@@ -191,11 +204,11 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
                         </div>
                         <div>
                           <div className="fw-bold small text-dark d-flex align-items-center gap-1">
-                            Shared Public Facility
-                            <span className="badge bg-success-subtle text-success border border-success-subtle" style={{ fontSize: '0.68rem' }}>Free</span>
+                            {t('amenities.shared_public_facility')}
+                            <span className="badge bg-success-subtle text-success border border-success-subtle" style={{ fontSize: '0.68rem' }}>{t('amenities.free')}</span>
                           </div>
                           <p className="text-secondary small mb-0" style={{ fontSize: '0.76rem' }}>
-                            Gym, Yoga Studio, Pool. Multiple residents book concurrently with live crowd stats.
+                            {t('amenities.shared_facility_desc')}
                           </p>
                         </div>
                       </div>
@@ -214,10 +227,10 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
                         </div>
                         <div>
                           <div className="fw-bold small text-dark">
-                            Exclusive Private Booking
+                            {t('amenities.exclusive_private_booking')}
                           </div>
                           <p className="text-secondary small mb-0" style={{ fontSize: '0.76rem' }}>
-                            Banquet Hall, Party Lawn, Tennis Court. Reserved exclusively for 1 apartment per slot.
+                            {t('amenities.exclusive_booking_desc')}
                           </p>
                         </div>
                       </div>
@@ -227,12 +240,12 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
 
                 <div className="col-12 col-md-7">
                   <label className="form-label fw-medium text-secondary small mb-1">
-                    Amenity Name <span className="text-danger">*</span>
+                    {t('amenities.name_label')} <span className="text-danger">*</span>
                   </label>
                   <input
                     type="text"
                     name="name"
-                    placeholder="e.g. Fitness Gymnasium, Swimming Pool, Clubhouse Hall"
+                    placeholder={t('amenities.name_placeholder')}
                     className={fieldClass('name')}
                     value={formik.values.name}
                     onChange={formik.handleChange}
@@ -246,14 +259,14 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
 
                 <div className="col-12 col-md-5">
                   <label className="form-label fw-medium text-secondary small mb-1">
-                    {isShared ? 'Max Concurrent People (Capacity)' : 'Capacity (Max Attendees)'}
+                    {isShared ? t('amenities.capacity_shared_label') : t('amenities.capacity_exclusive_label')}
                     <span className="text-danger">*</span>
                   </label>
                   <input
                     type="number"
                     min={1}
                     name="capacity"
-                    placeholder={isShared ? 'e.g. 25 people' : 'e.g. 100 people'}
+                    placeholder={isShared ? t('amenities.capacity_shared_placeholder') : t('amenities.capacity_exclusive_placeholder')}
                     className={fieldClass('capacity')}
                     value={formik.values.capacity}
                     onChange={formik.handleChange}
@@ -268,7 +281,7 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
                 {!isShared && (
                   <div className="col-12 col-md-4">
                     <label className="form-label fw-medium text-secondary small mb-1">
-                      Booking Fee (₹)
+                      {t('amenities.booking_fee_label')}
                     </label>
                     <div className="input-group">
                       <span className="input-group-text bg-light border-light-subtle text-secondary small">₹</span>
@@ -276,7 +289,7 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
                         type="number"
                         min={0}
                         name="price"
-                        placeholder="0 for free"
+                        placeholder={t('amenities.price_placeholder')}
                         className={fieldClass('price')}
                         value={formik.values.price}
                         onChange={formik.handleChange}
@@ -291,7 +304,7 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
                 )}
 
                 <div className={isShared ? 'col-12 col-md-6' : 'col-12 col-md-4'}>
-                  <label className="form-label fw-medium text-secondary small mb-1">Opens <span className="text-danger">*</span></label>
+                  <label className="form-label fw-medium text-secondary small mb-1">{t('amenities.opens_label')} <span className="text-danger">*</span></label>
                   <input
                     type="time"
                     name="operatingStart"
@@ -307,7 +320,7 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
                 </div>
 
                 <div className={isShared ? 'col-12 col-md-6' : 'col-12 col-md-4'}>
-                  <label className="form-label fw-medium text-secondary small mb-1">Closes <span className="text-danger">*</span></label>
+                  <label className="form-label fw-medium text-secondary small mb-1">{t('amenities.closes_label')} <span className="text-danger">*</span></label>
                   <input
                     type="time"
                     name="operatingEnd"
@@ -323,14 +336,14 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
                 </div>
 
                 <div className="col-12">
-                  <label className="form-label fw-medium text-secondary small mb-1">Description</label>
+                  <label className="form-label fw-medium text-secondary small mb-1">{t('amenities.desc_label')}</label>
                   <textarea
                     name="description"
                     className={fieldClass('description')}
                     value={formik.values.description}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    placeholder="Enter facility description, equipment available, guidelines..."
+                    placeholder={t('amenities.desc_placeholder')}
                     style={{ fontSize: '0.875rem', height: '80px', resize: 'none' }}
                   />
                 </div>
@@ -339,10 +352,10 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
                 <div className="col-12">
                   <div className="d-flex align-items-center justify-content-between mb-2">
                     <label className="form-label fw-medium text-secondary small mb-0">
-                      Amenity Photos (Max 5)
+                      {t('amenities.photos_label')}
                     </label>
                     <span className="badge bg-light text-secondary border" style={{ fontSize: '0.72rem' }}>
-                      {images.length} / 5 photos
+                      {t('amenities.photos_max_badge', { count: images.length })}
                     </span>
                   </div>
 
@@ -372,10 +385,10 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
                     >
                       <UploadCloud size={28} className="text-secondary mb-1" />
                       <div className="small fw-semibold text-dark mb-0">
-                        Click or drag & drop photos here
+                        {t('amenities.drag_drop_photos')}
                       </div>
                       <div className="text-muted" style={{ fontSize: '0.75rem' }}>
-                        PNG, JPG, WEBP up to 5MB each ({5 - images.length} remaining)
+                        {t('amenities.photos_format_hint', { remaining: 5 - images.length })}
                       </div>
                     </div>
                   )}
@@ -410,7 +423,7 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
                               borderRadius: '50%',
                               opacity: 0.9,
                             }}
-                            title="Remove photo"
+                            title={t('amenities.remove_photo')}
                           >
                             <Trash2 size={11} />
                           </button>
@@ -429,7 +442,7 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
                       disabled={loading}
                       style={{ height: '38px', fontSize: '0.875rem' }}
                     >
-                      Cancel
+                      {t('common.cancel')}
                     </button>
                     <button
                       type="submit"
@@ -440,7 +453,7 @@ const AmenityFormModal = ({ amenity, loading, onSubmit, onCancel }: AmenityFormM
                       {loading ? (
                         <span className="spinner-border spinner-border-sm" />
                       ) : (
-                        isEdit ? 'Save Changes' : 'Create Amenity'
+                        isEdit ? t('amenities.save_changes') : t('amenities.create_amenity')
                       )}
                     </button>
                   </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { CalendarCheck, CheckCircle2, Clock, XCircle } from "lucide-react";
 import type { BookingStats } from "../types/amenity.types";
 
@@ -7,6 +8,7 @@ interface BookingStatsCardsProps {
 }
 
 const BookingStatsCards = ({ stats, loading = false }: BookingStatsCardsProps) => {
+  const { t, i18n } = useTranslation();
   const confirmed = stats?.confirmed ?? stats?.Confirmed ?? 0;
   const pending = stats?.pending ?? stats?.Pending ?? 0;
   const rejected = stats?.rejected ?? stats?.Rejected ?? 0;
@@ -15,25 +17,25 @@ const BookingStatsCards = ({ stats, loading = false }: BookingStatsCardsProps) =
 
   const statItems = [
     {
-      label: "Total Bookings",
+      label: t('amenities.total_bookings'),
       value: totalCount,
-      subtext: "All booking requests",
+      subtext: t('amenities.all_booking_requests'),
       icon: CalendarCheck,
       bgClass: "bg-primary-subtle text-primary",
       subtextColor: "#0d6efd",
     },
     {
-      label: "Confirmed",
+      label: t('amenities.confirmed'),
       value: confirmed,
-      subtext: totalCount > 0 ? `${Math.round((confirmed / totalCount) * 100)}% of requests` : "Approved & confirmed",
+      subtext: totalCount > 0 ? t('amenities.pct_of_requests', { pct: Math.round((confirmed / totalCount) * 100) }) : t('amenities.approved_confirmed'),
       icon: CheckCircle2,
       bgClass: "bg-success-subtle text-success",
       subtextColor: "#198754",
     },
     {
-      label: "Pending",
+      label: t('amenities.pending'),
       value: pending,
-      subtext: "Awaiting committee vote",
+      subtext: t('amenities.awaiting_vote'),
       icon: Clock,
       bgClass: "bg-warning-subtle text-warning-emphasis",
       customBg: "#fffbeb",
@@ -41,9 +43,9 @@ const BookingStatsCards = ({ stats, loading = false }: BookingStatsCardsProps) =
       subtextColor: "#b45309",
     },
     {
-      label: "Rejected / Cancelled",
+      label: t('amenities.rejected_cancelled'),
       value: rejected + cancelled,
-      subtext: `${rejected} rejected, ${cancelled} cancelled`,
+      subtext: t('amenities.rejected_cancelled_breakdown', { rejected, cancelled }),
       icon: XCircle,
       bgClass: "bg-danger-subtle text-danger",
       customBg: "#fef2f2",
@@ -92,7 +94,7 @@ const BookingStatsCards = ({ stats, loading = false }: BookingStatsCardsProps) =
 
                   <div>
                     <h2 className="fw-bold m-0 lh-1 mb-1" style={{ color: "#1a1f36", fontSize: "2rem" }}>
-                      {item.value}
+                      {new Intl.NumberFormat(i18n.language).format(item.value)}
                     </h2>
                     <span className="small" style={{ fontSize: "0.8rem", color: item.subtextColor }}>
                       {item.subtext}

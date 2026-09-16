@@ -1,22 +1,14 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { AvailabilityResult, BusyInterval, SharedCapacitySlot } from '../types/amenity.types';
 import { Calendar, Clock, AlertTriangle, CheckCircle2, ShieldAlert, BarChart2, Info } from 'lucide-react';
+import { formatDateOnly } from '../../../utils/formatDate';
 
 interface AvailabilityGridProps {
   availability: AvailabilityResult | null;
   loading: boolean;
   onOpenBooking?: (slotPrefill?: { start: string; end: string }) => void;
 }
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-const formatDisplayDate = (isoStr: string): string => {
-  if (!isoStr) return '';
-  const [y, m, d] = isoStr.split('-').map(Number);
-  if (!y || !m || !d) return isoStr;
-  const monthName = MONTHS[m - 1] || '';
-  return `${monthName} ${d}, ${y}`;
-};
 
 const formatHourLabel = (timeStr: string): string => {
   return timeStr; // e.g. "17:00", "18:00"
@@ -28,6 +20,7 @@ const toMinutes = (timeStr: string): number => {
 };
 
 const AvailabilityGrid = ({ availability, loading, onOpenBooking }: AvailabilityGridProps) => {
+  const { t, i18n } = useTranslation();
   const [hoveredSlot, setHoveredSlot] = useState<SharedCapacitySlot | null>(null);
   const [hoveredInterval, setHoveredInterval] = useState<BusyInterval | null>(null);
 
@@ -35,7 +28,7 @@ const AvailabilityGrid = ({ availability, loading, onOpenBooking }: Availability
     return (
       <div className="text-center py-5">
         <div className="spinner-border spinner-border-sm text-primary me-2" role="status" />
-        <span className="text-muted small">Checking schedule availability...</span>
+        <span className="text-muted small">{t('amenities.checking_schedule')}</span>
       </div>
     );
   }
@@ -43,7 +36,7 @@ const AvailabilityGrid = ({ availability, loading, onOpenBooking }: Availability
   if (!availability) {
     return (
       <div className="text-center py-4 text-muted small">
-        Select a date to view amenity schedule.
+        {t('amenities.select_date_prompt')}
       </div>
     );
   }
@@ -78,11 +71,11 @@ const AvailabilityGrid = ({ availability, loading, onOpenBooking }: Availability
         <div className="d-flex align-items-center gap-2">
           <Clock size={16} className="text-primary" />
           <span className="small text-dark fw-medium">
-            Operating Hours: <span className="fw-bold">{operatingStart} – {operatingEnd}</span>
+            {t('amenities.operating_hours_colon')} <span className="fw-bold">{operatingStart} – {operatingEnd}</span>
           </span>
           {isShared && (
             <span className="badge bg-success-subtle text-success border border-success-subtle ms-1" style={{ fontSize: '0.72rem' }}>
-              Free Concurrent Facility • Max {totalCapacity} People
+              {t('amenities.free_concurrent_facility', { capacity: new Intl.NumberFormat(i18n.language).format(totalCapacity) })}
             </span>
           )}
         </div>
@@ -91,34 +84,34 @@ const AvailabilityGrid = ({ availability, loading, onOpenBooking }: Availability
             <>
               <span className="d-inline-flex align-items-center gap-1 small text-secondary" style={{ fontSize: '0.78rem' }}>
                 <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#22c55e', display: 'inline-block' }} />
-                Low Crowd (&lt;40%)
+                {t('amenities.low_crowd')}
               </span>
               <span className="d-inline-flex align-items-center gap-1 small text-secondary" style={{ fontSize: '0.78rem' }}>
                 <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#f59e0b', display: 'inline-block' }} />
-                Moderate (40-75%)
+                {t('amenities.moderate_crowd')}
               </span>
               <span className="d-inline-flex align-items-center gap-1 small text-secondary" style={{ fontSize: '0.78rem' }}>
                 <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#ef4444', display: 'inline-block' }} />
-                Busy / Full (&gt;75%)
+                {t('amenities.busy_crowd')}
               </span>
               <span className="d-inline-flex align-items-center gap-1 small text-secondary" style={{ fontSize: '0.78rem' }}>
                 <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#94a3b8', display: 'inline-block' }} />
-                Past / Closed
+                {t('amenities.past_closed')}
               </span>
             </>
           ) : (
             <>
               <span className="d-inline-flex align-items-center gap-1 small text-secondary" style={{ fontSize: '0.78rem' }}>
                 <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#22c55e', display: 'inline-block' }} />
-                Available
+                {t('amenities.available')}
               </span>
               <span className="d-inline-flex align-items-center gap-1 small text-secondary" style={{ fontSize: '0.78rem' }}>
                 <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#ef4444', display: 'inline-block' }} />
-                Reserved
+                {t('amenities.reserved')}
               </span>
               <span className="d-inline-flex align-items-center gap-1 small text-secondary" style={{ fontSize: '0.78rem' }}>
                 <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#64748b', display: 'inline-block' }} />
-                Blackout
+                {t('amenities.blackout')}
               </span>
             </>
           )}
@@ -136,11 +129,11 @@ const AvailabilityGrid = ({ availability, loading, onOpenBooking }: Availability
               <div className="d-flex align-items-center gap-2">
                 <BarChart2 size={18} className="text-primary" />
                 <h6 className="fw-bold text-dark mb-0" style={{ fontSize: '0.95rem' }}>
-                  Hourly Crowd Activity for {formatDisplayDate(date)}
+                  {t('amenities.hourly_crowd_activity', { date: formatDateOnly(date) })}
                 </h6>
               </div>
               <span className="badge bg-light text-secondary border" style={{ fontSize: '0.75rem' }}>
-                Max Capacity: {totalCapacity} people
+                {t('amenities.max_capacity', { capacity: new Intl.NumberFormat(i18n.language).format(totalCapacity) })}
               </span>
             </div>
 
@@ -216,14 +209,21 @@ const AvailabilityGrid = ({ availability, loading, onOpenBooking }: Availability
                         >
                           <div className="fw-bold text-white mb-0">{slot.startTime} – {slot.endTime}</div>
                           {isPast ? (
-                            <div className="text-secondary small">Past hour (Closed)</div>
+                            <div className="text-secondary small">{t('amenities.past_hour_closed')}</div>
                           ) : slot.isBlackout ? (
-                            <div className="text-warning small">{slot.blackoutReason || 'Maintenance Blackout'}</div>
+                            <div className="text-warning small">{slot.blackoutReason || t('amenities.maintenance_blackout')}</div>
                           ) : (
                             <div>
-                              <span style={{ color: '#cbd5e1' }}>{slot.currentOccupancy} / {slot.totalCapacity} people</span>
+                              <span style={{ color: '#cbd5e1' }}>
+                                {t('amenities.people_count', {
+                                  current: new Intl.NumberFormat(i18n.language).format(slot.currentOccupancy),
+                                  total: new Intl.NumberFormat(i18n.language).format(slot.totalCapacity),
+                                })}
+                              </span>
                               <div className="fw-bold" style={{ color: slot.availableSpots > 0 ? '#34d399' : '#f87171' }}>
-                                {slot.availableSpots > 0 ? `${slot.availableSpots} spots left` : 'Full'}
+                                {slot.availableSpots > 0
+                                  ? t('amenities.spots_left', { count: new Intl.NumberFormat(i18n.language).format(slot.availableSpots) })
+                                  : t('amenities.full')}
                               </div>
                             </div>
                           )}
@@ -243,7 +243,7 @@ const AvailabilityGrid = ({ availability, loading, onOpenBooking }: Availability
                             zIndex: 5,
                           }}
                         >
-                          NOW
+                          {t('amenities.now')}
                         </span>
                       )}
 
@@ -288,7 +288,7 @@ const AvailabilityGrid = ({ availability, loading, onOpenBooking }: Availability
             {/* Graph Bottom Helper Note */}
             <div className="pt-2 border-top border-light-subtle text-muted small" style={{ fontSize: '0.78rem' }}>
               <Info size={13} className="me-1 text-primary d-inline" />
-              Hover any bar to inspect hourly stats, or click to book. You can pick any custom duration when booking.
+              {t('amenities.crowd_graph_hint')}
             </div>
           </div>
         </div>
@@ -299,7 +299,7 @@ const AvailabilityGrid = ({ availability, loading, onOpenBooking }: Availability
         <div>
           <div className="d-flex justify-content-between small text-muted mb-1 px-1" style={{ fontSize: '0.75rem' }}>
             <span>{operatingStart}</span>
-            <span className="fw-semibold text-dark">Schedule for {formatDisplayDate(date)}</span>
+            <span className="fw-semibold text-dark">{t('amenities.schedule_for_date', { date: formatDateOnly(date) })}</span>
             <span>{operatingEnd}</span>
           </div>
 
@@ -314,8 +314,8 @@ const AvailabilityGrid = ({ availability, loading, onOpenBooking }: Availability
               const displayReason = hoveredInterval.label
                 ? hoveredInterval.label.replace(/^Reserved \((.*)\)$/, '$1').replace(/^Blackout: (.*)$/, '$1')
                 : isBlackout
-                ? 'Maintenance Blackout'
-                : 'Private Booking';
+                ? t('amenities.maintenance_blackout')
+                : t('amenities.private_booking');
 
               return (
                 <div
@@ -380,16 +380,15 @@ const AvailabilityGrid = ({ availability, loading, onOpenBooking }: Availability
               style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0' }}
             >
               <CheckCircle2 size={24} className="text-success mb-2" />
-              <h6 className="fw-bold mb-1 text-success fs-6">Fully Available All Day!</h6>
+              <h6 className="fw-bold mb-1 text-success fs-6">{t('amenities.fully_available_all_day')}</h6>
               <p className="text-secondary small mb-0" style={{ maxWidth: '420px' }}>
-                There are no bookings or blackouts for this date. You can request any duration between{' '}
-                <strong className="text-dark">{operatingStart}</strong> and <strong className="text-dark">{operatingEnd}</strong>.
+                {t('amenities.fully_available_desc', { start: operatingStart, end: operatingEnd })}
               </p>
             </div>
           ) : (
             <div>
               <h6 className="fw-bold text-dark small mb-2 d-flex align-items-center gap-1">
-                <AlertTriangle size={15} className="text-warning" /> Reserved / Unavailable Times Today
+                <AlertTriangle size={15} className="text-warning" /> {t('amenities.reserved_times_today')}
               </h6>
               <div className="d-flex flex-column gap-2 mb-3">
                 {busyIntervals.map((interval: BusyInterval, index: number) => {
@@ -398,8 +397,8 @@ const AvailabilityGrid = ({ availability, loading, onOpenBooking }: Availability
                   const displayReason = interval.label
                     ? interval.label.replace(/^Reserved \((.*)\)$/, '$1').replace(/^Blackout: (.*)$/, '$1')
                     : isBlackout
-                    ? 'Maintenance Blackout'
-                    : 'Private Booking';
+                    ? t('amenities.maintenance_blackout')
+                    : t('amenities.private_booking');
 
                   return (
                     <div
@@ -448,7 +447,7 @@ const AvailabilityGrid = ({ availability, loading, onOpenBooking }: Availability
                           padding: '4px 8px',
                         }}
                       >
-                        {isBlackout ? 'Blackout' : 'Reserved'}
+                        {isBlackout ? t('amenities.blackout') : t('amenities.reserved')}
                       </span>
                     </div>
                   );
@@ -456,7 +455,7 @@ const AvailabilityGrid = ({ availability, loading, onOpenBooking }: Availability
               </div>
               <p className="text-muted small mb-0" style={{ fontSize: '0.8rem' }}>
                 <i className="bi bi-info-circle me-1" />
-                You can book any custom duration during operating hours as long as it does not overlap with the reserved times above.
+                {t('amenities.custom_duration_hint')}
               </p>
             </div>
           )}

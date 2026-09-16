@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useScrollLock } from '../../../hooks/useScrollLock';
 import { useAdminBookings } from '../hooks/useBookings';
 import { useAmenities } from '../hooks/useAmenities';
@@ -13,18 +14,19 @@ import Pagination from '../../../components/Pagination/Pagination';
 import type { Booking, BookingListFilters } from '../types/amenity.types';
 
 const BookingsAdminPage = () => {
+  const { t } = useTranslation();
   const { amenities } = useAmenities();
   const [filters, setFilters] = useState<BookingListFilters>({});
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const { bookings, pagination, loading, refetch } = useAdminBookings(filters, page, pageSize);
   const { stats, loading: statsLoading, refetch: refetchStats } = useBookingStats();
 
   const handleRefetchAll = useCallback(() => {
     refetch();
     refetchStats();
-  }, [refetchStats]);
+  }, [refetch, refetchStats]);
 
-  const { bookings, pagination, loading, refetch } = useAdminBookings(filters, page, pageSize);
   const bookingMutations = useBookingMutations(handleRefetchAll);
   const navigate = useNavigate();
 
@@ -53,10 +55,10 @@ const BookingsAdminPage = () => {
       <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
         <div>
           <h4 className="fw-bold mb-2 fs-4" style={{ color: '#1a1f36' }}>
-            Bookings Management
+            {t('amenities.bookings_management')}
           </h4>
           <p className="text-muted mb-0 small">
-            Review, vote on, approve, and manage all resident amenity booking requests.
+            {t('amenities.bookings_management_desc')}
           </p>
         </div>
       </div>
@@ -97,8 +99,8 @@ const BookingsAdminPage = () => {
 
       {rejectTarget && (
         <ReasonModal
-          title="Reject Booking"
-          submitLabel="Reject Booking"
+          title={t('amenities.reject_booking')}
+          submitLabel={t('amenities.reject_booking')}
           icon="bi-x-circle"
           loading={bookingMutations.loading}
           onSubmit={handleReject}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Booking } from '../types/amenity.types';
 import { bookingApi } from '../api/bookingApi';
 
@@ -19,6 +20,7 @@ const BookingRowActions = ({
   onSettle,
   isFree,
 }: BookingRowActionsProps) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
@@ -117,7 +119,7 @@ const BookingRowActions = ({
         style={{ width: '28px', height: '28px' }}
         onMouseEnter={(e) => (e.currentTarget.style.color = '#212529')}
         onMouseLeave={(e) => (e.currentTarget.style.color = '#6c757d')}
-        title="Actions"
+        title={t('common.actions')}
       >
         <i className="bi bi-three-dots-vertical fs-5" />
       </button>
@@ -138,7 +140,7 @@ const BookingRowActions = ({
                 }}
                 style={{ fontSize: '0.85rem' }}
               >
-                <i className="bi bi-shield-check text-primary" /> Vote & Review
+                <i className="bi bi-shield-check text-primary" /> {t('amenities.vote_and_review')}
               </button>
             </li>
           ) : showAdminView ? (
@@ -152,7 +154,7 @@ const BookingRowActions = ({
                 }}
                 style={{ fontSize: '0.85rem' }}
               >
-                <i className="bi bi-eye text-muted" /> View Details
+                <i className="bi bi-eye text-muted" /> {t('amenities.view_details')}
               </button>
             </li>
           ) : null}
@@ -166,7 +168,7 @@ const BookingRowActions = ({
                 disabled={downloading}
                 style={{ fontSize: '0.85rem' }}
               >
-                <i className="bi bi-file-earmark-pdf text-danger" /> {downloading ? 'Generating...' : 'Download Receipt'}
+                <i className="bi bi-file-earmark-pdf text-danger" /> {downloading ? t('amenities.generating_receipt') : t('amenities.download_receipt')}
               </button>
             </li>
           )}
@@ -182,7 +184,7 @@ const BookingRowActions = ({
                 }}
                 style={{ fontSize: '0.85rem' }}
               >
-                <i className="bi bi-credit-card text-success" /> Pay via UPI
+                <i className="bi bi-credit-card text-success" /> {t('amenities.pay_upi')}
               </button>
             </li>
           )}
@@ -198,7 +200,7 @@ const BookingRowActions = ({
                 }}
                 style={{ fontSize: '0.85rem' }}
               >
-                <i className="bi bi-x-circle text-danger" /> Cancel Booking
+                <i className="bi bi-x-circle text-danger" /> {t('amenities.cancel_booking')}
               </button>
             </li>
           )}

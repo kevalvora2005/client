@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { maintenanceApi } from '../api/maintenanceApi';
 import type { MaintenanceSetting } from '../types/maintenance.types';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { showError } from '../../../utils/toast';
 
 export const useMaintenanceSettings = (enabled: boolean = true) => {
+  const { t } = useTranslation();
   const [setting, setSetting] = useState<MaintenanceSetting | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [updating, setUpdating] = useState<boolean>(false);
@@ -15,11 +17,11 @@ export const useMaintenanceSettings = (enabled: boolean = true) => {
       const data = await maintenanceApi.getMaintenanceAmount();
       setSetting(data);
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to fetch maintenance amount'));
+      showError(getErrorMessage(err, t('maintenance.fetch_amount_failed')));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -32,7 +34,7 @@ export const useMaintenanceSettings = (enabled: boolean = true) => {
         const data = await maintenanceApi.getMaintenanceAmount();
         if (!cancelled) setSetting(data);
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, 'Failed to fetch maintenance amount'));
+        if (!cancelled) showError(getErrorMessage(err, t('maintenance.fetch_amount_failed')));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -41,7 +43,7 @@ export const useMaintenanceSettings = (enabled: boolean = true) => {
     load();
 
     return () => { cancelled = true; };
-  }, [enabled]);
+  }, [enabled, t]);
 
   const updateAmount = async (amount: number): Promise<boolean> => {
     try {
@@ -50,7 +52,7 @@ export const useMaintenanceSettings = (enabled: boolean = true) => {
       setSetting(updated);
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to update maintenance amount'));
+      showError(getErrorMessage(err, t('maintenance.update_amount_failed')));
       return false;
     } finally {
       setUpdating(false);

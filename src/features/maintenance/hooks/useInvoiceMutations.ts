@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { maintenanceApi } from '../api/maintenanceApi';
 import type { GenerateInvoicesPayload } from '../types/maintenance.types';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { showError } from '../../../utils/toast';
 
 export const useInvoiceMutations = (onSuccess?: () => void) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const generateInvoices = async (payload: GenerateInvoicesPayload): Promise<boolean> => {
@@ -14,7 +16,7 @@ export const useInvoiceMutations = (onSuccess?: () => void) => {
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to generate invoices'));
+      showError(getErrorMessage(err, t('maintenance.generate_failed')));
       return false;
     } finally {
       setLoading(false);
@@ -28,7 +30,7 @@ export const useInvoiceMutations = (onSuccess?: () => void) => {
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to mark invoice as settled'));
+      showError(getErrorMessage(err, t('maintenance.mark_settled_failed')));
       return false;
     } finally {
       setLoading(false);
@@ -42,7 +44,7 @@ export const useInvoiceMutations = (onSuccess?: () => void) => {
       onSuccess?.();
       return result;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to apply overdue penalties'));
+      showError(getErrorMessage(err, t('maintenance.apply_penalties_failed')));
       return null;
     } finally {
       setLoading(false);

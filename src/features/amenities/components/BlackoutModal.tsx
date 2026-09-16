@@ -1,3 +1,6 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import DatePicker from '../../../components/DatePicker/DatePicker';
@@ -17,43 +20,44 @@ const getInitialTimes = () => {
   return { startStr, endStr };
 };
 
-const schema = Yup.object({
-  date: Yup.string()
-    .matches(DATE_RE, 'Date is required')
-    .required('Date is required')
-    .test('not-in-past', 'Blackout date cannot be in the past', (value) => {
-      if (!value) return true;
-      return value >= today();
-    }),
-  startTime: Yup.string()
-    .matches(TIME_RE, 'HH:MM required')
-    .required('Start time is required')
-    .test('future-time-if-today', 'Start time must be in the future', function (value) {
-      const { date } = this.parent;
-      if (!value || !date) return true;
-      if (date === today()) {
-        const now = new Date();
-        const currentH = String(now.getHours()).padStart(2, '0');
-        const currentM = String(now.getMinutes()).padStart(2, '0');
-        const currentTimeStr = `${currentH}:${currentM}`;
-        return value > currentTimeStr;
-      }
-      return true;
-    }),
-  endTime: Yup.string()
-    .matches(TIME_RE, 'HH:MM required')
-    .required('End time is required')
-    .test('after-start', 'End time must be after start time', function (value) {
-      const { startTime } = this.parent;
-      if (!value || !startTime) return true;
-      return value > startTime;
-    }),
-  reason: Yup.string()
-    .trim()
-    .min(2, 'Min 2 characters')
-    .max(500, 'Max 500 characters')
-    .required('Reason is required'),
-});
+const createSchema = (t: TFunction) =>
+  Yup.object({
+    date: Yup.string()
+      .matches(DATE_RE, t('validation.date_req'))
+      .required(t('validation.date_req'))
+      .test('not-in-past', t('validation.date_not_past'), (value) => {
+        if (!value) return true;
+        return value >= today();
+      }),
+    startTime: Yup.string()
+      .matches(TIME_RE, t('validation.hhmm_req'))
+      .required(t('validation.start_time_req'))
+      .test('future-time-if-today', t('validation.start_time_future'), function (value) {
+        const { date } = this.parent;
+        if (!value || !date) return true;
+        if (date === today()) {
+          const now = new Date();
+          const currentH = String(now.getHours()).padStart(2, '0');
+          const currentM = String(now.getMinutes()).padStart(2, '0');
+          const currentTimeStr = `${currentH}:${currentM}`;
+          return value > currentTimeStr;
+        }
+        return true;
+      }),
+    endTime: Yup.string()
+      .matches(TIME_RE, t('validation.hhmm_req'))
+      .required(t('validation.end_time_req'))
+      .test('after-start', t('validation.end_time_after_start'), function (value) {
+        const { startTime } = this.parent;
+        if (!value || !startTime) return true;
+        return value > startTime;
+      }),
+    reason: Yup.string()
+      .trim()
+      .min(2, t('validation.reason_min2'))
+      .max(500, t('validation.reason_max500'))
+      .required(t('validation.reason_req')),
+  });
 
 interface BlackoutModalProps {
   loading: boolean;
@@ -62,6 +66,8 @@ interface BlackoutModalProps {
 }
 
 const BlackoutModal = ({ loading, onSubmit, onCancel }: BlackoutModalProps) => {
+  const { t } = useTranslation();
+  const schema = useMemo(() => createSchema(t), [t]);
   const { startStr, endStr } = getInitialTimes();
 
   const formik = useFormik({
@@ -91,8 +97,8 @@ const BlackoutModal = ({ loading, onSubmit, onCancel }: BlackoutModalProps) => {
         <div className="modal-content border-0 rounded-3 shadow-lg bg-white" style={{ overflow: 'visible' }}>
           <div className="modal-header border-bottom border-light-subtle px-3 px-sm-4 pt-4 pb-3 align-items-start position-relative">
             <div>
-              <h5 className="modal-title fw-bold fs-6" style={{ color: '#1a1f36' }}>Add Blackout</h5>
-              <p className="text-muted mb-0" style={{ fontSize: '0.8rem' }}>Block a future time slot from resident bookings.</p>
+              <h5 className="modal-title fw-bold fs-6" style={{ color: '#1a1f36' }}>{t('amenities.add_blackout')}</h5>
+              <p className="text-muted mb-0" style={{ fontSize: '0.8rem' }}>{t('amenities.blackout_modal_desc')}</p>
             </div>
             <button
               type="button"
@@ -100,7 +106,7 @@ const BlackoutModal = ({ loading, onSubmit, onCancel }: BlackoutModalProps) => {
               style={{ top: 22, right: 22, width: 28, height: 28, border: '1px solid #e9ecef', background: '#fff', fontSize: '1.1rem', borderRadius: '6px' }}
               onClick={onCancel}
               disabled={loading}
-              aria-label="Close"
+              aria-label={t('common.close')}
             >
               <i className="bi bi-x" />
             </button>
@@ -112,7 +118,7 @@ const BlackoutModal = ({ loading, onSubmit, onCancel }: BlackoutModalProps) => {
                 {/* Full-width Date Picker */}
                 <div className="col-12">
                   <DatePicker
-                    label="Blackout Date"
+                    label={t('amenities.blackout_date')}
                     name="date"
                     required
                     align="left"
@@ -133,7 +139,7 @@ const BlackoutModal = ({ loading, onSubmit, onCancel }: BlackoutModalProps) => {
                 {/* Start & End Times side-by-side */}
                 <div className="col-6">
                   <label className="form-label fw-medium text-secondary small mb-1">
-                    Start Time <span className="text-danger">*</span>
+                    {t('amenities.start_time')} <span className="text-danger">*</span>
                   </label>
                   <input
                     type="time"
@@ -151,7 +157,7 @@ const BlackoutModal = ({ loading, onSubmit, onCancel }: BlackoutModalProps) => {
 
                 <div className="col-6">
                   <label className="form-label fw-medium text-secondary small mb-1">
-                    End Time <span className="text-danger">*</span>
+                    {t('amenities.end_time')} <span className="text-danger">*</span>
                   </label>
                   <input
                     type="time"
@@ -170,7 +176,7 @@ const BlackoutModal = ({ loading, onSubmit, onCancel }: BlackoutModalProps) => {
                 {/* Reason Field */}
                 <div className="col-12">
                   <label className="form-label fw-medium text-secondary small mb-1">
-                    Reason <span className="text-danger">*</span>
+                    {t('amenities.reason')} <span className="text-danger">*</span>
                   </label>
                   <textarea
                     name="reason"
@@ -178,7 +184,7 @@ const BlackoutModal = ({ loading, onSubmit, onCancel }: BlackoutModalProps) => {
                     value={formik.values.reason}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    placeholder="Enter reason for blackout (e.g. Scheduled Pool Cleaning, Routine Maintenance)..."
+                    placeholder={t('amenities.blackout_reason_placeholder')}
                     style={{ fontSize: '0.875rem', height: '90px', resize: 'none' }}
                   />
                   {formik.touched.reason && formik.errors.reason && (
@@ -196,7 +202,7 @@ const BlackoutModal = ({ loading, onSubmit, onCancel }: BlackoutModalProps) => {
                       disabled={loading}
                       style={{ height: '38px', fontSize: '0.875rem' }}
                     >
-                      Cancel
+                      {t('common.cancel')}
                     </button>
                     <button
                       type="submit"
@@ -208,7 +214,7 @@ const BlackoutModal = ({ loading, onSubmit, onCancel }: BlackoutModalProps) => {
                         <span className="spinner-border spinner-border-sm" />
                       ) : (
                         <>
-                          <i className="bi bi-plus-lg me-1" /> Add Blackout
+                          <i className="bi bi-plus-lg me-1" /> {t('amenities.add_blackout')}
                         </>
                       )}
                     </button>

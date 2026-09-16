@@ -1,6 +1,7 @@
+import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { showError, showSuccess } from '../../../utils/toast';
+import { showSuccess } from '../../../utils/toast';
 
 interface MaintenanceSettingsFormProps {
   currentAmount: number | undefined;
@@ -9,6 +10,8 @@ interface MaintenanceSettingsFormProps {
 }
 
 const MaintenanceSettingsForm = ({ currentAmount, updating, onSubmit }: MaintenanceSettingsFormProps) => {
+  const { t } = useTranslation();
+
   const formik = useFormik({
     initialValues: {
       amount: currentAmount !== undefined ? String(currentAmount) : '',
@@ -16,15 +19,15 @@ const MaintenanceSettingsForm = ({ currentAmount, updating, onSubmit }: Maintena
     enableReinitialize: true,
     validationSchema: Yup.object({
       amount: Yup.number()
-        .typeError('Amount must be a valid number')
-        .required('Amount is required')
-        .moreThan(0, 'Amount must be greater than 0'),
+        .typeError(t('validation.amount_number'))
+        .required(t('validation.amount_req'))
+        .moreThan(0, t('validation.amount_gt0')),
     }),
     onSubmit: async (values) => {
       const parsed = Number(values.amount);
       const ok = await onSubmit(parsed);
       if (ok) {
-        showSuccess('Monthly maintenance amount updated successfully!');
+        showSuccess(t('maintenance.amount_updated'));
       }
     },
   });
@@ -33,14 +36,13 @@ const MaintenanceSettingsForm = ({ currentAmount, updating, onSubmit }: Maintena
     <form onSubmit={formik.handleSubmit} className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-end gap-2">
       <div className="flex-grow-1" style={{ minWidth: '160px', maxWidth: '200px' }}>
         <label className="form-label fw-medium" style={{ fontSize: '0.85rem' }}>
-          Monthly Maintenance Amount (₹)
+          {t('maintenance.monthly_amount_label')}
         </label>
         <input
           type="number"
-          name="amount"
           id="amount"
           className={`form-control shadow-none${formik.touched.amount && formik.errors.amount ? ' is-invalid' : ''}`}
-          placeholder="Enter amount"
+          placeholder={t('maintenance.enter_amount')}
           {...formik.getFieldProps('amount')}
           style={{ borderRadius: '8px', fontSize: '0.9rem' }}
         />
@@ -60,7 +62,7 @@ const MaintenanceSettingsForm = ({ currentAmount, updating, onSubmit }: Maintena
         {updating ? (
           <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
         ) : (
-          'Save'
+          t('common.save')
         )}
       </button>
     </form>

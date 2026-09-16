@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useInvoicesPage } from '../hooks/useInvoicesPage';
 import { useInvoiceMutations } from '../hooks/useInvoiceMutations';
 import { useMaintenanceSettings } from '../hooks/useMaintenanceSettings';
@@ -18,19 +19,24 @@ import { useScrollLock } from '../../../hooks/useScrollLock';
 import useAuth from '../../../hooks/useAuth';
 import useMyResident from '../../residents/hooks/useMyResident';
 import { showError, showSuccess } from '../../../utils/toast';
+import { formatCurrency } from '../../../utils/formatCurrency';
+import { formatDateOnly } from '../../../utils/formatDate';
 import type { TableColumn } from '../../../components/AppTable/AppTable';
 import type { Invoice, AdminDashboardMetrics } from '../types/maintenance.types';
-
-function formatMonth(month: number, year: number): string {
-  return new Date(year, month - 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' });
-}
 
 type InvoiceScope = 'self' | 'tenant';
 
 const MaintenancePage = () => {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const { resident, isOwner, isCurrentOccupant } = useMyResident(!isAdmin);
+
+  const formatMonth = (month: number, year: number): string => {
+    return new Intl.DateTimeFormat(i18n.language || 'en', { month: 'long', year: 'numeric' }).format(
+      new Date(year, month - 1)
+    );
+  };
 
   // Owners can toggle between their own invoices and their tenant's invoices,
   // regardless of whether they currently occupy the unit.
@@ -88,7 +94,7 @@ const MaintenancePage = () => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch {
-      showError('Failed to download receipt');
+      showError(t('maintenance.download_failed'));
     }
   };
 
@@ -135,7 +141,7 @@ const MaintenancePage = () => {
   }[] = [
     {
       key: 'monthYear',
-      label: 'Month / Year',
+      label: t('maintenance.col_month_year'),
       adminWidth: '10%',
       residentWidth: '10%',
       align: 'center',
@@ -147,7 +153,7 @@ const MaintenancePage = () => {
     },
     {
       key: 'raisedBy',
-      label: 'Tenant',
+      label: t('roles.tenant'),
       adminWidth: '0%',
       residentWidth: '14%',
       align: 'center',
@@ -160,7 +166,7 @@ const MaintenancePage = () => {
     },
     {
       key: 'apartment',
-      label: 'Apartment',
+      label: t('maintenance.col_apartment'),
       adminWidth: '12%',
       residentWidth: '0%',
       align: 'center',
@@ -187,19 +193,19 @@ const MaintenancePage = () => {
     },
     {
       key: 'baseAmount',
-      label: 'Base Amount',
+      label: t('maintenance.col_base_amount'),
       adminWidth: '11%',
       residentWidth: showResidentName ? '12%' : '15%',
       align: 'center',
       render: (inv) => (
         <span className="fw-medium text-dark" style={{ fontSize: '0.875rem' }}>
-          ₹{inv.baseAmount.toFixed(2)}
+          {formatCurrency(inv.baseAmount)}
         </span>
       ),
     },
     {
       key: 'extraCharges',
-      label: 'Extra Charges',
+      label: t('maintenance.col_extra_charges'),
       adminWidth: '16%',
       residentWidth: showResidentName ? '18%' : '17%',
       align: 'center',
@@ -216,7 +222,7 @@ const MaintenancePage = () => {
                 className="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle"
                 style={{ fontSize: '0.65rem', padding: '2px 5px', fontWeight: 500 }}
               >
-                {charge.label}: ₹{charge.amount}
+                {charge.label}: {formatCurrency(charge.amount)}
               </span>
             ))}
           </div>
@@ -225,31 +231,31 @@ const MaintenancePage = () => {
     },
     {
       key: 'totalAmount',
-      label: 'Total Amount',
+      label: t('maintenance.col_total_amount'),
       adminWidth: '14%',
       residentWidth: showResidentName ? '12%' : '17%',
       align: 'center',
       render: (inv) => (
         <span className="fw-semibold text-dark" style={{ fontSize: '0.875rem' }}>
-          ₹{inv.totalAmount.toFixed(2)}
+          {formatCurrency(inv.totalAmount)}
         </span>
       ),
     },
     {
       key: 'dueDate',
-      label: 'Due Date',
+      label: t('maintenance.col_due_date'),
       adminWidth: '14%',
       residentWidth: showResidentName ? '13%' : '17%',
       align: 'center',
       render: (inv) => (
         <span style={{ fontSize: '0.875rem', color: '#4b5563' }}>
-          {new Date(inv.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+          {formatDateOnly(inv.dueDate)}
         </span>
       ),
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('common.status'),
       adminWidth: '12%',
       residentWidth: showResidentName ? '11%' : '11%',
       align: 'center',
@@ -257,7 +263,7 @@ const MaintenancePage = () => {
     },
     {
       key: 'actions',
-      label: 'Actions',
+      label: t('common.actions'),
       adminWidth: '13%',
       residentWidth: showResidentName ? '10%' : '13%',
       align: 'center',
@@ -269,7 +275,7 @@ const MaintenancePage = () => {
               className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
               onClick={() => handleDownload(inv.id)}
               style={{ borderRadius: '6px', fontSize: '0.78rem' }}
-              title="Download receipt"
+              title={t('maintenance.download_receipt')}
             >
               <i className="bi bi-download" />
             </button>
@@ -283,7 +289,7 @@ const MaintenancePage = () => {
             className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
             onClick={() => handleDownload(inv.id)}
             style={{ borderRadius: '6px', fontSize: '0.78rem' }}
-            title="Download receipt"
+            title={t('maintenance.download_receipt')}
           >
             <i className="bi bi-download" />
           </button>
@@ -314,12 +320,12 @@ const MaintenancePage = () => {
       <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
         <div>
           <h4 className="fw-bold mb-2 fs-4 fs-sm-3" style={{ color: '#1a1f36' }}>
-            Maintenance
+            {t('nav.maintenance')}
           </h4>
           <p className="text-muted mb-0 small">
             {isAdmin
-              ? 'Generate invoices and track collections.'
-              : 'View and pay your maintenance dues.'}
+              ? t('maintenance.admin_subtitle')
+              : t('maintenance.resident_subtitle')}
           </p>
         </div>
         {isAdmin && (
@@ -330,7 +336,7 @@ const MaintenancePage = () => {
               style={{ fontSize: '0.875rem', borderRadius: '8px' }}
               disabled={mutationLoading}
             >
-              <i className="bi bi-arrow-repeat" /> Apply Penalties
+              <i className="bi bi-arrow-repeat" /> {t('maintenance.apply_penalties_btn')}
             </button>
             <button
               className="btn btn-dark fw-medium d-inline-flex align-items-center justify-content-center gap-2 px-3 py-2"
@@ -338,7 +344,7 @@ const MaintenancePage = () => {
               style={{ fontSize: '0.875rem', borderRadius: '8px', backgroundColor: '#1a1f36', borderColor: '#1a1f36' }}
               disabled={mutationLoading}
             >
-              <i className="bi bi-plus-lg" /> Generate Invoices
+              <i className="bi bi-plus-lg" /> {t('maintenance.generate_invoices_btn')}
             </button>
           </div>
         )}
@@ -366,8 +372,8 @@ const MaintenancePage = () => {
       {showScopeToggle && (
         <div className="d-flex flex-wrap gap-2 mb-3">
           {([
-            { key: 'self', label: 'Self' },
-            { key: 'tenant', label: 'Tenant' },
+            { key: 'self', label: t('maintenance.scope_self') },
+            { key: 'tenant', label: t('maintenance.scope_tenant') },
           ] as { key: InvoiceScope; label: string }[]).map(({ key, label }) => {
             const active = scope === key;
             return (
@@ -410,8 +416,8 @@ const MaintenancePage = () => {
             data={invoiceItems}
             loading={loading}
             rowKey={(inv) => inv.id}
-            emptyTitle="No invoices found"
-            emptySubtitle="There are no invoices matching your criteria. Try adjusting your filters or check back later."
+            emptyTitle={t('maintenance.empty_title')}
+            emptySubtitle={t('maintenance.empty_subtitle')}
             emptyIcon="bi-receipt"
             skeletonRows={4}
           />
@@ -436,11 +442,11 @@ const MaintenancePage = () => {
             <div className="modal-content border-0 rounded-3 shadow-lg bg-white" style={{ overflow: 'visible' }}>
               <div className="modal-header border-bottom border-light-subtle px-3 px-sm-4 pt-4 pb-3 position-relative">
                 <h5 className="modal-title fw-bold fs-6 d-inline-flex align-items-center gap-2" style={{ color: '#1a1f36' }}>
-                  Generate Invoices
+                  {t('maintenance.generate_invoices_title')}
                   <i
                     className="bi bi-info-circle text-muted fs-7"
                     style={{ cursor: 'help' }}
-                    title="This will generate an invoice for every active resident. Duplicate invoices for the same month are not automatically prevented."
+                    title={t('maintenance.generate_invoices_tooltip')}
                   />
                 </h5>
                 <button
@@ -449,7 +455,7 @@ const MaintenancePage = () => {
                   style={{ top: 22, right: 22, width: 28, height: 28, border: '1px solid #e9ecef', background: '#fff', fontSize: '1.1rem', borderRadius: '6px' }}
                   onClick={() => setGenerateModalOpen(false)}
                   disabled={mutationLoading}
-                  aria-label="Close"
+                  aria-label={t('common.close')}
                 >
                   <i className="bi bi-x" />
                 </button>
@@ -466,15 +472,13 @@ const MaintenancePage = () => {
         </div>
       )}
 
-
-
       {/* ── Apply Penalties Confirm ── */}
       <ConfirmDialog
         show={applyPenaltiesConfirmOpen}
-        title="Apply Overdue Penalties"
-        message="Are you sure you want to run the penalty job right now? This will scan all pending invoices whose due date has passed, flag them as Overdue, and apply the 5% late fee penalty."
-        confirmLabel="Run Job"
-        cancelLabel="Cancel"
+        title={t('maintenance.apply_penalties_title')}
+        message={t('maintenance.apply_penalties_message')}
+        confirmLabel={t('maintenance.run_job')}
+        cancelLabel={t('common.cancel')}
         variant="warning"
         loading={mutationLoading}
         onConfirm={async () => {
@@ -484,8 +488,8 @@ const MaintenancePage = () => {
             refetchMetrics();
             showSuccess(
               result.penaltiesApplied > 0
-                ? `Penalties applied — ${result.penaltiesApplied} invoice(s) penalized.`
-                : "Penalties applied — no new penalties."
+                ? t('maintenance.penalties_applied_count', { count: result.penaltiesApplied })
+                : t('maintenance.penalties_applied_none')
             );
           }
         }}

@@ -1,21 +1,23 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { bookingApi } from '../api/bookingApi';
 import type { CreateBookingPayload } from '../types/amenity.types';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { showSuccess, showError } from '../../../utils/toast';
 
 export const useBookingMutations = (onSuccess?: () => void) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const create = async (payload: CreateBookingPayload): Promise<boolean> => {
     try {
       setLoading(true);
       await bookingApi.create(payload);
-      showSuccess('Booking request submitted successfully');
+      showSuccess(t('amenities.booking_created'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to create booking'));
+      showError(getErrorMessage(err, t('amenities.create_booking_failed')));
       return false;
     } finally {
       setLoading(false);
@@ -26,11 +28,11 @@ export const useBookingMutations = (onSuccess?: () => void) => {
     try {
       setLoading(true);
       await bookingApi.cancel(id, reason);
-      showSuccess('Booking cancelled successfully');
+      showSuccess(t('amenities.booking_cancelled'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to cancel booking'));
+      showError(getErrorMessage(err, t('amenities.cancel_booking_failed')));
       return false;
     } finally {
       setLoading(false);
@@ -41,11 +43,11 @@ export const useBookingMutations = (onSuccess?: () => void) => {
     try {
       setLoading(true);
       await bookingApi.approve(id);
-      showSuccess('Booking approved successfully');
+      showSuccess(t('amenities.booking_approved'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to approve booking'));
+      showError(getErrorMessage(err, t('amenities.approve_booking_failed')));
       return false;
     } finally {
       setLoading(false);
@@ -56,11 +58,11 @@ export const useBookingMutations = (onSuccess?: () => void) => {
     try {
       setLoading(true);
       await bookingApi.reject(id, reason);
-      showSuccess('Booking rejected successfully');
+      showSuccess(t('amenities.booking_rejected'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to reject booking'));
+      showError(getErrorMessage(err, t('amenities.reject_booking_failed')));
       return false;
     } finally {
       setLoading(false);
@@ -71,11 +73,11 @@ export const useBookingMutations = (onSuccess?: () => void) => {
     try {
       setLoading(true);
       await bookingApi.settle(id, paymentRef);
-      showSuccess('Payment recorded successfully');
+      showSuccess(t('amenities.payment_recorded'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to record payment'));
+      showError(getErrorMessage(err, t('amenities.record_payment_failed')));
       return false;
     } finally {
       setLoading(false);

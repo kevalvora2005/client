@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Sparkles, Clock, Users, Camera, Edit2, Eye, Lock } from 'lucide-react';
 import type { Amenity } from '../types/amenity.types';
 import { highlightMatch } from '../../../utils/highlight';
+import { formatCurrency } from '../../../utils/formatCurrency';
 
 interface AmenityCardProps {
   amenity: Amenity;
@@ -12,6 +14,7 @@ interface AmenityCardProps {
 }
 
 const AmenityCard = ({ amenity, isAdmin, onEdit, search }: AmenityCardProps) => {
+  const { t, i18n } = useTranslation();
   const [imageError, setImageError] = useState(false);
 
   const images: string[] = Array.isArray(amenity.images) ? amenity.images : [];
@@ -42,7 +45,7 @@ const AmenityCard = ({ amenity, isAdmin, onEdit, search }: AmenityCardProps) => 
             >
               <Sparkles size={24} className="text-secondary opacity-75" />
             </div>
-            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>No photo uploaded</span>
+            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{t('amenities.no_photo')}</span>
           </div>
         )}
 
@@ -62,11 +65,11 @@ const AmenityCard = ({ amenity, isAdmin, onEdit, search }: AmenityCardProps) => 
         >
           {isShared ? (
             <>
-              <Users size={11} /> Shared Facility
+              <Users size={11} /> {t('amenities.shared_facility')}
             </>
           ) : (
             <>
-              <Lock size={11} /> Exclusive Booking
+              <Lock size={11} /> {t('amenities.exclusive_facility')}
             </>
           )}
         </span>
@@ -85,7 +88,7 @@ const AmenityCard = ({ amenity, isAdmin, onEdit, search }: AmenityCardProps) => 
             borderRadius: '6px',
           }}
         >
-          {isFree ? 'Free' : `₹${amenity.price}`}
+          {isFree ? t('amenities.free') : formatCurrency(amenity.price)}
         </span>
 
         {/* Photo count indicator (Bottom Right) */}
@@ -94,7 +97,7 @@ const AmenityCard = ({ amenity, isAdmin, onEdit, search }: AmenityCardProps) => 
             className="badge position-absolute bg-dark bg-opacity-75 text-white d-flex align-items-center gap-1"
             style={{ bottom: 8, right: 10, fontSize: '0.7rem', backdropFilter: 'blur(4px)' }}
           >
-            <Camera size={12} /> {images.length} photos
+            <Camera size={12} /> {t('amenities.photos_count', { count: images.length })}
           </span>
         )}
       </div>
@@ -109,7 +112,7 @@ const AmenityCard = ({ amenity, isAdmin, onEdit, search }: AmenityCardProps) => 
             {amenity.description}
           </p>
         ) : (
-          <p className="text-muted small mb-3 fst-italic">No description provided</p>
+          <p className="text-muted small mb-3 fst-italic">{t('amenities.no_description')}</p>
         )}
 
         <div className="d-flex flex-wrap align-items-center gap-3 text-secondary small mb-3 mt-auto">
@@ -120,7 +123,11 @@ const AmenityCard = ({ amenity, isAdmin, onEdit, search }: AmenityCardProps) => 
           {amenity.capacity != null && (
             <div className="d-flex align-items-center gap-1">
               <Users size={14} className="text-muted" />
-              <span>{isShared ? `Cap: ${amenity.capacity} people` : `Cap: ${amenity.capacity}`}</span>
+              <span>
+                {isShared
+                  ? t('amenities.max_capacity', { capacity: new Intl.NumberFormat(i18n.language).format(amenity.capacity) })
+                  : `${t('amenities.capacity_colon')} ${new Intl.NumberFormat(i18n.language).format(amenity.capacity)}`}
+              </span>
             </div>
           )}
         </div>
@@ -131,7 +138,7 @@ const AmenityCard = ({ amenity, isAdmin, onEdit, search }: AmenityCardProps) => 
             className="btn btn-sm btn-dark flex-grow-1 d-inline-flex align-items-center justify-content-center gap-1"
             style={{ borderRadius: '8px', height: '36px', backgroundColor: '#1a1f36', borderColor: '#1a1f36' }}
           >
-            <Eye size={14} /> View Details
+            <Eye size={14} /> {t('amenities.view_details')}
           </Link>
           {isAdmin && (
             <button
@@ -139,8 +146,8 @@ const AmenityCard = ({ amenity, isAdmin, onEdit, search }: AmenityCardProps) => 
               className="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center"
               style={{ borderRadius: '8px', width: '36px', height: '36px' }}
               onClick={() => onEdit(amenity)}
-              aria-label="Edit"
-              title="Edit Amenity"
+              aria-label={t('common.edit')}
+              title={t('amenities.edit_amenity')}
             >
               <Edit2 size={14} />
             </button>

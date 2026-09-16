@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { maintenanceApi } from '../api/maintenanceApi';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { showError, showSuccess } from '../../../utils/toast';
+import { formatCurrency } from '../../../utils/formatCurrency';
 
 interface UpiPaymentModalProps {
   invoiceId: number;
@@ -12,23 +14,24 @@ interface UpiPaymentModalProps {
   onPaymentSuccess: () => void;
 }
 
-const validationSchema = Yup.object({
-  utrNumber: Yup.string()
-    .trim()
-    .length(12, 'UPI UTR number must be exactly 12 digits')
-    .matches(/^\d{12}$/, 'UPI UTR number must be exactly 12 digits')
-    .required('Please enter a 12-digit UPI transaction UTR / Reference number'),
-});
-
 export const UpiPaymentModal = ({
   invoiceId,
   amount,
   onClose,
   onPaymentSuccess,
 }: UpiPaymentModalProps) => {
+  const { t } = useTranslation();
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
   const [qrError, setQrError] = useState(false);
+
+  const validationSchema = useMemo(() => Yup.object({
+    utrNumber: Yup.string()
+      .trim()
+      .length(12, t('validation.utr_12_digits'))
+      .matches(/^\d{12}$/, t('validation.utr_12_digits'))
+      .required(t('validation.utr_req')),
+  }), [t]);
 
   const formik = useFormik({
     initialValues: {
@@ -39,11 +42,11 @@ export const UpiPaymentModal = ({
       setSubmitting(true);
       try {
         await maintenanceApi.markInvoiceSettled(invoiceId, `UPI - ${values.utrNumber}`);
-        showSuccess('UPI Payment submitted and verified successfully!');
+        showSuccess(t('maintenance.upi_success'));
         onPaymentSuccess();
         onClose();
       } catch (err: unknown) {
-        showError(getErrorMessage(err, 'Failed to process UPI payment'));
+        showError(getErrorMessage(err, t('maintenance.upi_failed')));
       } finally {
         setSubmitting(false);
       }
@@ -61,11 +64,11 @@ export const UpiPaymentModal = ({
         setSubmitting(true);
         try {
           await maintenanceApi.markInvoiceSettled(invoiceId, `UPI - ${customUtr}`);
-          showSuccess('UPI Payment submitted and verified successfully!');
+          showSuccess(t('maintenance.upi_success'));
           onPaymentSuccess();
           onClose();
         } catch (err: unknown) {
-          showError(getErrorMessage(err, 'Failed to process UPI payment'));
+          showError(getErrorMessage(err, t('maintenance.upi_failed')));
         } finally {
           setSubmitting(false);
         }
@@ -75,7 +78,6 @@ export const UpiPaymentModal = ({
 
     formik.handleSubmit();
   };
-
 
   const handleCopyUpi = () => {
     navigator.clipboard.writeText('society@icici');
@@ -110,9 +112,9 @@ export const UpiPaymentModal = ({
                 <i className="bi bi-qr-code-scan fs-5 text-dark" />
               </div>
               <div className="text-start">
-                <h5 className="modal-title fw-bold fs-6 mb-0 text-dark text-start">UPI Payment</h5>
+                <h5 className="modal-title fw-bold fs-6 mb-0 text-dark text-start">{t('maintenance.upi_payment')}</h5>
                 <p className="text-muted mb-0 small text-start" style={{ fontSize: '0.78rem' }}>
-                  Scan QR or enter UTR number to pay
+                  {t('maintenance.upi_payment_desc')}
                 </p>
               </div>
             </div>
@@ -122,7 +124,7 @@ export const UpiPaymentModal = ({
               style={{ top: 22, right: 22, width: 28, height: 28, border: '1px solid #e9ecef', background: '#fff', fontSize: '1.1rem', borderRadius: '6px' }}
               onClick={onClose}
               disabled={submitting}
-              aria-label="Close"
+              aria-label={t('common.close')}
             >
               <i className="bi bi-x" />
             </button>
@@ -134,9 +136,9 @@ export const UpiPaymentModal = ({
             {/* Amount Banner */}
             <div className="rounded-3 p-3 text-center border mb-3" style={{ backgroundColor: '#f8fafc' }}>
               <span className="text-secondary small fw-medium d-block mb-1" style={{ fontSize: '0.78rem', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
-                Amount Payable
+                {t('maintenance.amount_payable')}
               </span>
-              <span className="fs-3 fw-bold text-dark">₹{amount.toFixed(2)}</span>
+              <span className="fs-3 fw-bold text-dark">{formatCurrency(amount)}</span>
             </div>
 
             {/* QR Code Block */}
@@ -211,17 +213,17 @@ export const UpiPaymentModal = ({
               </div>
               
               <small className="text-secondary fw-semibold d-block mb-2" style={{ fontSize: '0.8rem' }}>
-                Scan using GPay / PhonePe / Paytm / BHIM
+                {t('maintenance.scan_using_apps')}
               </small>
 
               <div className="d-inline-flex align-items-center gap-2 bg-white px-3 py-1.5 rounded-pill border">
-                <span className="text-muted small">UPI ID:</span>
+                <span className="text-muted small">{t('maintenance.upi_id_label')}</span>
                 <code className="text-dark fw-bold" style={{ fontSize: '0.85rem' }}>society@icici</code>
                 <button
                   type="button"
                   className="btn btn-link p-0 text-primary border-0 ms-1 d-inline-flex align-items-center"
                   onClick={handleCopyUpi}
-                  title="Copy UPI ID"
+                  title={t('maintenance.copy_upi_id')}
                   style={{ textDecoration: 'none' }}
                 >
                   <i className={`bi ${copied ? 'bi-check-lg text-success' : 'bi-clipboard'}`} />
@@ -237,7 +239,7 @@ export const UpiPaymentModal = ({
                 style={{ borderRadius: '8px', fontSize: '0.9rem' }}
               >
                 <i className="bi bi-phone-vibrate fs-6" />
-                Open UPI App on Mobile
+                {t('maintenance.open_upi_app')}
               </a>
             </div>
 
@@ -249,7 +251,7 @@ export const UpiPaymentModal = ({
                 className="px-2 text-uppercase text-secondary fw-semibold"
                 style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}
               >
-                Or Enter UTR Manually
+                {t('maintenance.or_enter_utr_manually')}
               </span>
               <div className="flex-grow-1 border-top" style={{ borderColor: '#e2e8f0' }} />
             </div>
@@ -258,13 +260,13 @@ export const UpiPaymentModal = ({
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
                 <label className="form-label fw-medium text-secondary small mb-1">
-                  12-Digit UTR / Transaction Reference <span className="text-danger">*</span>
+                  {t('maintenance.utr_field_label')} <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
                   name="utrNumber"
                   className={`form-control shadow-none rounded-2 text-dark ${formik.touched.utrNumber && formik.errors.utrNumber ? 'is-invalid' : ''}`}
-                  placeholder="e.g. 987654321098"
+                  placeholder={t('maintenance.utr_placeholder')}
                   maxLength={12}
                   value={formik.values.utrNumber}
                   onChange={(e) => {
@@ -294,7 +296,7 @@ export const UpiPaymentModal = ({
                   disabled={submitting}
                   style={{ height: '38px', fontSize: '0.875rem' }}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -305,12 +307,12 @@ export const UpiPaymentModal = ({
                   {submitting ? (
                     <>
                       <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
-                      <span className="ms-1">Verifying...</span>
+                      <span className="ms-1">{t('maintenance.verifying')}</span>
                     </>
                   ) : (
                     <>
                       <i className="bi bi-check-lg me-1" />
-                      <span>Submit UTR</span>
+                      <span>{t('maintenance.submit_utr')}</span>
                     </>
                   )}
                 </button>

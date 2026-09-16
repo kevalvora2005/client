@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import { STATUS_CONFIG } from '../constants/invoiceStyles';
 import type { InvoiceStatus } from '../types/maintenance.types';
 
 const InvoiceStatusBadge = ({ status }: { status: InvoiceStatus }) => {
+  const { t } = useTranslation();
   const cfg = STATUS_CONFIG[status];
 
   return (
@@ -16,7 +18,7 @@ const InvoiceStatusBadge = ({ status }: { status: InvoiceStatus }) => {
       }}
     >
       <i className={`bi ${cfg.icon}`} style={{ fontSize: '0.7rem' }} />
-      {status}
+      {t(`maintenance.status_${status.toLowerCase()}`)}
     </span>
   );
 };

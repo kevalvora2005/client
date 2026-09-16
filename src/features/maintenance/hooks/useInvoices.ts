@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { maintenanceApi } from '../api/maintenanceApi';
 import type { PaginatedInvoices, InvoiceListParams } from '../types/maintenance.types';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { showError } from '../../../utils/toast';
 
 export const useInvoices = (params?: InvoiceListParams, isAdmin: boolean = true, apartmentView: boolean = false) => {
+  const { t } = useTranslation();
   const [invoices, setInvoices] = useState<PaginatedInvoices | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -23,12 +25,12 @@ export const useInvoices = (params?: InvoiceListParams, isAdmin: boolean = true,
       const response = await fetchFn(parsed);
       setInvoices(response);
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to fetch invoices'));
+      showError(getErrorMessage(err, t('maintenance.fetch_invoices_failed')));
     } finally {
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serializedParams, isAdmin, apartmentView]);
+  }, [serializedParams, isAdmin, apartmentView, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -40,7 +42,7 @@ export const useInvoices = (params?: InvoiceListParams, isAdmin: boolean = true,
         const response = await fetchFn(parsed);
         if (!cancelled) setInvoices(response);
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, 'Failed to fetch invoices'));
+        if (!cancelled) showError(getErrorMessage(err, t('maintenance.fetch_invoices_failed')));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -50,7 +52,7 @@ export const useInvoices = (params?: InvoiceListParams, isAdmin: boolean = true,
 
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serializedParams, isAdmin, apartmentView]);
+  }, [serializedParams, isAdmin, apartmentView, t]);
 
   return { invoices, loading, refetch: fetchInvoices };
 };

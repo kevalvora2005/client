@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Clock, Users, IndianRupee, Image as ImageIcon, CalendarPlus, Plus, Trash2, Lock, CheckCircle2, Sparkles, Info } from 'lucide-react';
 import useAuth from '../../../hooks/useAuth';
 import useMyResident from '../../residents/hooks/useMyResident';
@@ -8,6 +9,8 @@ import { useAmenityDetail } from '../hooks/useAmenityDetail';
 import { useBookingMutations } from '../hooks/useBookingMutations';
 import { useBlackouts } from '../hooks/useBlackouts';
 import { amenityApi } from '../api/amenityApi';
+import { formatDateOnly } from '../../../utils/formatDate';
+import { formatCurrency } from '../../../utils/formatCurrency';
 import type { AvailabilityResult, CreateBookingPayload, CreateBlackoutPayload } from '../types/amenity.types';
 import AvailabilityGrid from '../components/AvailabilityGrid';
 import BookingFormModal from '../components/BookingFormModal';
@@ -15,6 +18,7 @@ import BlackoutModal from '../components/BlackoutModal';
 import DatePicker from '../../../components/DatePicker/DatePicker';
 
 const AmenityDetailPage = () => {
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const amenityId = Number(id);
   const { user } = useAuth();
@@ -92,8 +96,8 @@ const AmenityDetailPage = () => {
           <div className="d-flex justify-content-center">
             <Sparkles size={48} className="text-secondary mb-3 opacity-50" />
           </div>
-          <h5 className="fw-semibold text-dark mb-1">Amenity Not Found</h5>
-          <p className="small text-muted mb-3">The facility you are looking for does not exist or has been removed.</p>
+          <h5 className="fw-semibold text-dark mb-1">{t('amenities.not_found_title')}</h5>
+          <p className="small text-muted mb-3">{t('amenities.not_found_desc')}</p>
           <div>
             <button
               type="button"
@@ -101,7 +105,7 @@ const AmenityDetailPage = () => {
               onClick={() => navigate('/amenities')}
               style={{ borderRadius: '8px', fontSize: '0.85rem' }}
             >
-              Back to Amenities
+              {t('amenities.back_to_amenities')}
             </button>
           </div>
         </div>
@@ -117,7 +121,7 @@ const AmenityDetailPage = () => {
   return (
     <div className="container-fluid p-3 p-md-4">
       <button className="btn btn-link text-decoration-none ps-0 mb-2 text-secondary" onClick={() => navigate('/amenities')}>
-        <i className="bi bi-arrow-left me-1" /> Back to amenities
+        <i className="bi bi-arrow-left me-1" /> {t('amenities.back_to_amenities')}
       </button>
 
       {/* ── Header ── */}
@@ -138,11 +142,11 @@ const AmenityDetailPage = () => {
             >
               {isShared ? (
                 <>
-                  <Users size={13} /> Shared Facility
+                  <Users size={13} /> {t('amenities.shared_facility')}
                 </>
               ) : (
                 <>
-                  <Lock size={13} /> Exclusive Booking
+                  <Lock size={13} /> {t('amenities.exclusive_facility')}
                 </>
               )}
             </span>
@@ -157,11 +161,11 @@ const AmenityDetailPage = () => {
                   fontWeight: 600,
                 }}
               >
-                ₹{amenity.price} / booking
+                {t('amenities.price_per_booking', { price: new Intl.NumberFormat(i18n.language).format(amenity.price) })}
               </span>
             )}
           </div>
-          <p className="text-muted mb-0 small">{amenity.description ?? 'No description provided.'}</p>
+          <p className="text-muted mb-0 small">{amenity.description ?? t('amenities.no_description')}</p>
         </div>
       </div>
 
@@ -185,7 +189,7 @@ const AmenityDetailPage = () => {
               ) : (
                 <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-muted" style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
                   <ImageIcon size={40} className="text-secondary opacity-50 mb-1" />
-                  <span style={{ fontSize: '0.8rem' }}>No photos available</span>
+                  <span style={{ fontSize: '0.8rem' }}>{t('amenities.no_photos_available')}</span>
                 </div>
               )}
 
@@ -203,7 +207,7 @@ const AmenityDetailPage = () => {
                   backdropFilter: 'blur(4px)',
                 }}
               >
-                {isFree ? 'Free Facility' : `₹${amenity.price}`}
+                {isFree ? t('amenities.free_facility') : formatCurrency(amenity.price)}
               </div>
             </div>
 
@@ -242,36 +246,36 @@ const AmenityDetailPage = () => {
           {/* Details & Blackouts Card */}
           <div className="card border-0 shadow-sm" style={{ borderRadius: '12px' }}>
             <div className="card-body">
-              <h6 className="fw-bold mb-3" style={{ color: '#1a1f36' }}>Facility Details & Guidelines</h6>
+              <h6 className="fw-bold mb-3" style={{ color: '#1a1f36' }}>{t('amenities.facility_details_guidelines')}</h6>
               
               <div className="d-flex flex-column gap-2 mb-3">
                 <div className="d-flex align-items-center gap-2 small text-secondary">
                   <Clock size={15} className="text-muted flex-shrink-0" />
-                  <span><strong>Operating Hours:</strong> {amenity.operatingStart} – {amenity.operatingEnd}</span>
+                  <span><strong>{t('amenities.operating_hours_colon')}</strong> {amenity.operatingStart} – {amenity.operatingEnd}</span>
                 </div>
                 {amenity.capacity != null && (
                   <div className="d-flex align-items-center gap-2 small text-secondary">
                     <Users size={15} className="text-muted flex-shrink-0" />
                     <span>
-                      <strong>{isShared ? 'Max Concurrent People:' : 'Capacity:'}</strong> {amenity.capacity} people
+                      <strong>{isShared ? t('amenities.max_concurrent_people_colon') : t('amenities.capacity_colon')}</strong> {amenity.capacity === 1 ? t('amenities.person_1') : t('amenities.persons_count', { count: amenity.capacity })}
                     </span>
                   </div>
                 )}
                 <div className="d-flex align-items-center gap-2 small text-secondary">
                   <IndianRupee size={15} className="text-muted flex-shrink-0" />
                   <span>
-                    <strong>Booking Fee:</strong>{' '}
+                    <strong>{t('amenities.booking_fee_colon')}</strong>{' '}
                     {isFree ? (
-                      <span className="text-success fw-semibold">Free (Instant Confirmation)</span>
+                      <span className="text-success fw-semibold">{t('amenities.free_instant_confirmation')}</span>
                     ) : (
-                      <span className="text-dark fw-bold">₹{amenity.price} (payable after voting approval)</span>
+                      <span className="text-dark fw-bold">{t('amenities.fee_payable_after_approval', { price: formatCurrency(amenity.price) })}</span>
                     )}
                   </span>
                 </div>
                 {isShared && (
                   <div className="d-flex align-items-center gap-2 small text-success">
                     <CheckCircle2 size={15} className="flex-shrink-0" />
-                    <span>Auto-approved instantly with no committee voting required.</span>
+                    <span>{t('amenities.auto_approved_no_voting')}</span>
                   </div>
                 )}
               </div>
@@ -279,26 +283,22 @@ const AmenityDetailPage = () => {
               <hr className="border-light-subtle" />
 
               <div className="d-flex justify-content-between align-items-center mb-2">
-                <h6 className="fw-bold mb-0" style={{ color: '#1a1f36' }}>Maintenance Blackouts</h6>
+                <h6 className="fw-bold mb-0" style={{ color: '#1a1f36' }}>{t('amenities.maintenance_blackouts')}</h6>
                 {isAdmin && (
                   <button className="btn btn-sm btn-outline-dark d-flex align-items-center gap-1" style={{ borderRadius: '8px' }} onClick={() => setBlackoutOpen(true)}>
-                    <Plus size={14} /> Add
+                    <Plus size={14} /> {t('amenities.add_blackout')}
                   </button>
                 )}
               </div>
               {blackouts.length === 0 ? (
-                <p className="small text-muted mb-0">No blackouts configured.</p>
+                <p className="small text-muted mb-0">{t('amenities.no_blackouts_configured')}</p>
               ) : (
                 <ul className="list-unstyled mb-0">
                   {blackouts.map((b) => (
                     <li key={b.id} className="d-flex justify-content-between align-items-start small border-bottom border-light-subtle py-2">
                       <div>
                         <div className="fw-medium" style={{ color: '#1a1f36' }}>
-                          {(() => {
-                            const [y, m, d] = (b.date || '').split('-').map(Number);
-                            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                            return y && m && d ? `${months[m - 1]} ${d}, ${y}` : b.date;
-                          })()}
+                          {formatDateOnly(b.date)}
                         </div>
                         <div className="text-secondary">{b.startTime} – {b.endTime}</div>
                         <div className="text-muted">{b.reason}</div>
@@ -308,7 +308,7 @@ const AmenityDetailPage = () => {
                           type="button"
                           className="btn btn-sm btn-link text-danger p-0 ms-2"
                           onClick={() => blackoutOps.remove(b.id)}
-                          title="Delete blackout"
+                          title={t('amenities.delete_blackout')}
                         >
                           <Trash2 size={14} />
                         </button>
@@ -327,7 +327,7 @@ const AmenityDetailPage = () => {
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <h6 className="fw-bold mb-0" style={{ color: '#1a1f36' }}>
-                  {isShared ? 'Facility Schedule & Live Crowd' : 'Availability Schedule'}
+                  {isShared ? t('amenities.facility_schedule_live_crowd') : t('amenities.availability_schedule')}
                 </h6>
                 <div style={{ width: '190px' }}>
                   <DatePicker
@@ -358,7 +358,7 @@ const AmenityDetailPage = () => {
                     onClick={() => openBooking()}
                   >
                     <CalendarPlus size={16} />
-                    {isShared ? 'Reserve Free Spot' : `Book This Amenity (₹${amenity.price})`}
+                    {isShared ? t('amenities.reserve_free_spot') : t('amenities.book_this_amenity', { price: formatCurrency(amenity.price) })}
                   </button>
                 ) : (
                   <div
@@ -367,7 +367,7 @@ const AmenityDetailPage = () => {
                   >
                     <Info size={18} className="flex-shrink-0 text-warning" />
                     <span>
-                      Amenity booking is reserved for active residents currently residing in the apartment. Since your unit is currently rented to an active tenant, only the residing tenant can book amenities.
+                      {t('amenities.tenant_only_booking_notice')}
                     </span>
                   </div>
                 )}

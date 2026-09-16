@@ -1,5 +1,7 @@
+import { useTranslation } from 'react-i18next';
 import type { AdminDashboardMetrics } from '../types/maintenance.types';
 import { CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
+import { formatCurrency } from '../../../utils/formatCurrency';
 
 interface MaintenanceStatsRowProps {
   metrics: AdminDashboardMetrics | null;
@@ -7,27 +9,29 @@ interface MaintenanceStatsRowProps {
 }
 
 const MaintenanceStatsRow = ({ metrics, loading = false }: MaintenanceStatsRowProps) => {
+  const { t, i18n } = useTranslation();
+
   const statItems = [
     {
-      label: 'Total Collected',
-      value: `₹${metrics?.totalCollected ? metrics.totalCollected.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}`,
-      subtext: 'Total payments received',
+      label: t('maintenance.total_collected'),
+      value: formatCurrency(metrics?.totalCollected ?? 0),
+      subtext: t('maintenance.total_collected_subtext'),
       icon: CheckCircle2,
       bgClass: 'bg-success-subtle text-success',
       subtextColor: '#198754',
     },
     {
-      label: 'Total Pending',
-      value: `₹${metrics?.totalPending ? metrics.totalPending.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}`,
-      subtext: 'Outstanding maintenance dues',
+      label: t('maintenance.total_pending'),
+      value: formatCurrency(metrics?.totalPending ?? 0),
+      subtext: t('maintenance.total_pending_subtext'),
       icon: Clock,
       bgClass: 'bg-warning-subtle text-warning-emphasis',
       subtextColor: '#b45309',
     },
     {
-      label: 'Overdue Invoices',
-      value: metrics?.overdueCount ?? 0,
-      subtext: 'Invoices past due date',
+      label: t('maintenance.overdue_invoices'),
+      value: new Intl.NumberFormat(i18n.language || 'en').format(metrics?.overdueCount ?? 0),
+      subtext: t('maintenance.overdue_invoices_subtext'),
       icon: AlertTriangle,
       bgClass: 'bg-danger-subtle text-danger',
       subtextColor: '#dc2626',

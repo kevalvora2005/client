@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useScrollLock } from '../../../hooks/useScrollLock';
 import { useMyBookings } from '../hooks/useBookings';
 import { useAmenities } from '../hooks/useAmenities';
@@ -10,6 +11,7 @@ import Pagination from '../../../components/Pagination/Pagination';
 import type { Booking } from '../types/amenity.types';
 
 const MyBookingsPage = () => {
+  const { t } = useTranslation();
   const [scope, setScope] = useState<'upcoming' | 'past'>('upcoming');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -41,8 +43,8 @@ const MyBookingsPage = () => {
     <div className="container-fluid p-3 p-md-4">
       <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
         <div>
-          <h4 className="fw-bold mb-2 fs-4" style={{ color: '#1a1f36' }}>My Bookings</h4>
-          <p className="text-muted mb-0 small">View and manage your amenity bookings.</p>
+          <h4 className="fw-bold mb-2 fs-4" style={{ color: '#1a1f36' }}>{t('amenities.my_bookings')}</h4>
+          <p className="text-muted mb-0 small">{t('amenities.my_bookings_desc')}</p>
         </div>
       </div>
 
@@ -63,7 +65,7 @@ const MyBookingsPage = () => {
                 border: `1px solid ${active ? '#1a1f36' : '#e5e7eb'}`,
               }}
             >
-              {key === 'upcoming' ? 'Upcoming' : 'Past'}
+              {key === 'upcoming' ? t('amenities.upcoming') : t('amenities.past')}
             </button>
           );
         })}
@@ -93,8 +95,8 @@ const MyBookingsPage = () => {
 
       {cancelTarget && (
         <ReasonModal
-          title="Cancel Booking"
-          submitLabel="Cancel Booking"
+          title={t('amenities.cancel_booking')}
+          submitLabel={t('amenities.cancel_booking')}
           icon="bi-slash-circle"
           loading={bookingMutations.loading}
           onSubmit={handleCancel}

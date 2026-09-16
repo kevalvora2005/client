@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { bookingApi } from '../api/bookingApi';
 import type { Booking, BookingListFilters } from '../types/amenity.types';
 import type { PaginatedResult } from '../../../types/pagination.types';
@@ -6,6 +7,7 @@ import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { showError } from '../../../utils/toast';
 
 export const useMyBookings = (scope: 'upcoming' | 'past', pageNumber = 1, pageSize = 10) => {
+  const { t } = useTranslation();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [pagination, setPagination] = useState<Omit<PaginatedResult<unknown>, 'items'>>({
     pageNumber: 1,
@@ -38,14 +40,14 @@ export const useMyBookings = (scope: 'upcoming' | 'past', pageNumber = 1, pageSi
           });
         }
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, 'Failed to load bookings'));
+        if (!cancelled) showError(getErrorMessage(err, t('amenities.load_bookings_failed')));
       } finally {
         if (!cancelled) setLoading(false);
       }
     };
     load();
     return () => { cancelled = true; };
-  }, [scope, pageNumber, pageSize, nonce]);
+  }, [scope, pageNumber, pageSize, nonce, t]);
 
   return { bookings, pagination, loading, refetch };
 };
@@ -55,6 +57,7 @@ export const useAdminBookings = (
   pageNumber = 1,
   pageSize = 10
 ) => {
+  const { t } = useTranslation();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [pagination, setPagination] = useState<Omit<PaginatedResult<unknown>, 'items'>>({
     pageNumber: 1,
@@ -90,14 +93,14 @@ export const useAdminBookings = (
           });
         }
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, 'Failed to load bookings'));
+        if (!cancelled) showError(getErrorMessage(err, t('amenities.load_bookings_failed')));
       } finally {
         if (!cancelled) setLoading(false);
       }
     };
     load();
     return () => { cancelled = true; };
-  }, [serialized, pageNumber, pageSize, nonce]);
+  }, [serialized, pageNumber, pageSize, nonce, t]);
 
   return { bookings, pagination, loading, refetch };
 };

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Check, X, Gavel, IndianRupee, QrCode, AlertCircle, CheckCircle2, Download } from 'lucide-react';
 import useAuth from '../../../hooks/useAuth';
 import { useScrollLock } from '../../../hooks/useScrollLock';
@@ -7,6 +8,8 @@ import { useBookingDetail } from '../hooks/useBookingDetail';
 import { useBookingMutations } from '../hooks/useBookingMutations';
 import { useAmenities } from '../hooks/useAmenities';
 import { bookingApi } from '../api/bookingApi';
+import { formatDateOnly } from '../../../utils/formatDate';
+import { formatCurrency } from '../../../utils/formatCurrency';
 import BookingStatusBadge from '../components/BookingStatusBadge';
 import ReasonModal from '../components/ReasonModal';
 import BookingPaymentModal from '../components/BookingPaymentModal';
@@ -29,83 +32,87 @@ const VoterRow = ({
   pending: boolean;
   actionLoading: boolean;
   onVote: (choice: VoteChoice) => void;
-}) => (
-  <div className="d-flex align-items-center justify-content-between p-3 rounded-3 border border-light-subtle flex-wrap gap-2">
-    <div className="min-w-0" style={{ flex: '1 1 auto' }}>
-      <div className="d-flex align-items-center gap-2">
-        <span className="fw-semibold text-dark" style={{ fontSize: '0.9rem' }}>{name}</span>
-        {tag && (
-          <span className="badge" style={{ backgroundColor: '#e8eaf6', color: '#3949ab', fontSize: '0.68rem', fontWeight: 600 }}>
-            {tag}
-          </span>
-        )}
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div className="d-flex align-items-center justify-content-between p-3 rounded-3 border border-light-subtle flex-wrap gap-2">
+      <div className="min-w-0" style={{ flex: '1 1 auto' }}>
+        <div className="d-flex align-items-center gap-2">
+          <span className="fw-semibold text-dark" style={{ fontSize: '0.9rem' }}>{name}</span>
+          {tag && (
+            <span className="badge" style={{ backgroundColor: '#e8eaf6', color: '#3949ab', fontSize: '0.68rem', fontWeight: 600 }}>
+              {tag}
+            </span>
+          )}
+        </div>
+        <div className="text-muted mt-0" style={{ fontSize: '0.78rem' }}>{email}</div>
       </div>
-      <div className="text-muted mt-0" style={{ fontSize: '0.78rem' }}>{email}</div>
+      {pending ? (
+        <div className="d-flex rounded-3 overflow-hidden flex-shrink-0" style={{ border: '1px solid #e5e7eb' }}>
+          <button
+            type="button"
+            disabled={actionLoading}
+            onClick={() => onVote('Approve')}
+            className="d-flex align-items-center gap-1 px-3 fw-semibold border-0"
+            style={{
+              fontSize: '0.82rem',
+              paddingTop: '6px',
+              paddingBottom: '6px',
+              backgroundColor: draft === 'Approve' ? '#166534' : '#fff',
+              color: draft === 'Approve' ? '#fff' : '#6b7280',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <Check size={14} /> {t('amenities.approve')}
+          </button>
+          <div style={{ width: '1px', background: '#e5e7eb' }} />
+          <button
+            type="button"
+            disabled={actionLoading}
+            onClick={() => onVote('Reject')}
+            className="d-flex align-items-center gap-1 px-3 fw-semibold border-0"
+            style={{
+              fontSize: '0.82rem',
+              paddingTop: '6px',
+              paddingBottom: '6px',
+              backgroundColor: draft === 'Reject' ? '#991b1b' : '#fff',
+              color: draft === 'Reject' ? '#fff' : '#6b7280',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <X size={14} /> {t('amenities.reject')}
+          </button>
+        </div>
+      ) : draft ? (
+        <span
+          className="d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill fw-semibold flex-shrink-0"
+          style={{
+            fontSize: '0.78rem',
+            backgroundColor: draft === 'Approve' ? '#dcfce7' : '#fee2e2',
+            color: draft === 'Approve' ? '#166534' : '#991b1b',
+          }}
+        >
+          {draft === 'Approve' ? <Check size={13} /> : <X size={13} />}
+          {draft === 'Approve' ? t('status.approved') : t('status.rejected')}
+        </span>
+      ) : (
+        <span
+          className="d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill fw-semibold flex-shrink-0"
+          style={{
+            fontSize: '0.78rem',
+            backgroundColor: '#f3f4f6',
+            color: '#6b7280',
+          }}
+        >
+          {t('amenities.not_voted')}
+        </span>
+      )}
     </div>
-    {pending ? (
-      <div className="d-flex rounded-3 overflow-hidden flex-shrink-0" style={{ border: '1px solid #e5e7eb' }}>
-        <button
-          type="button"
-          disabled={actionLoading}
-          onClick={() => onVote('Approve')}
-          className="d-flex align-items-center gap-1 px-3 fw-semibold border-0"
-          style={{
-            fontSize: '0.82rem',
-            paddingTop: '6px',
-            paddingBottom: '6px',
-            backgroundColor: draft === 'Approve' ? '#166534' : '#fff',
-            color: draft === 'Approve' ? '#fff' : '#6b7280',
-            transition: 'all 0.15s ease',
-          }}
-        >
-          <Check size={14} /> Approve
-        </button>
-        <div style={{ width: '1px', background: '#e5e7eb' }} />
-        <button
-          type="button"
-          disabled={actionLoading}
-          onClick={() => onVote('Reject')}
-          className="d-flex align-items-center gap-1 px-3 fw-semibold border-0"
-          style={{
-            fontSize: '0.82rem',
-            paddingTop: '6px',
-            paddingBottom: '6px',
-            backgroundColor: draft === 'Reject' ? '#991b1b' : '#fff',
-            color: draft === 'Reject' ? '#fff' : '#6b7280',
-            transition: 'all 0.15s ease',
-          }}
-        >
-          <X size={14} /> Reject
-        </button>
-      </div>
-    ) : draft ? (
-      <span
-        className="d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill fw-semibold flex-shrink-0"
-        style={{
-          fontSize: '0.78rem',
-          backgroundColor: draft === 'Approve' ? '#dcfce7' : '#fee2e2',
-          color: draft === 'Approve' ? '#166534' : '#991b1b',
-        }}
-      >
-        {draft === 'Approve' ? <Check size={13} /> : <X size={13} />}
-        {draft}
-      </span>
-    ) : (
-      <span
-        className="d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill fw-semibold flex-shrink-0"
-        style={{
-          fontSize: '0.78rem',
-          backgroundColor: '#f3f4f6',
-          color: '#6b7280',
-        }}
-      >
-        Not Voted
-      </span>
-    )}
-  </div>
-);
+  );
+};
 
 const BookingDetailPage = () => {
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const bookingId = Number(id);
   const { user } = useAuth();
@@ -137,7 +144,7 @@ const BookingDetailPage = () => {
     return <div className="container-fluid p-4 text-center"><div className="spinner-border text-primary" /></div>;
   }
   if (!booking) {
-    return <div className="container-fluid p-4 text-center text-muted">Booking not found.</div>;
+    return <div className="container-fluid p-4 text-center text-muted">{t('amenities.booking_not_found')}</div>;
   }
 
   const amenity = booking.amenity || amenities.find((a) => a.id === booking.amenityId);
@@ -236,98 +243,73 @@ const BookingDetailPage = () => {
       aptDisplay = `${block}-${fullUnit}`;
     }
   } else if (booking.apartmentId) {
-    aptDisplay = `Apt #${booking.apartmentId}`;
+    aptDisplay = t('amenities.apt_hash', { id: booking.apartmentId });
   }
 
-  const formatDisplayDate = (dateStr?: string | null): string => {
-    if (!dateStr) return '—';
-    try {
-      const [y, m, d] = dateStr.split('-').map(Number);
-      if (!y || !m || !d) {
-        const dt = new Date(dateStr);
-        return dt.toLocaleDateString('en-US', {
-          weekday: 'short',
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        });
-      }
-      const dateObj = new Date(y, m - 1, d);
-      return dateObj.toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      });
-    } catch {
-      return dateStr;
-    }
-  };
-
   const rows: { label: string; value: React.ReactNode }[] = [
-    { label: 'Amenity', value: <span className="fw-semibold">{amenityName}</span> },
+    { label: t('amenities.amenity_label'), value: <span className="fw-semibold">{amenityName}</span> },
     {
-      label: 'Booking Fee',
+      label: t('amenities.booking_fee'),
       value: isFree ? (
-        <span className="badge bg-success-subtle text-success border border-success-subtle">Free</span>
+        <span className="badge bg-success-subtle text-success border border-success-subtle">{t('amenities.free')}</span>
       ) : (
-        <span className="fw-bold text-dark">₹{amenityPrice}</span>
+        <span className="fw-bold text-dark">{formatCurrency(amenityPrice)}</span>
       ),
     },
     {
-      label: 'Resident',
+      label: t('amenities.resident_label'),
       value: residentUser?.name
         ? `${residentUser.name} (${residentUser.phone || residentUser.email})`
         : booking.resident?.name
         ? booking.resident.name
-        : `Resident #${booking.residentId}`,
+        : t('amenities.resident_hash', { id: booking.residentId }),
     },
     {
-      label: 'Apartment',
+      label: t('amenities.apartment_label'),
       value: aptDisplay,
     },
     ...((amenity?.bookingType === 'SHARED_CAPACITY' || amenity?.isSharedCapacity)
       ? [
           {
-            label: 'Attendees',
+            label: t('amenities.attendees'),
             value: (
               <span className="fw-medium text-dark">
                 {booking.memberCount && booking.memberCount > 1
-                  ? `${booking.memberCount} Persons`
-                  : '1 Person'}
+                  ? t('amenities.persons_count', { count: booking.memberCount })
+                  : t('amenities.person_1')}
               </span>
             ),
           },
         ]
       : []),
-    { label: 'Booking Date', value: formatDisplayDate(booking.bookingDate) },
-    { label: 'Time', value: `${booking.startTime} – ${booking.endTime}` },
-    { label: 'Purpose', value: booking.purpose ?? '—' },
+    { label: t('amenities.booking_date'), value: formatDateOnly(booking.bookingDate) || '—' },
+    { label: t('amenities.time_label'), value: `${booking.startTime} – ${booking.endTime}` },
+    { label: t('amenities.purpose_label'), value: booking.purpose ?? '—' },
     {
-      label: 'Payment Status',
+      label: t('amenities.payment_status'),
       value: isPaid ? (
         <span className="badge bg-success-subtle text-success border border-success-subtle d-inline-flex align-items-center gap-1">
-          <CheckCircle2 size={13} /> Paid ({booking.paymentRef})
+          <CheckCircle2 size={13} /> {t('amenities.paid_ref', { ref: booking.paymentRef })}
         </span>
       ) : isFree ? (
-        <span className="text-muted small">Not applicable (Free)</span>
+        <span className="text-muted small">{t('amenities.not_applicable_free')}</span>
       ) : isConfirmed ? (
         <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle d-inline-flex align-items-center gap-1">
-          <AlertCircle size={13} /> Unpaid — Awaiting Payment
+          <AlertCircle size={13} /> {t('amenities.unpaid_awaiting')}
         </span>
       ) : (
-        <span className="text-muted small">Payable upon approval</span>
+        <span className="text-muted small">{t('amenities.payable_upon_approval')}</span>
       ),
     },
   ];
 
-  if (booking.rejectionReason) rows.push({ label: 'Rejection Reason', value: booking.rejectionReason });
-  if (booking.cancellationReason) rows.push({ label: 'Cancellation Reason', value: booking.cancellationReason });
+  if (booking.rejectionReason) rows.push({ label: t('amenities.rejection_reason'), value: booking.rejectionReason });
+  if (booking.cancellationReason) rows.push({ label: t('amenities.cancellation_reason'), value: booking.cancellationReason });
 
   return (
     <div className="container-fluid p-3 p-md-4">
       <button className="btn btn-link text-decoration-none ps-0 mb-2 text-secondary" onClick={() => navigate(-1)}>
-        <i className="bi bi-arrow-left me-1" /> Back
+        <i className="bi bi-arrow-left me-1" /> {t('common.back')}
       </button>
 
       {/* ── Status Banners ── */}
@@ -345,10 +327,10 @@ const BookingDetailPage = () => {
               <CheckCircle2 size={20} className="text-primary flex-shrink-0" />
               <div>
                 <div className="fw-bold" style={{ fontSize: '0.95rem' }}>
-                  Booking Approved by Committee!
+                  {t('amenities.booking_approved_banner')}
                 </div>
                 <div className="small" style={{ color: '#1e3a8a' }}>
-                  Please complete the payment of <strong>₹{amenityPrice}</strong> to finalize your booking reservation.
+                  {t('amenities.booking_approved_resident_desc', { amount: formatCurrency(amenityPrice) })}
                 </div>
               </div>
             </div>
@@ -358,7 +340,7 @@ const BookingDetailPage = () => {
               style={{ borderRadius: '8px', fontSize: '0.88rem', backgroundColor: '#1a1f36', borderColor: '#1a1f36' }}
               onClick={() => setPayModalOpen(true)}
             >
-              <QrCode size={16} /> Pay ₹{amenityPrice} via UPI
+              <QrCode size={16} /> {t('amenities.pay_amount_upi', { amount: formatCurrency(amenityPrice) })}
             </button>
           </div>
         ) : (
@@ -374,10 +356,10 @@ const BookingDetailPage = () => {
             <CheckCircle2 size={18} className="text-primary flex-shrink-0" />
             <div>
               <span className="fw-semibold">
-                Booking Approved — Awaiting Payment from Resident
+                {t('amenities.booking_approved_awaiting_payment')}
               </span>
               <div className="small text-muted mt-0.5">
-                The resident who requested this booking has been notified to complete the fee payment of ₹{amenityPrice} via UPI.
+                {t('amenities.booking_approved_admin_desc', { amount: formatCurrency(amenityPrice) })}
               </div>
             </div>
           </div>
@@ -398,10 +380,10 @@ const BookingDetailPage = () => {
             <CheckCircle2 size={18} className="text-success flex-shrink-0" />
             <div>
               <span className="fw-semibold">
-                Booking confirmed and payment verified!
+                {t('amenities.booking_confirmed_paid_banner')}
               </span>
               <div className="small text-muted mt-0.5">
-                UPI Reference: <code>{booking.paymentRef}</code>
+                {t('amenities.upi_ref_colon', { ref: booking.paymentRef })}
               </div>
             </div>
           </div>
@@ -412,7 +394,7 @@ const BookingDetailPage = () => {
             onClick={handleDownloadReceipt}
             disabled={downloadingReceipt}
           >
-            <Download size={14} /> {downloadingReceipt ? 'Generating Receipt...' : 'Download Receipt'}
+            <Download size={14} /> {downloadingReceipt ? t('amenities.generating_receipt') : t('amenities.download_receipt')}
           </button>
         </div>
       )}
@@ -430,16 +412,16 @@ const BookingDetailPage = () => {
           <X size={18} className="flex-shrink-0 text-danger" />
           <div>
             <span className="fw-semibold">
-              This booking request was {booking.status.toLowerCase()}.
+              {t('amenities.booking_status_banner', { status: t(`status.${booking.status.toLowerCase()}`) })}
             </span>
             {booking.status === 'Rejected' && booking.rejectionReason && (
               <div className="mt-1" style={{ fontSize: '0.85rem', color: '#b91c1c' }}>
-                <strong>Rejection Reason:</strong> {booking.rejectionReason}
+                <strong>{t('amenities.rejection_reason')}:</strong> {booking.rejectionReason}
               </div>
             )}
             {booking.status === 'Cancelled' && booking.cancellationReason && (
               <div className="mt-1" style={{ fontSize: '0.85rem', color: '#b91c1c' }}>
-                <strong>Cancellation Reason:</strong> {booking.cancellationReason}
+                <strong>{t('amenities.cancellation_reason')}:</strong> {booking.cancellationReason}
               </div>
             )}
           </div>
@@ -449,12 +431,12 @@ const BookingDetailPage = () => {
       {/* ── Header ── */}
       <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
         <div>
-          <h4 className="fw-bold mb-1 fs-4" style={{ color: '#1a1f36' }}>Booking #{booking.id}</h4>
+          <h4 className="fw-bold mb-1 fs-4" style={{ color: '#1a1f36' }}>{t('amenities.booking_hash', { id: booking.id })}</h4>
           <div className="mt-1 d-flex align-items-center gap-2">
             <BookingStatusBadge status={booking.status} />
             {isPaid && (
               <span className="badge bg-success-subtle text-success border border-success-subtle">
-                Paid
+                {t('status.paid')}
               </span>
             )}
           </div>
@@ -466,7 +448,7 @@ const BookingDetailPage = () => {
         <div className="col-12 col-lg-6">
           <div className="card border-0 shadow-sm h-100" style={{ borderRadius: '12px' }}>
             <div className="card-body">
-              <h6 className="fw-bold mb-3" style={{ color: '#1a1f36' }}>Booking Details</h6>
+              <h6 className="fw-bold mb-3" style={{ color: '#1a1f36' }}>{t('amenities.booking_details')}</h6>
               <table className="table table-sm mb-0">
                 <tbody>
                   {rows.map((r, idx) => (
@@ -487,7 +469,7 @@ const BookingDetailPage = () => {
                       style={{ borderRadius: '8px', height: '38px' }}
                       onClick={() => setPayModalOpen(true)}
                     >
-                      <IndianRupee size={15} /> Pay ₹{amenityPrice} via UPI
+                      <IndianRupee size={15} /> {t('amenities.pay_amount_upi', { amount: formatCurrency(amenityPrice) })}
                     </button>
                   )}
                   {canCancel && (
@@ -496,7 +478,7 @@ const BookingDetailPage = () => {
                       style={{ borderRadius: '8px', height: '38px' }}
                       onClick={() => setCancelOpen(true)}
                     >
-                      <i className="bi bi-slash-circle me-1" /> Cancel Booking
+                      <i className="bi bi-slash-circle me-1" /> {t('amenities.cancel_booking')}
                     </button>
                   )}
                 </div>
@@ -513,10 +495,10 @@ const BookingDetailPage = () => {
               <div className="d-flex align-items-center justify-content-between mb-3">
                 <div className="d-flex align-items-center gap-2">
                   <Gavel size={18} className="text-dark" />
-                  <h6 className="fw-bold mb-0" style={{ color: '#1a1f36' }}>Committee Voting</h6>
+                  <h6 className="fw-bold mb-0" style={{ color: '#1a1f36' }}>{t('amenities.committee_voting')}</h6>
                 </div>
                 <span className="badge bg-light text-secondary border">
-                  {votedCount} of {totalPossibleVoters} voted
+                  {t('amenities.voted_count', { voted: new Intl.NumberFormat(i18n.language).format(votedCount), total: new Intl.NumberFormat(i18n.language).format(totalPossibleVoters) })}
                 </span>
               </div>
 
@@ -526,13 +508,13 @@ const BookingDetailPage = () => {
                   <div className="d-flex align-items-center justify-content-between mb-2">
                     <div className="d-flex align-items-center gap-3">
                       <span className="d-flex align-items-center gap-1" style={{ fontSize: '0.82rem', color: '#166534' }}>
-                        <Check size={14} /> <span className="fw-semibold">{approvedCount}</span> Approved
+                        <Check size={14} /> <span className="fw-semibold">{t('amenities.approved_count', { count: new Intl.NumberFormat(i18n.language).format(approvedCount) })}</span>
                       </span>
                       <span className="d-flex align-items-center gap-1" style={{ fontSize: '0.82rem', color: '#991b1b' }}>
-                        <X size={14} /> <span className="fw-semibold">{rejectedCount}</span> Rejected
+                        <X size={14} /> <span className="fw-semibold">{t('amenities.rejected_count', { count: new Intl.NumberFormat(i18n.language).format(rejectedCount) })}</span>
                       </span>
                       <span className="text-muted d-flex align-items-center gap-1" style={{ fontSize: '0.82rem' }}>
-                        <span className="fw-semibold">{totalPossibleVoters - votedCount}</span> Pending
+                        <span className="fw-semibold">{t('amenities.pending_count', { count: new Intl.NumberFormat(i18n.language).format(totalPossibleVoters - votedCount) })}</span>
                       </span>
                     </div>
                   </div>
@@ -553,7 +535,7 @@ const BookingDetailPage = () => {
 
               {/* ── Committee member rows ── */}
               {committeeMembers.length === 0 && !(isAdmin && isPending) ? (
-                <p className="text-muted small mb-0">No committee members configured to vote.</p>
+                <p className="text-muted small mb-0">{t('amenities.no_committee_members')}</p>
               ) : (
                 <div className="d-flex flex-column gap-2">
                   {committeeMembers.map((m: CommitteeMember) => {
@@ -562,7 +544,7 @@ const BookingDetailPage = () => {
                     return (
                       <VoterRow
                         key={m.id}
-                        name={m.fullName || `Member #${m.id}`}
+                        name={m.fullName || t('amenities.member_hash', { id: m.id })}
                         email={m.email}
                         draft={draft}
                         pending={isPending && isAdmin}
@@ -575,9 +557,9 @@ const BookingDetailPage = () => {
                   {/* ── Admin vote ── */}
                   {((isAdmin && isPending) || draftAdminVote || adminVoteFromDb?.vote) && (
                     <VoterRow
-                      name={user?.name ?? 'Admin'}
+                      name={user?.name ?? t('roles.admin')}
                       email={user?.email ?? ''}
-                      tag="Admin (Tiebreaker)"
+                      tag={t('amenities.admin_tiebreaker')}
                       draft={draftAdminVote ?? adminVoteFromDb?.vote}
                       pending={isPending && isAdmin}
                       actionLoading={actionLoading}
@@ -597,7 +579,7 @@ const BookingDetailPage = () => {
                     disabled={actionLoading || votedCount === 0}
                     onClick={recordVotes}
                   >
-                    {actionLoading ? 'Saving...' : 'Save Draft Votes'}
+                    {actionLoading ? t('amenities.saving') : t('amenities.save_draft_votes')}
                   </button>
                   <button
                     type="button"
@@ -606,7 +588,7 @@ const BookingDetailPage = () => {
                     disabled={actionLoading || votedCount === 0}
                     onClick={() => setShowFinalizeConfirm(true)}
                   >
-                    <Gavel size={15} /> Finalize Decision
+                    <Gavel size={15} /> {t('amenities.finalize_decision')}
                   </button>
                 </div>
               )}
@@ -619,8 +601,8 @@ const BookingDetailPage = () => {
 
       {cancelOpen && (
         <ReasonModal
-          title="Cancel Booking"
-          submitLabel="Cancel Booking"
+          title={t('amenities.cancel_booking')}
+          submitLabel={t('amenities.cancel_booking')}
           icon="bi-slash-circle"
           loading={bookingMutations.loading}
           onSubmit={handleCancel}
@@ -642,9 +624,9 @@ const BookingDetailPage = () => {
 
       <ConfirmDialog
         show={showFinalizeConfirm}
-        title="Finalize Booking Decision"
-        message="All recorded votes will be evaluated and the booking request will be approved or rejected based on the majority vote outcome. If approved, the resident will be prompted to pay the booking fee."
-        confirmLabel="Finalize Decision"
+        title={t('amenities.finalize_confirm_title')}
+        message={t('amenities.finalize_confirm_message')}
+        confirmLabel={t('amenities.finalize_decision')}
         variant="dark"
         loading={actionLoading}
         onConfirm={confirmFinalize}

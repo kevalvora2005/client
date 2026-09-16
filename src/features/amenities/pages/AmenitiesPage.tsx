@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import useAuth from '../../../hooks/useAuth';
 import { useScrollLock } from '../../../hooks/useScrollLock';
 import { useAmenities } from '../hooks/useAmenities';
@@ -9,17 +10,18 @@ import AmenityFormModal from '../components/AmenityFormModal';
 import Select from '../../../components/Select/Select';
 import type { Amenity, CreateAmenityPayload, UpdateAmenityPayload } from '../types/amenity.types';
 
-const FACILITY_TYPE_OPTIONS = [
-  { value: '', label: 'All Facility Types' },
-  { value: 'EXCLUSIVE', label: 'Exclusive' },
-  { value: 'SHARED_CAPACITY', label: 'Shared' },
-];
-
 const AmenitiesPage = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const { amenities, loading, refetch } = useAmenities();
   const { create, update, loading: mutationLoading } = useAmenityMutations(refetch);
+
+  const facilityTypeOptions = useMemo(() => [
+    { value: '', label: t('amenities.all_facility_types') },
+    { value: 'EXCLUSIVE', label: t('amenities.exclusive') },
+    { value: 'SHARED_CAPACITY', label: t('amenities.shared') },
+  ], [t]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editAmenity, setEditAmenity] = useState<Amenity | null>(null);
@@ -80,9 +82,9 @@ const AmenitiesPage = () => {
       {/* ── Header ── */}
       <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
         <div>
-          <h4 className="fw-bold mb-2 fs-4" style={{ color: '#1a1f36' }}>Amenities</h4>
+          <h4 className="fw-bold mb-2 fs-4" style={{ color: '#1a1f36' }}>{t('amenities.title')}</h4>
           <p className="text-muted mb-0 small">
-            {isAdmin ? 'Manage society amenities, operating hours and blackouts.' : 'Browse and book available amenities.'}
+            {isAdmin ? t('amenities.admin_subtitle') : t('amenities.resident_subtitle')}
           </p>
         </div>
         {isAdmin && (
@@ -91,7 +93,7 @@ const AmenitiesPage = () => {
             onClick={openAdd}
             style={{ fontSize: '0.875rem', borderRadius: '8px', backgroundColor: '#1a1f36', borderColor: '#1a1f36' }}
           >
-            <i className="bi bi-plus-lg" /> Add Amenity
+            <i className="bi bi-plus-lg" /> {t('amenities.add_amenity')}
           </button>
         )}
       </div>
@@ -106,7 +108,7 @@ const AmenitiesPage = () => {
             <input
               type="text"
               className="w-100 border-0 p-0 shadow-none bg-transparent text-dark"
-              placeholder="Search amenities by name..."
+              placeholder={t('amenities.search_placeholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{ fontSize: '0.875rem', outline: 'none' }}
@@ -128,8 +130,8 @@ const AmenitiesPage = () => {
 
         <div style={{ minWidth: '170px' }}>
           <Select
-            options={FACILITY_TYPE_OPTIONS}
-            placeholder="All Facility Types"
+            options={facilityTypeOptions}
+            placeholder={t('amenities.all_facility_types')}
             value={facilityType}
             onChange={(e) => setFacilityType(e.target.value)}
             className="fw-medium text-secondary"
@@ -146,7 +148,7 @@ const AmenitiesPage = () => {
               style={{ height: '46px', fontSize: '0.875rem' }}
             >
               <i className="bi bi-x-circle me-2" />
-              Clear
+              {t('common.clear')}
             </button>
           </div>
         )}
@@ -159,11 +161,11 @@ const AmenitiesPage = () => {
           <div className="d-flex justify-content-center">
             <Sparkles size={48} className="text-secondary mb-3 opacity-50" />
           </div>
-          <h6 className="fw-semibold text-dark mb-1">No amenities found</h6>
+          <h6 className="fw-semibold text-dark mb-1">{t('amenities.no_amenities_found')}</h6>
           <p className="small text-muted mb-3">
             {hasActiveFilters
-              ? 'No amenities match your selected filters.'
-              : 'No amenities have been registered yet.'}
+              ? t('amenities.no_amenities_matching')
+              : t('amenities.no_amenities_registered')}
           </p>
           {hasActiveFilters && (
             <div>
@@ -173,7 +175,7 @@ const AmenitiesPage = () => {
                 onClick={handleResetFilters}
                 style={{ borderRadius: '8px', fontSize: '0.82rem' }}
               >
-                Reset Filters
+                {t('amenities.reset_filters')}
               </button>
             </div>
           )}

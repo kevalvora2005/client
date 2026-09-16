@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import DatePicker from '../../../components/DatePicker/DatePicker';
@@ -10,25 +11,28 @@ interface GenerateInvoicesFormProps {
   onCancel: () => void;
 }
 
-const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => ({
-  value: i + 1,
-  label: new Date(2000, i).toLocaleString('en-IN', { month: 'long' }),
-}));
+const getMonthOptions = (locale: string) =>
+  Array.from({ length: 12 }, (_, i) => ({
+    value: i + 1,
+    label: new Intl.DateTimeFormat(locale, { month: 'long' }).format(new Date(2000, i, 15)),
+  }));
 
 const GenerateInvoicesForm = ({ loading, onSubmit, onCancel }: GenerateInvoicesFormProps) => {
+  const { t, i18n } = useTranslation();
   const today = new Date();
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
+  const monthOptions = useMemo(() => getMonthOptions(i18n.language || 'en'), [i18n.language]);
   const [extraChargesTouched, setExtraChargesTouched] = useState<{ label: boolean; amount: boolean }[]>([]);
 
-  const validationSchema = Yup.object({
-    month: Yup.number().required('Month is required'),
-    year: Yup.number().required('Year is required').min(2000, 'Year must be 2000 or later'),
+  const validationSchema = useMemo(() => Yup.object({
+    month: Yup.number().required(t('validation.month_req')),
+    year: Yup.number().required(t('validation.year_req')).min(2000, t('validation.year_min2000')),
     dueDate: Yup.string()
-      .required('Due date is required')
-      .test('future-date', 'Due date must be in the future', (value) => {
+      .required(t('validation.due_date_req'))
+      .test('future-date', t('validation.due_date_future'), (value) => {
         if (!value) return false;
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
@@ -37,14 +41,14 @@ const GenerateInvoicesForm = ({ loading, onSubmit, onCancel }: GenerateInvoicesF
       }),
     extraCharges: Yup.array().of(
       Yup.object({
-        label: Yup.string().test('label-required', 'Description is required', function (value) {
+        label: Yup.string().test('label-required', t('validation.charge_desc_req'), function (value) {
           const { amount } = this.parent;
           if ((value && value.trim() !== '') || (amount && String(amount).trim() !== '')) {
             return !!(value && value.trim() !== '');
           }
           return true;
         }),
-        amount: Yup.string().test('amount-required', 'Amount is required', function (value) {
+        amount: Yup.string().test('amount-required', t('validation.charge_amount_req'), function (value) {
           const { label } = this.parent;
           if ((label && label.trim() !== '') || (value && value.trim() !== '')) {
             if (!value || value.trim() === '') return false;
@@ -55,7 +59,7 @@ const GenerateInvoicesForm = ({ loading, onSubmit, onCancel }: GenerateInvoicesF
         }),
       }),
     ),
-  });
+  }), [t]);
 
   const formik = useFormik({
     initialValues: {
@@ -89,7 +93,11 @@ const GenerateInvoicesForm = ({ loading, onSubmit, onCancel }: GenerateInvoicesF
 
   const handleChargeBlur = (index: number, field: 'label' | 'amount') => {
     const updated = [...extraChargesTouched];
-    updated[index] = { ...(updated[index] ?? {}), [field]: true };
+    const current = updated[index] ?? { label: false, amount: false };
+    updated[index] = {
+      label: field === 'label' ? true : current.label,
+      amount: field === 'amount' ? true : current.amount,
+    };
     setExtraChargesTouched(updated);
     formik.setFieldTouched(`extraCharges[${index}].${field}`, true, false);
   };
@@ -99,7 +107,7 @@ const GenerateInvoicesForm = ({ loading, onSubmit, onCancel }: GenerateInvoicesF
 
       <div className="row g-3 mb-3">
         <div className="col-6">
-          <label className="form-label fw-medium" style={{ fontSize: '0.85rem' }}>Month</label>
+          <label className="form-label fw-medium" style={{ fontSize: '0.85rem' }}>{t('maintenance.month')}</label>
           <select
             className="form-select shadow-none"
             name="month"
@@ -107,14 +115,14 @@ const GenerateInvoicesForm = ({ loading, onSubmit, onCancel }: GenerateInvoicesF
             onChange={formik.handleChange}
             style={{ borderRadius: '8px', fontSize: '0.9rem' }}
           >
-            {MONTH_OPTIONS.map((opt) => (
+            {monthOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
         </div>
 
         <div className="col-6">
-          <label className="form-label fw-medium" style={{ fontSize: '0.85rem' }}>Year</label>
+          <label className="form-label fw-medium" style={{ fontSize: '0.85rem' }}>{t('maintenance.year')}</label>
           <input
             type="number"
             className="form-control shadow-none"
@@ -128,7 +136,7 @@ const GenerateInvoicesForm = ({ loading, onSubmit, onCancel }: GenerateInvoicesF
 
       <div className="mb-3">
         <DatePicker
-          label="Due Date"
+          label={t('maintenance.due_date')}
           name="dueDate"
           required
           minDate={tomorrowStr}
@@ -148,7 +156,7 @@ const GenerateInvoicesForm = ({ loading, onSubmit, onCancel }: GenerateInvoicesF
       <div className="mb-4">
         <div className="d-flex align-items-center justify-content-between mb-2">
           <label className="form-label fw-medium mb-0" style={{ fontSize: '0.85rem' }}>
-            Extra Charges (Optional)
+            {t('maintenance.extra_charges_optional')}
           </label>
           <button
             type="button"
@@ -159,7 +167,7 @@ const GenerateInvoicesForm = ({ loading, onSubmit, onCancel }: GenerateInvoicesF
             }}
             style={{ fontSize: '0.78rem', borderRadius: '6px' }}
           >
-            <i className="bi bi-plus-lg" /> Add Charge
+            <i className="bi bi-plus-lg" /> {t('maintenance.add_charge')}
           </button>
         </div>
 
@@ -175,7 +183,7 @@ const GenerateInvoicesForm = ({ loading, onSubmit, onCancel }: GenerateInvoicesF
                     <div className="flex-grow-1">
                       <input
                         type="text"
-                        placeholder="Description (e.g. Water, Late Fee)"
+                        placeholder={t('maintenance.charge_desc_placeholder')}
                         className={`form-control form-control-sm shadow-none ${chargeTouched?.label && chargeError?.label ? 'is-invalid' : ''}`}
                         value={charge.label}
                         onChange={(e) => {
@@ -194,7 +202,7 @@ const GenerateInvoicesForm = ({ loading, onSubmit, onCancel }: GenerateInvoicesF
                         <span className="input-group-text bg-light border-light-subtle" style={{ fontSize: '0.8rem' }}>₹</span>
                         <input
                           type="number"
-                          placeholder="Amount"
+                          placeholder={t('maintenance.charge_amount_placeholder')}
                           className={`form-control shadow-none ${chargeTouched?.amount && chargeError?.amount ? 'is-invalid' : ''}`}
                           value={charge.amount}
                           onChange={(e) => {
@@ -247,7 +255,7 @@ const GenerateInvoicesForm = ({ loading, onSubmit, onCancel }: GenerateInvoicesF
           disabled={loading}
           style={{ height: '38px', fontSize: '0.875rem' }}
         >
-          Cancel
+          {t('common.cancel')}
         </button>
         <button
           type="submit"
@@ -258,7 +266,7 @@ const GenerateInvoicesForm = ({ loading, onSubmit, onCancel }: GenerateInvoicesF
           {loading ? (
             <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
           ) : (
-            'Generate Invoices'
+            t('maintenance.generate_invoices_btn')
           )}
         </button>
       </div>

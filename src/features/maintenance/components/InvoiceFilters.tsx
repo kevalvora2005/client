@@ -1,31 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import Select from '../../../components/Select/Select';
 import type { SelectOption } from '../../../components/Select/Select';
 import type { InvoiceStatus, InvoiceListParams } from '../types/maintenance.types';
-
-const STATUS_OPTIONS: SelectOption[] = [
-  { value: '', label: 'All statuses' },
-  { value: 'Pending', label: 'Pending' },
-  { value: 'Paid', label: 'Paid' },
-  { value: 'Overdue', label: 'Overdue' },
-];
-
-const MONTH_OPTIONS: SelectOption[] = [
-  { value: '', label: 'All months' },
-  ...Array.from({ length: 12 }, (_, i) => ({
-    value: String(i + 1),
-    label: new Date(2000, i).toLocaleString('en-IN', { month: 'long' }),
-  })),
-];
-
-const currentYear = new Date().getFullYear();
-const YEAR_OPTIONS: SelectOption[] = [
-  { value: '', label: 'All years' },
-  ...Array.from({ length: 5 }, (_, i) => {
-    const yr = currentYear - i;
-    return { value: String(yr), label: String(yr) };
-  }),
-];
 
 interface InvoiceFiltersProps {
   filters: InvoiceListParams;
@@ -36,14 +13,41 @@ interface InvoiceFiltersProps {
 }
 
 const InvoiceFilters = ({ filters, onFilterChange, isAdmin = true, apartmentView = false, placeholder }: InvoiceFiltersProps) => {
+  const { t, i18n } = useTranslation();
   const [search, setSearch] = useState(filters.search ?? '');
+
+  const statusOptions: SelectOption[] = useMemo(() => [
+    { value: '', label: t('maintenance.all_statuses') },
+    { value: 'Pending', label: t('maintenance.status_pending') },
+    { value: 'Paid', label: t('maintenance.status_paid') },
+    { value: 'Overdue', label: t('maintenance.status_overdue') },
+  ], [t]);
+
+  const monthOptions: SelectOption[] = useMemo(() => [
+    { value: '', label: t('maintenance.all_months') },
+    ...Array.from({ length: 12 }, (_, i) => ({
+      value: String(i + 1),
+      label: new Intl.DateTimeFormat(i18n.language || 'en', { month: 'long' }).format(new Date(2000, i, 15)),
+    })),
+  ], [t, i18n.language]);
+
+  const yearOptions: SelectOption[] = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return [
+      { value: '', label: t('maintenance.all_years') },
+      ...Array.from({ length: 5 }, (_, i) => {
+        const yr = currentYear - i;
+        return { value: String(yr), label: String(yr) };
+      }),
+    ];
+  }, [t]);
 
   const computedPlaceholder = placeholder ?? (
     isAdmin
-      ? 'Search by unit or resident name...'
+      ? t('maintenance.search_admin_placeholder')
       : apartmentView
-        ? 'Search by tenant name...'
-        : 'Search invoices...'
+        ? t('maintenance.search_tenant_placeholder')
+        : t('maintenance.search_invoices_placeholder')
   );
 
   useEffect(() => {
@@ -102,8 +106,8 @@ const InvoiceFilters = ({ filters, onFilterChange, isAdmin = true, apartmentView
       <div style={{ minWidth: '140px' }}>
         <Select
           name="month"
-          options={MONTH_OPTIONS}
-          placeholder="All months"
+          options={monthOptions}
+          placeholder={t('maintenance.all_months')}
           value={filters.month ? String(filters.month) : ''}
           onChange={(e) =>
             onFilterChange({
@@ -120,8 +124,8 @@ const InvoiceFilters = ({ filters, onFilterChange, isAdmin = true, apartmentView
       <div style={{ minWidth: '130px' }}>
         <Select
           name="year"
-          options={YEAR_OPTIONS}
-          placeholder="All years"
+          options={yearOptions}
+          placeholder={t('maintenance.all_years')}
           value={filters.year ? String(filters.year) : ''}
           onChange={(e) =>
             onFilterChange({
@@ -138,8 +142,8 @@ const InvoiceFilters = ({ filters, onFilterChange, isAdmin = true, apartmentView
       <div style={{ minWidth: '140px' }}>
         <Select
           name="status"
-          options={STATUS_OPTIONS}
-          placeholder="All statuses"
+          options={statusOptions}
+          placeholder={t('maintenance.all_statuses')}
           value={filters.status ?? ''}
           onChange={(e) =>
             onFilterChange({
@@ -161,7 +165,7 @@ const InvoiceFilters = ({ filters, onFilterChange, isAdmin = true, apartmentView
             style={{ height: '46px', fontSize: '0.875rem', borderRadius: '8px' }}
           >
             <i className="bi bi-x-circle me-2" />
-            Clear
+            {t('common.clear')}
           </button>
         </div>
       )}

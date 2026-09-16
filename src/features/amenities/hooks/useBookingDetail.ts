@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useReducer } from 'react';
+import { useTranslation } from 'react-i18next';
 import { bookingApi } from '../api/bookingApi';
 import type { BookingDetail, VoteChoice } from '../types/amenity.types';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
@@ -29,6 +30,7 @@ function draftReducer(state: Record<number, VoteChoice>, action: DraftAction) {
 }
 
 export const useBookingDetail = (id: number) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const [data, setData] = useState<BookingDetail | null>(null);
@@ -55,11 +57,11 @@ export const useBookingDetail = (id: number) => {
       dispatch({ type: 'INIT', votes: draft });
       setDraftAdminVote(admin);
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to load booking'));
+      showError(getErrorMessage(err, t('amenities.load_booking_failed')));
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -83,14 +85,14 @@ export const useBookingDetail = (id: number) => {
           setDraftAdminVote(admin);
         }
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, 'Failed to load booking'));
+        if (!cancelled) showError(getErrorMessage(err, t('amenities.load_booking_failed')));
       } finally {
         if (!cancelled) setLoading(false);
       }
     };
     load();
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, t]);
 
   const setMemberVote = useCallback((committeeMemberId: number, vote: VoteChoice) => {
     dispatch({ type: 'TOGGLE', memberId: committeeMemberId, vote });
@@ -111,16 +113,16 @@ export const useBookingDetail = (id: number) => {
 
       await bookingApi.bulkRecordVotes(id, votes, draftAdminVote ?? undefined);
       const result = await bookingApi.finalizeBooking(id);
-      showSuccess(result.status === 'Confirmed' ? 'Booking approved by voting' : 'Booking rejected by voting');
+      showSuccess(result.status === 'Confirmed' ? t('amenities.booking_approved_voting') : t('amenities.booking_rejected_voting'));
       await fetchDetail();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to finalize booking'));
+      showError(getErrorMessage(err, t('amenities.finalize_booking_failed')));
       return false;
     } finally {
       setActionLoading(false);
     }
-  }, [id, data, draftVotes, draftAdminVote, fetchDetail]);
+  }, [id, data, draftVotes, draftAdminVote, fetchDetail, t]);
 
   const recordVotes = useCallback(async () => {
     setActionLoading(true);
@@ -132,16 +134,16 @@ export const useBookingDetail = (id: number) => {
         .map((m) => ({ committeeMemberId: m.id, vote: draftVotes[m.id] as VoteChoice }));
 
       await bookingApi.bulkRecordVotes(id, votes, draftAdminVote ?? undefined);
-      showSuccess('Votes recorded successfully');
+      showSuccess(t('amenities.votes_recorded'));
       await fetchDetail();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to record votes'));
+      showError(getErrorMessage(err, t('amenities.record_votes_failed')));
       return false;
     } finally {
       setActionLoading(false);
     }
-  }, [id, data, draftVotes, draftAdminVote, fetchDetail]);
+  }, [id, data, draftVotes, draftAdminVote, fetchDetail, t]);
 
   return {
     booking: data,
