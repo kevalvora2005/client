@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Bell,
   FileText,
@@ -22,6 +23,7 @@ import { SOCKET_EVENTS } from '../../../services/socket';
 import useAuth from '../../../hooks/useAuth';
 import { notificationApi, type NotificationItem } from '../../../features/notifications/api/notificationApi';
 import VisitorApprovalDialog from '../../../features/visitors/components/VisitorApprovalDialog';
+import { formatRelativeTime } from '../../../utils/formatRelativeTime';
 
 const ICON_MAP: Record<string, typeof FileText> = {
   visitor_approval_needed: ShieldAlert,
@@ -122,27 +124,14 @@ const NAV_MAP: Record<string, string> = {
   booking_payment_succeeded: '/bookings/me',
 };
 
-function timeAgo(dateStr: string, nowMs: number): string {
-  const then = new Date(dateStr).getTime();
-  const diff = nowMs - then;
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return 'Yesterday';
-  if (days < 30) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-}
-
 const NotificationBell = () => {
+  const { t, i18n } = useTranslation();
   const socket = useSocket();
   const { user, isAuthenticated } = useAuth();
   const isAdmin = user?.role === 'admin';
   const isSecurity = user?.role === 'security';
   const navigate = useNavigate();
-  const [now, setNow] = useState(() => Date.now());
+  const [, setTick] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [pageNumber, setPageNumber] = useState(1);
@@ -163,7 +152,7 @@ const NotificationBell = () => {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setNow(Date.now());
+      setTick((prev) => prev + 1);
     }, 10000);
     return () => clearInterval(timer);
   }, []);
@@ -479,7 +468,7 @@ const NotificationBell = () => {
             style={{ minWidth: '18px', height: '18px', fontSize: '0.62rem', fontWeight: 700, padding: '0 4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
             {unreadCount > 9 ? '9+' : unreadCount}
-            <span className="visually-hidden">unread notifications</span>
+            <span className="visually-hidden">{t('notifications.unread')}</span>
           </span>
         )}
       </button>
@@ -491,7 +480,7 @@ const NotificationBell = () => {
         {/* ── Header ── */}
         <div className="d-flex align-items-center justify-content-between px-4 py-3 bg-light border-bottom border-light-subtle">
           <div className="d-flex align-items-center gap-2">
-            <span className="fw-bold text-dark" style={{ fontSize: '0.92rem' }}>Notifications</span>
+            <span className="fw-bold text-dark" style={{ fontSize: '0.92rem' }}>{t('notifications.title')}</span>
             {unreadCount > 0 && (
               <span className="badge rounded-pill bg-primary"
                 style={{ fontSize: '0.68rem', padding: '3px 6px' }}
@@ -507,7 +496,7 @@ const NotificationBell = () => {
               style={{ fontSize: '0.78rem' }}
             >
               <CheckCheck size={14} strokeWidth={2.2} />
-              Clear all
+              {t('notifications.clear_all')}
             </button>
           )}
         </div>
@@ -521,8 +510,8 @@ const NotificationBell = () => {
             >
               <Bell size={24} className="text-secondary" />
             </div>
-            <p className="fw-semibold mb-1 text-dark" style={{ fontSize: '0.9rem' }}>No notifications yet</p>
-            <p className="mb-0 text-muted" style={{ fontSize: '0.8rem' }}>We'll let you know when something arrives.</p>
+            <p className="fw-semibold mb-1 text-dark" style={{ fontSize: '0.9rem' }}>{t('notifications.empty_title')}</p>
+            <p className="mb-0 text-muted" style={{ fontSize: '0.8rem' }}>{t('notifications.empty_desc')}</p>
           </div>
         ) : (
           <div className="list-group list-group-flush" style={{ maxHeight: '420px', overflowY: 'auto' }}>
@@ -561,18 +550,18 @@ const NotificationBell = () => {
                         {n.body}
                       </p>
                       <p className="mb-0 text-muted" style={{ fontSize: '0.7rem', marginTop: '4px' }}>
-                        {timeAgo(n.createdAt, now)}
+                        {formatRelativeTime(n.createdAt, i18n.language)}
                       </p>
 
                       {isApprovalNotification && decision && (
                         <div className="mt-2">
                           {decision === 'Approved' ? (
                             <span className="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1" style={{ fontSize: '0.72rem' }}>
-                              ✓ Entry Approved
+                              ✓ {t('notifications.entry_approved')}
                             </span>
                           ) : (
                             <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1" style={{ fontSize: '0.72rem' }}>
-                              ✕ Entry Rejected
+                              ✕ {t('notifications.entry_rejected')}
                             </span>
                           )}
                         </div>
@@ -587,8 +576,8 @@ const NotificationBell = () => {
                     <button
                       className="btn btn-light btn-sm border-0 rounded-circle d-flex align-items-center justify-content-center p-0"
                       onClick={(e) => handleDismiss(n.id, e)}
-                      aria-label="Dismiss"
-                      title="Dismiss"
+                      aria-label={t('notifications.dismiss')}
+                      title={t('notifications.dismiss')}
                       style={{ width: '24px', height: '24px', color: '#9ca3af' }}
                     >
                       <X size={14} />
@@ -606,7 +595,7 @@ const NotificationBell = () => {
                   disabled={loadingMore}
                   style={{ fontSize: '0.8rem' }}
                 >
-                  {loadingMore ? 'Loading...' : 'Load more'}
+                  {loadingMore ? t('common.loading') : t('notifications.load_more')}
                 </button>
               </div>
             )}

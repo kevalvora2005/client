@@ -709,5 +709,16 @@
     "move_out_warning": "Setting a move-out date will deactivate this resident and free their apartment.",
     "save_changes": "Save Changes",
     "create_resident": "Create Resident"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "unread": "unread notifications",
+    "clear_all": "Clear all",
+    "empty_title": "No notifications yet",
+    "empty_desc": "We'll let you know when something arrives.",
+    "entry_approved": "Entry Approved",
+    "entry_rejected": "Entry Rejected",
+    "dismiss": "Dismiss",
+    "load_more": "Load more"
   }
 }
