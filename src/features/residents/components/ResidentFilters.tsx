@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Select from "../../../components/Select/Select";
 import type { ResidentFiltersProps } from "../types/resident.types";
 
@@ -6,7 +7,7 @@ const ResidentFiltersComponent = ({
   filters,
   onFilterChange,
 }: ResidentFiltersProps) => {
-
+  const { t } = useTranslation();
   const [search, setSearch] = useState(filters.search ?? "");
 
   // debounce 300ms
@@ -49,7 +50,7 @@ const ResidentFiltersComponent = ({
           <input
             type="text"
             className="w-100 border-0 p-0 shadow-none bg-transparent text-dark"
-            placeholder="Search by name or email..."
+            placeholder={t("residents.search_placeholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ fontSize: "0.875rem", outline: "none" }}
@@ -59,8 +60,8 @@ const ResidentFiltersComponent = ({
 
       <div style={{ minWidth: "140px" }}>
         <Select
-          options={[{ value: "true", label: "Active" }, { value: "false", label: "Inactive" }]}
-          placeholder="All status"
+          options={[{ value: "true", label: t("residents.status_active") }, { value: "false", label: t("residents.status_inactive") }]}
+          placeholder={t("residents.all_statuses")}
           value={filters.isActive === undefined ? "" : String(filters.isActive)}
           onChange={(e) => onFilterChange({ isActive: e.target.value === "" ? undefined : e.target.value === "true" })}
           className="fw-medium text-secondary"
@@ -70,8 +71,8 @@ const ResidentFiltersComponent = ({
 
       <div style={{ minWidth: "140px" }}>
         <Select
-          options={[{ value: "true", label: "Owner" }, { value: "false", label: "Tenant" }]}
-          placeholder="All types"
+          options={[{ value: "true", label: t("roles.owner") }, { value: "false", label: t("roles.tenant") }]}
+          placeholder={t("residents.all_types")}
           value={filters.isOwner === undefined ? "" : String(filters.isOwner)}
           onChange={(e) => onFilterChange({ isOwner: e.target.value === "" ? undefined : e.target.value === "true" })}
           className="fw-medium text-secondary"
@@ -87,7 +88,7 @@ const ResidentFiltersComponent = ({
             style={{ height: "46px", fontSize: "0.875rem" }}
           >
             <i className="bi bi-x-circle me-2" />
-            Clear
+            {t("common.clear")}
           </button>
         </div>
       )}

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useApartmentSelect } from "../hooks/useApartmentSelect";
 
 interface ApartmentSelectProps {
@@ -20,6 +21,7 @@ const ApartmentSelect = ({
   onlyVacant = false,
   onlyOccupied = false,
 }: ApartmentSelectProps) => {
+  const { t } = useTranslation();
   const { apartments, loading } = useApartmentSelect(currentApartmentId, onlyVacant, onlyOccupied);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -112,7 +114,7 @@ const ApartmentSelect = ({
           {loading ? (
             <span className="text-muted small">
               <span className="spinner-border spinner-border-sm me-2" role="status" />
-              Loading units...
+              {t("apartments.loading_units")}
             </span>
           ) : selectedApartment ? (
             <>
@@ -123,18 +125,18 @@ const ApartmentSelect = ({
                 {selectedApartment.block}-{selectedApartment.floorNumber}{selectedApartment.unitNumber}
               </span>
               <span className="text-muted" style={{ fontSize: "0.72rem", lineHeight: 1 }}>
-                Block {selectedApartment.block} • Floor {selectedApartment.floorNumber}
+                {t("apartments.block_prefix", { block: selectedApartment.block })} • {t("apartments.floor_suffix", { floor: selectedApartment.floorNumber })}
               </span>
             </>
           ) : (
             <span className="text-muted" style={{ fontSize: "0.875rem" }}>
               {isEmpty
                 ? onlyOccupied
-                  ? "No occupied apartments available"
+                  ? t("apartments.no_occupied_available")
                   : onlyVacant
-                  ? "No vacant apartments available"
-                  : "No apartments found"
-                : "Select apartment unit"}
+                  ? t("apartments.no_vacant_available")
+                  : t("apartments.no_apartments_found")
+                : t("apartments.select_unit")}
             </span>
           )}
         </div>
@@ -166,7 +168,7 @@ const ApartmentSelect = ({
             <input
               type="text"
               className="w-100 border-0 p-0 bg-transparent text-dark"
-              placeholder="Search by Flat No. (e.g. A-101)..."
+              placeholder={t("apartments.search_placeholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               autoFocus
@@ -181,7 +183,7 @@ const ApartmentSelect = ({
           >
             {filteredApartments.length === 0 ? (
               <div className="text-center py-3 text-muted" style={{ fontSize: "0.8rem" }}>
-                No matching units found
+                {t("apartments.no_units_found")}
               </div>
             ) : (
               filteredApartments.map((apt) => {
@@ -204,7 +206,7 @@ const ApartmentSelect = ({
                         {highlightMatch(`${apt.block}-${apt.floorNumber}${apt.unitNumber}`, search)}
                       </p>
                       <p className="text-muted m-0" style={{ fontSize: "0.75rem" }}>
-                        {highlightMatch(`Block ${apt.block}, Floor ${apt.floorNumber}`, search)}
+                        {t("apartments.block_prefix", { block: apt.block })}, {t("apartments.floor_suffix", { floor: apt.floorNumber })}
                       </p>
                     </div>
                     {isSelected && (
@@ -229,7 +231,7 @@ const ApartmentSelect = ({
       {isEmpty && onlyVacant && (
         <p className="m-0 mt-1 d-flex align-items-center gap-1 px-2 py-1" style={{ fontSize: "0.75rem", color: '#92400e', backgroundColor: '#fef3c7', border: '1px solid #fde68a', borderRadius: '6px' }}>
           <i className="bi bi-exclamation-triangle" style={{ fontSize: '0.9rem' }} />
-          All apartments are currently occupied. Please try again after some days.
+          {t("apartments.all_occupied_notice")}
         </p>
       )}
     </div>

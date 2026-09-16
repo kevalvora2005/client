@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Phone, Mail, Building2, Calendar, UserCheck } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { StatusBadge } from '../../../components/StatusBadge/StatusBadge';
 import { useResident } from '../hooks/useResident';
 import { getAvatarColor, getInitials, formatDate } from '../components/residentTableHelpers';
@@ -11,6 +12,7 @@ import FamilyMembersSection from '../../myApartment/pages/FamilyMembersSection';
 import VehiclesSection from '../../myApartment/pages/VehiclesSection';
 
 const ResidentDetailPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { resident, loading, refetch } = useResident(Number(id));
@@ -45,10 +47,10 @@ const ResidentDetailPage = () => {
       <div className="page">
         <div className="error-state">
           <i className="bi bi-exclamation-circle error-state__icon" />
-          <p className="error-state__title">Failed to load resident</p>
-          <p className="error-state__sub">Resident not found</p>
+          <p className="error-state__title">{t('residents.failed_to_load')}</p>
+          <p className="error-state__sub">{t('residents.not_found')}</p>
           <button className="back-btn" onClick={() => navigate('/residents')}>
-            <ArrowLeft size={16} /> Back to residents
+            <ArrowLeft size={16} /> {t('residents.back_to_residents')}
           </button>
         </div>
       </div>
@@ -58,19 +60,19 @@ const ResidentDetailPage = () => {
   const { bg, color } = getAvatarColor(resident.user.name);
 
   const infoCards = [
-    { icon: Building2, label: 'Apartment', value: resident.apartment ? `${resident.apartment.block}-${resident.apartment.floorNumber}${resident.apartment.unitNumber}` : '—', accent: 'info-card--green' },
-    { icon: Calendar, label: resident.isOwner ? 'Registered On' : 'Move-in Date', value: formatDate(resident.moveInDate), accent: 'info-card--purple' },
+    { icon: Building2, label: t('residents.label_apartment'), value: resident.apartment ? `${resident.apartment.block}-${resident.apartment.floorNumber}${resident.apartment.unitNumber}` : '—', accent: 'info-card--green' },
+    { icon: Calendar, label: resident.isOwner ? t('residents.registered_on') : t('residents.move_in_date'), value: formatDate(resident.moveInDate), accent: 'info-card--purple' },
     resident.isActive
-      ? { icon: UserCheck, label: 'Resident Type', value: resident.isOwner ? 'Owner' : 'Tenant', accent: 'info-card--amber' }
-      : { icon: Calendar, label: resident.isOwner ? 'Deactivated On' : 'Move-out Date', value: resident.moveOutDate ? formatDate(resident.moveOutDate) : '—', accent: 'info-card--amber' },
-    { icon: UserCheck, label: 'Occupancy', value: resident.isOccupant ? 'Occupant' : 'Non-occupant', accent: 'info-card--green' },
+      ? { icon: UserCheck, label: t('residents.resident_type'), value: resident.isOwner ? t('roles.owner') : t('roles.tenant'), accent: 'info-card--amber' }
+      : { icon: Calendar, label: resident.isOwner ? t('residents.deactivated_on') : t('residents.move_out_date'), value: resident.moveOutDate ? formatDate(resident.moveOutDate) : '—', accent: 'info-card--amber' },
+    { icon: UserCheck, label: t('residents.occupancy'), value: resident.isOccupant ? t('residents.status_occupant') : t('residents.status_non_occupant'), accent: 'info-card--green' },
   ];
   return (
     <div className="page">
 
       <button className="back-btn" onClick={() => navigate('/residents')}>
         <ArrowLeft size={16} strokeWidth={2} />
-        Back to residents
+        {t('residents.back_to_residents')}
       </button>
 
       {/* ── Header ── */}
@@ -85,9 +87,9 @@ const ResidentDetailPage = () => {
           <div>
             <div className="detail-header__name-row">
               <h4 className="detail-header__name">{resident.user.name}</h4>
-              <StatusBadge variant={resident.isActive ? 'success' : 'secondary'} label={resident.isActive ? 'Active' : 'Inactive'} />
-              <StatusBadge variant={resident.isOwner ? 'info' : 'secondary'} label={resident.isOwner ? 'Owner' : 'Tenant'} />
-              <StatusBadge variant={resident.isOccupant ? 'success' : 'secondary'} label={resident.isOccupant ? 'Occupant' : 'Non-occupant'} />
+              <StatusBadge variant={resident.isActive ? 'success' : 'secondary'} label={resident.isActive ? t('residents.status_active') : t('residents.status_inactive')} />
+              <StatusBadge variant={resident.isOwner ? 'info' : 'secondary'} label={resident.isOwner ? t('roles.owner') : t('roles.tenant')} />
+              <StatusBadge variant={resident.isOccupant ? 'success' : 'secondary'} label={resident.isOccupant ? t('residents.status_occupant') : t('residents.status_non_occupant')} />
             </div>
             <div className="detail-header__meta">
               <span><Mail size={13} strokeWidth={1.75} /> {resident.user.email}</span>
@@ -104,7 +106,7 @@ const ResidentDetailPage = () => {
             onClick={() => handleEdit(resident)}
             disabled={!resident.isActive}
           >
-            <i className="bi bi-pencil" /> Edit
+            <i className="bi bi-pencil" /> {t('common.edit')}
           </button>
           <button
             className="btn btn-outline-danger d-inline-flex align-items-center gap-2"
@@ -112,7 +114,7 @@ const ResidentDetailPage = () => {
             onClick={() => handleDeactivate(resident)}
             disabled={!resident.isActive}
           >
-            <i className="bi bi-person-x" /> Deactivate
+            <i className="bi bi-person-x" /> {t('residents.deactivate')}
           </button>
         </div>
         )}
@@ -159,13 +161,14 @@ const ResidentDetailPage = () => {
 
       <ConfirmDialog
         show={showDeactivateModal}
-        title="Deactivate Resident"
+        title={t('residents.deactivate_confirm_title')}
         message={
           selectedResident
-            ? `Are you sure you want to deactivate ${selectedResident.user.name}? They will lose access to the system.`
-            : "Are you sure you want to deactivate this resident?"
+            ? t('residents.deactivate_confirm_msg', { name: selectedResident.user.name })
+            : t('residents.deactivate_confirm_generic')
         }
-        confirmLabel="Yes, Deactivate"
+        confirmLabel={t('residents.deactivate_btn')}
+        cancelLabel={t('common.cancel')}
         variant="warning"
         loading={deactivateLoading}
         onConfirm={async () => {

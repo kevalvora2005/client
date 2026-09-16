@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useResidentMutations } from "./useResidentMutations";
 import type { ResidentDetail, UpdateResidentPayload } from "../types/resident.types";
 import { showSuccess } from "../../../utils/toast";
 
 export const useResidentActions = () => {
+  const { t } = useTranslation();
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
   const [selectedResident, setSelectedResident] = useState<ResidentDetail | null>(null);
@@ -25,13 +27,13 @@ export const useResidentActions = () => {
 
   const handleUpdate = async (id: number, payload: UpdateResidentPayload): Promise<boolean> => {
     const success = await updateResident(id, payload);
-    if (success) showSuccess("Resident updated successfully");
+    if (success) showSuccess(t("residents.update_success"));
     return success;
   };
 
   const handleDeactivateConfirm = async (id: number): Promise<boolean> => {
     const success = await deactivateResident(id);
-    if (success) showSuccess("Resident deactivated successfully");
+    if (success) showSuccess(t("residents.deactivate_success"));
     return success;
   };
 

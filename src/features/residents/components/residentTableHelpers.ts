@@ -1,3 +1,5 @@
+import { formatDateOnly } from "../../../utils/formatDate";
+
 const AVATAR_COLORS = [
   { bg: "#e8eaf6", color: "#3949ab" },
   { bg: "#e3f2fd", color: "#1565c0" },
@@ -19,10 +21,4 @@ export const getInitials = (name: string) =>
   name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 
 export const formatDate = (date: string | null | undefined) =>
-  date
-    ? new Date(date).toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
-    : "—";
+  date ? formatDateOnly(date) : "—";

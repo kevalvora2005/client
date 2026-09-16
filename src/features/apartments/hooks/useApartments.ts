@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { apartmentApi } from "../api/apartmentApi";
 import type { Apartment, ApartmentStats } from "../types/apartment.types";
 import type { PaginatedResult } from "../../../types/pagination.types";
@@ -7,6 +8,7 @@ import { useApartmentStore } from "./useApartmentStore";
 import { showError } from "../../../utils/toast";
 
 export const useApartments = () => {
+  const { t } = useTranslation();
   const { filters, updateFilters, changePage } = useApartmentStore();
 
   const [apartments, setApartments] = useState<Apartment[]>([]);
@@ -47,7 +49,7 @@ export const useApartments = () => {
           setStats(response.stats);
         }
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, "Failed to fetch apartments"));
+        if (!cancelled) showError(getErrorMessage(err, t("apartments.fetch_failed")));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -55,7 +57,7 @@ export const useApartments = () => {
 
     fetch();
     return () => { cancelled = true; };
-  }, [filters, refreshKey]);
+  }, [filters, refreshKey, t]);
 
   const refetch = () => setRefreshKey((prev) => prev + 1);
 

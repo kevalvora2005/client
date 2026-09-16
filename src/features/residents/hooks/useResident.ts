@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { residentApi } from "../api/residentApi";
 import type { ResidentDetail } from "../types/resident.types";
 import { getErrorMessage } from "../../../utils/getErrorMessage";
 import { showError } from "../../../utils/toast";
 
 export const useResident = (id: number) => {
+  const { t } = useTranslation();
   const [resident, setResident] = useState<ResidentDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -14,11 +16,11 @@ export const useResident = (id: number) => {
       const response = await residentApi.getResident(id);
       setResident(response);
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to fetch resident"));
+      showError(getErrorMessage(err, t("residents.fetch_single_failed")));
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -29,7 +31,7 @@ export const useResident = (id: number) => {
         const response = await residentApi.getResident(id);
         if (!cancelled) setResident(response);
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, "Failed to fetch resident"));
+        if (!cancelled) showError(getErrorMessage(err, t("residents.fetch_single_failed")));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -38,7 +40,7 @@ export const useResident = (id: number) => {
     load();
 
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, t]);
 
   return { resident, loading, refetch: fetchResident };
 };

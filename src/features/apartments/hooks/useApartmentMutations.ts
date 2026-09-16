@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { apartmentApi } from "../api/apartmentApi";
 import type { CreateApartmentPayload, ImportApartmentResult } from "../types/apartment.types";
 import { getErrorMessage } from "../../../utils/getErrorMessage";
 import { showError } from "../../../utils/toast";
 
 export const useApartmentMutations = (onSuccess?: () => void) => {
+  const { t } = useTranslation();
   const [createLoading, setCreateLoading] = useState(false);
   const [importLoading, setImportLoading] = useState(false);
 
@@ -15,7 +17,7 @@ export const useApartmentMutations = (onSuccess?: () => void) => {
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to create apartment"));
+      showError(getErrorMessage(err, t("apartments.create_failed")));
       return false;
     } finally {
       setCreateLoading(false);
@@ -29,7 +31,7 @@ export const useApartmentMutations = (onSuccess?: () => void) => {
       onSuccess?.();
       return res;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to import apartments"));
+      showError(getErrorMessage(err, t("apartments.import_failed")));
       return null;
     } finally {
       setImportLoading(false);

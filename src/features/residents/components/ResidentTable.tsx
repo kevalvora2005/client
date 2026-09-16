@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import AppTable from '../../../components/AppTable/AppTable';
 import type { TableColumn } from '../../../components/AppTable/AppTable';
 import { StatusBadge } from '../../../components/StatusBadge/StatusBadge';
@@ -12,13 +13,14 @@ const ACTIONS_COL_WIDTH = '12%';
 const COL_WIDTH = '14%';
 
 const ResidentTable = ({ residents, loading, onView, onEdit, onDeactivate }: ResidentTableProps) => {
+  const { t } = useTranslation();
   const { filters } = useResidentStore();
   const searchVal = filters.search ?? '';
 
   const columns: TableColumn<ResidentDetail>[] = [
     {
       key: 'name',
-      label: 'Resident Name',
+      label: t('residents.col_name'),
       width: NAME_COL_WIDTH,
       render: (r) => {
         const { bg, color } = getAvatarColor(r.user.name);
@@ -50,7 +52,7 @@ const ResidentTable = ({ residents, loading, onView, onEdit, onDeactivate }: Res
     },
     {
       key: 'apartment',
-      label: 'Apartment',
+      label: t('residents.col_apartment'),
       width: COL_WIDTH,
       align: 'center',
       render: (r) => r.apartment ? (
@@ -59,14 +61,14 @@ const ResidentTable = ({ residents, loading, onView, onEdit, onDeactivate }: Res
             {highlightMatch(`${r.apartment.block}-${r.apartment.floorNumber}${r.apartment.unitNumber}`, searchVal)}
           </p>
           <p className="m-0 text-muted text-truncate" style={{ fontSize: '0.8rem' }}>
-            Block {highlightMatch(r.apartment.block, searchVal)} - Floor {r.apartment.floorNumber}
+            {t('apartments.block_prefix', { block: r.apartment.block })} - {t('apartments.floor_suffix', { floor: r.apartment.floorNumber })}
           </p>
         </div>
       ) : <span className="text-muted small">—</span>,
     },
     {
       key: 'type',
-      label: 'Type',
+      label: t('residents.col_type'),
       width: COL_WIDTH,
       align: 'center',
       render: (r) => (
@@ -78,13 +80,13 @@ const ResidentTable = ({ residents, loading, onView, onEdit, onDeactivate }: Res
             color: r.isOwner ? '#0369a1' : '#4f46e5'
           }}
         >
-          {r.isOwner ? 'Owner' : 'Tenant'}
+          {r.isOwner ? t('roles.owner') : t('roles.tenant')}
         </span>
       ),
     },
     {
       key: 'moveInDate',
-      label: 'Registered on',
+      label: t('residents.col_registered_on'),
       width: COL_WIDTH,
       align: 'center',
       render: (r) => (
@@ -95,25 +97,25 @@ const ResidentTable = ({ residents, loading, onView, onEdit, onDeactivate }: Res
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('common.status'),
       width: COL_WIDTH,
       align: 'center',
       render: (r) => (
-        <StatusBadge variant={r.isActive ? 'success' : 'secondary'} label={r.isActive ? 'Active' : 'Inactive'} />
+        <StatusBadge variant={r.isActive ? 'success' : 'secondary'} label={r.isActive ? t('residents.status_active') : t('residents.status_inactive')} />
       ),
     },
     {
       key: 'occupant',
-      label: 'Occupant',
+      label: t('residents.col_occupant'),
       width: COL_WIDTH,
       align: 'center',
       render: (r) => (
-        <StatusBadge variant={r.isOccupant ? 'success' : 'secondary'} label={r.isOccupant ? 'Occupant' : 'Non-occupant'} />
+        <StatusBadge variant={r.isOccupant ? 'success' : 'secondary'} label={r.isOccupant ? t('residents.status_occupant') : t('residents.status_non_occupant')} />
       ),
     },
     {
       key: 'actions',
-      label: 'Actions',
+      label: t('common.actions'),
       width: ACTIONS_COL_WIDTH,
       align: 'center',
       render: (r) => (
@@ -135,8 +137,8 @@ const ResidentTable = ({ residents, loading, onView, onEdit, onDeactivate }: Res
       data={residents}
       loading={loading}
       rowKey={(r) => r.id}
-      emptyTitle="No residents found"
-      emptySubtitle="Try adjusting your filters or add a new resident."
+      emptyTitle={t('residents.no_residents_found')}
+      emptySubtitle={t('residents.no_residents_desc')}
       emptyIcon="bi-people"
       tableStyle={{ tableLayout: 'fixed' }}
     />

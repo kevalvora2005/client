@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface FailedImportItem {
   row: number;
@@ -23,6 +24,8 @@ const ImportResultsModal: React.FC<ImportResultsModalProps> = ({
   failedItems,
   title,
 }) => {
+  const { t } = useTranslation();
+
   if (!show) return null;
 
   return (
@@ -37,7 +40,7 @@ const ImportResultsModal: React.FC<ImportResultsModalProps> = ({
                 {title}
               </h5>
               <p className="text-muted m-0 small" style={{ fontSize: "0.8rem" }}>
-                Excel import summary and skipped record details.
+                {t('import.results_subtitle')}
               </p>
             </div>
             <button
@@ -45,7 +48,7 @@ const ImportResultsModal: React.FC<ImportResultsModalProps> = ({
               className="btn position-absolute d-flex align-items-center justify-content-center p-0 text-secondary"
               style={{ top: 22, right: 22, width: 28, height: 28, border: '1px solid #e9ecef', background: '#fff', fontSize: '1.1rem', borderRadius: '6px' }}
               onClick={onClose}
-              aria-label="Close"
+              aria-label={t('common.close')}
             >
               <i className="bi bi-x" />
             </button>
@@ -59,7 +62,7 @@ const ImportResultsModal: React.FC<ImportResultsModalProps> = ({
               <div className="col-6">
                 <div className="card bg-success-subtle border-0 rounded-3 p-3">
                   <div className="small fw-semibold text-success-emphasis text-uppercase" style={{ letterSpacing: '0.05em', fontSize: '0.75rem' }}>
-                    Successfully Imported
+                    {t('import.successfully_imported')}
                   </div>
                   <div className="fs-3 fw-bold text-success mt-1">
                     {successCount}
@@ -69,7 +72,7 @@ const ImportResultsModal: React.FC<ImportResultsModalProps> = ({
               <div className="col-6">
                 <div className="card bg-warning-subtle border-0 rounded-3 p-3">
                   <div className="small fw-semibold text-warning-emphasis text-uppercase" style={{ letterSpacing: '0.05em', fontSize: '0.75rem' }}>
-                    Skipped / Failed
+                    {t('import.skipped_failed')}
                   </div>
                   <div className="fs-3 fw-bold text-warning mt-1">
                     {failedCount}
@@ -82,15 +85,15 @@ const ImportResultsModal: React.FC<ImportResultsModalProps> = ({
             {failedItems.length > 0 ? (
               <div>
                 <h6 className="fw-bold text-secondary mb-3 small text-uppercase" style={{ letterSpacing: '0.05em' }}>
-                  Skipped Rows & Details
+                  {t('import.skipped_rows_details')}
                 </h6>
                 <div className="table-responsive border rounded-3" style={{ maxHeight: '250px' }}>
                   <table className="table table-hover align-middle mb-0" style={{ fontSize: '0.875rem' }}>
                     <thead className="table-light">
                       <tr>
-                        <th scope="col" className="ps-3" style={{ width: '80px' }}>Row</th>
-                        <th scope="col">Identifier</th>
-                        <th scope="col" className="pe-3">Reason / Error</th>
+                        <th scope="col" className="ps-3" style={{ width: '80px' }}>{t('import.col_row')}</th>
+                        <th scope="col">{t('import.col_identifier')}</th>
+                        <th scope="col" className="pe-3">{t('import.col_reason')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -112,7 +115,7 @@ const ImportResultsModal: React.FC<ImportResultsModalProps> = ({
             ) : (
               <div className="text-center py-4 text-secondary">
                 <i className="bi bi-check-circle-fill text-success fs-1 mb-2 d-block" />
-                <p className="mb-0 fw-semibold">All items from the Excel file were successfully added!</p>
+                <p className="mb-0 fw-semibold">{t('import.all_items_successful')}</p>
               </div>
             )}
 
@@ -126,7 +129,7 @@ const ImportResultsModal: React.FC<ImportResultsModalProps> = ({
               onClick={onClose}
               style={{ height: "38px", fontSize: "0.875rem", borderRadius: "8px" }}
             >
-              Close
+              {t('common.close')}
             </button>
           </div>
 

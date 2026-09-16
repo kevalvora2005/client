@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Building2, CheckCircle, XCircle, LayoutGrid } from 'lucide-react';
 import type { ApartmentStats } from '../types/apartment.types';
 
@@ -7,37 +8,38 @@ interface ApartmentStatsCardsProps {
 }
 
 const ApartmentStatsCards = ({ stats, loading = false }: ApartmentStatsCardsProps) => {
+  const { t } = useTranslation();
 
   const statItems = [
     {
-      label: 'TOTAL UNITS',
+      label: t('apartments.stats_total_units'),
       value: stats.totalCount,
       icon: Building2,
-      sub: 'All apartment units',
+      sub: t('apartments.stats_total_units_desc'),
       bgClass: 'bg-primary-subtle text-primary',
       subtextColor: '#0d6efd',
     },
     {
-      label: 'OCCUPIED',
+      label: t('apartments.stats_occupied'),
       value: stats.totalOccupied,
       icon: CheckCircle,
-      sub: 'Currently occupied',
+      sub: t('apartments.stats_occupied_desc'),
       bgClass: 'bg-success-subtle text-success',
       subtextColor: '#198754',
     },
     {
-      label: 'VACANT',
+      label: t('apartments.stats_vacant'),
       value: stats.totalVacant,
       icon: XCircle,
-      sub: 'Available units',
+      sub: t('apartments.stats_vacant_desc'),
       bgClass: 'bg-warning-subtle text-warning-emphasis',
       subtextColor: '#b45309',
     },
     {
-      label: 'OCCUPANCY RATE',
+      label: t('apartments.stats_occupancy_rate'),
       value: `${stats.occupancyRate}%`,
       icon: LayoutGrid,
-      sub: 'Across all units',
+      sub: t('apartments.stats_occupancy_rate_desc'),
       bgClass: 'bg-purple text-purple',
       customBg: '#eef2ff',
       customColor: '#4338ca',

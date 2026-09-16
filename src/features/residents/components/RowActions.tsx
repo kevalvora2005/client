@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { ResidentDetail } from "../types/resident.types";
 
 interface RowActionsProps {
@@ -9,6 +10,7 @@ interface RowActionsProps {
 }
 
 const RowActions = ({ resident, onView, onEdit, onDeactivate }: RowActionsProps) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -69,7 +71,7 @@ const RowActions = ({ resident, onView, onEdit, onDeactivate }: RowActionsProps)
               onClick={() => { onView(); setIsOpen(false); }}
               style={{ fontSize: "0.85rem" }}
             >
-              <i className="bi bi-eye text-muted" /> View Details
+              <i className="bi bi-eye text-muted" /> {t("common.details")}
             </button>
           </li>
           <li>
@@ -78,10 +80,10 @@ const RowActions = ({ resident, onView, onEdit, onDeactivate }: RowActionsProps)
               className="dropdown-item d-flex align-items-center gap-2 px-3 py-2 rounded-2 small"
               onClick={() => { onEdit(); setIsOpen(false); }}
               disabled={!resident.isActive || !resident.isOwner}
-              title={!resident.isOwner ? "Tenants cannot be edited directly from here." : undefined}
+              title={!resident.isOwner ? t("residents.tenant_cannot_edit") : undefined}
               style={{ fontSize: "0.85rem" }}
             >
-              <i className="bi bi-pencil text-muted" /> Edit
+              <i className="bi bi-pencil text-muted" /> {t("common.edit")}
             </button>
           </li>
           <li>
@@ -90,14 +92,14 @@ const RowActions = ({ resident, onView, onEdit, onDeactivate }: RowActionsProps)
               className="dropdown-item d-flex align-items-center gap-2 px-3 py-2 rounded-2 small text-danger"
               onClick={() => { onDeactivate(); setIsOpen(false); }}
               disabled={!resident.isActive || !resident.isOwner}
-              title={!resident.isOwner ? "Tenants cannot be deactivated directly from here." : undefined}
+              title={!resident.isOwner ? t("residents.tenant_cannot_deactivate") : undefined}
               style={{ fontSize: "0.85rem" }}
             >
-              <i className="bi bi-person-x" /> Deactivate
+              <i className="bi bi-person-x" /> {t("residents.deactivate")}
             </button>
           </li>
-          </ul>
-        )}
+        </ul>
+      )}
     </>
   );
 };

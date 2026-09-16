@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useApartmentForm } from "../hooks/useApartmentForm";
 import Select from "../../../components/Select/Select";
 import type { Apartment, CreateApartmentPayload, UpdateApartmentPayload } from "../types/apartment.types";
@@ -27,6 +28,7 @@ const ApartmentFormModal = ({
   onClose,
   onSubmit,
 }: ApartmentFormModalProps) => {
+  const { t } = useTranslation();
   const { isEdit, formik, handleClose } = useApartmentForm({ mode, apartment, onSubmit, onClose });
 
   if (!show) return null;
@@ -46,10 +48,10 @@ const ApartmentFormModal = ({
           <div className="modal-header border-bottom border-light-subtle px-4 pt-4 pb-3 align-items-start position-relative">
             <div>
               <h5 className="modal-title fw-bold fs-6" style={{ color: "#1a1f36" }}>
-                {isEdit ? `Edit Apartment — ${apartment?.unitNumber}` : "Add New Apartment"}
+                {isEdit ? t("apartments.edit_apartment", { unit: apartment?.unitNumber }) : t("apartments.add_new_apartment")}
               </h5>
               <p className="text-muted mb-0" style={{ fontSize: "0.8rem" }}>
-                {isEdit ? "Update the apartment details below." : "Fill in the details to create a new apartment unit."}
+                {isEdit ? t("apartments.edit_desc") : t("apartments.add_desc")}
               </p>
             </div>
             <button
@@ -58,7 +60,7 @@ const ApartmentFormModal = ({
               style={{ top: 22, right: 22, width: 28, height: 28, border: '1px solid #e9ecef', background: '#fff', fontSize: '1.1rem', borderRadius: '6px' }}
               onClick={handleClose}
               disabled={loading}
-              aria-label="Close"
+              aria-label={t("common.close")}
             >
               <i className="bi bi-x" />
             </button>
@@ -71,7 +73,7 @@ const ApartmentFormModal = ({
                 {/* Block */}
                 <div className="col-md-4">
                   <label className="form-label fw-medium text-secondary small mb-1" style={{ fontSize: "0.8rem" }}>
-                    Block <span className="text-danger">*</span>
+                    {t("apartments.label_block")} <span className="text-danger">*</span>
                   </label>
                   <input
                     type="text"
@@ -96,7 +98,7 @@ const ApartmentFormModal = ({
                 {/* Floor Number */}
                 <div className="col-md-4">
                   <label className="form-label fw-medium text-secondary small mb-1" style={{ fontSize: "0.8rem" }}>
-                    Floor Number <span className="text-danger">*</span>
+                    {t("apartments.label_floor")} <span className="text-danger">*</span>
                   </label>
                   <input
                     type="number"
@@ -118,7 +120,7 @@ const ApartmentFormModal = ({
                 {/* Unit Number — both add and edit */}
                 <div className="col-md-4">
                   <label className="form-label fw-medium text-secondary small mb-1" style={{ fontSize: "0.8rem" }}>
-                    Unit Number <span className="text-danger">*</span>
+                    {t("apartments.label_unit")} <span className="text-danger">*</span>
                   </label>
                   <input
                     type="text"
@@ -139,7 +141,7 @@ const ApartmentFormModal = ({
                 {/* Area */}
                 <div className="col-md-6">
                   <label className="form-label fw-medium text-secondary small mb-1" style={{ fontSize: "0.8rem" }}>
-                    Area (sq ft) <span className="text-danger">*</span>
+                    {t("apartments.label_area")} <span className="text-danger">*</span>
                   </label>
                   <input
                     type="number"
@@ -161,11 +163,11 @@ const ApartmentFormModal = ({
                 {/* Type */}
                 <div className="col-md-6">
                   <Select
-                    label="Type"
+                    label={t("apartments.label_type")}
                     name="type"
                     required
                     options={Object.entries(apartmentTypeLabels).map(([value, label]) => ({ value, label }))}
-                    placeholder="Select type"
+                    placeholder={t("apartments.select_type")}
                     value={formik.values.type}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
@@ -187,7 +189,7 @@ const ApartmentFormModal = ({
                 disabled={loading}
                 style={{ height: "38px", fontSize: "0.875rem" }}
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="submit"
@@ -200,7 +202,7 @@ const ApartmentFormModal = ({
                 ) : (
                   <>
                     <i className={`bi ${isEdit ? "bi-check-lg" : "bi-building"} me-1`} />
-                    {isEdit ? "Save Changes" : "Create Apartment"}
+                    {isEdit ? t("apartments.save_changes") : t("apartments.create_apartment")}
                   </>
                 )}
               </button>

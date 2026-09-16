@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Building2, Layers, Maximize2, Home, Mail, Phone, Crown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useApartment } from '../hooks/useApartment';
 import { formatArea, formatFloor, apartmentTypeLabels } from '../components/apartmentTableHelpers';
 import { getAvatarColor, getInitials, formatDate } from '../../residents/components/residentTableHelpers';
@@ -13,6 +14,7 @@ import type { TableColumn } from '../../../components/AppTable/AppTable';
 import { StatusBadge } from '../../../components/StatusBadge/StatusBadge';
 
 const ApartmentDetailPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { apartment, loading } = useApartment(Number(id));
@@ -32,14 +34,14 @@ const ApartmentDetailPage = () => {
         });
         if (!cancelled) setResidents(response.items);
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, "Failed to fetch apartment residents"));
+        if (!cancelled) showError(getErrorMessage(err, t('apartments.fetch_residents_failed')));
       } finally {
         if (!cancelled) setResidentsLoading(false);
       }
     };
     fetchResidents();
     return () => { cancelled = true; };
-  }, [apartment?.id]);
+  }, [apartment?.id, t]);
 
   const owner = residents.find((r) => r.isOwner && r.isActive) ?? null;
   const tenantHistory = residents
@@ -51,7 +53,7 @@ const ApartmentDetailPage = () => {
   const tenantColumns: TableColumn<ResidentDetail>[] = [
     {
       key: 'name',
-      label: 'Resident Name',
+      label: t('residents.col_name'),
       width: COL_WIDTH,
       render: (r) => (
         <div className="d-flex align-items-center gap-3 py-1">
@@ -80,7 +82,7 @@ const ApartmentDetailPage = () => {
     },
     {
       key: 'phone',
-      label: 'Phone',
+      label: t('residents.label_phone'),
       width: COL_WIDTH,
       align: 'center',
       render: (r) => (
@@ -91,7 +93,7 @@ const ApartmentDetailPage = () => {
     },
     {
       key: 'moveInDate',
-      label: 'Move-in Date',
+      label: t('residents.move_in_date'),
       width: COL_WIDTH,
       align: 'center',
       render: (r) => (
@@ -102,7 +104,7 @@ const ApartmentDetailPage = () => {
     },
     {
       key: 'moveOutDate',
-      label: 'Move-out Date',
+      label: t('residents.move_out_date'),
       width: COL_WIDTH,
       align: 'center',
       render: (r) => (
@@ -113,16 +115,16 @@ const ApartmentDetailPage = () => {
     },
     {
       key: 'occupant',
-      label: 'Status',
+      label: t('common.status'),
       width: COL_WIDTH,
       align: 'center',
       render: (r) => (
-        <StatusBadge variant={r.isOccupant ? 'success' : 'secondary'} label={r.isOccupant ? 'Occupant' : 'Past Tenant'} />
+        <StatusBadge variant={r.isOccupant ? 'success' : 'secondary'} label={r.isOccupant ? t('apartments.occupant') : t('apartments.past_tenant')} />
       ),
     },
     {
       key: 'actions',
-      label: 'VIEW',
+      label: t('common.view').toUpperCase(),
       width: COL_WIDTH,
       align: 'center',
       render: (r) => (
@@ -131,7 +133,7 @@ const ApartmentDetailPage = () => {
           className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
           onClick={() => navigate(`/residents/${r.id}`)}
           style={{ borderRadius: '6px', fontSize: '0.78rem' }}
-          title="View Details"
+          title={t('apartments.view_details')}
         >
           <i className="bi bi-eye" />
         </button>
@@ -161,9 +163,9 @@ const ApartmentDetailPage = () => {
       <div className="page">
         <div className="error-state">
           <i className="bi bi-exclamation-circle error-state__icon" />
-          <p className="error-state__title">Failed to load apartment</p>
+          <p className="error-state__title">{t('apartments.failed_to_load')}</p>
           <button className="back-btn" onClick={() => navigate('/apartments')}>
-            <ArrowLeft size={16} /> Back to apartments
+            <ArrowLeft size={16} /> {t('apartments.back_to_apartments')}
           </button>
         </div>
       </div>
@@ -171,10 +173,10 @@ const ApartmentDetailPage = () => {
   }
 
   const infoCards = [
-    { icon: Building2, label: 'Block', value: `Block ${apartment.block}`, accent: 'info-card--blue' },
-    { icon: Layers, label: 'Floor', value: formatFloor(apartment.floorNumber), accent: 'info-card--green' },
-    { icon: Maximize2, label: 'Area', value: `${formatArea(apartment.areaSqft)} sq ft`, accent: 'info-card--purple' },
-    { icon: Home, label: 'Type', value: apartmentTypeLabels[apartment.type] ?? apartment.type, accent: 'info-card--amber' },
+    { icon: Building2, label: t('apartments.label_block'), value: t('apartments.block_prefix', { block: apartment.block }), accent: 'info-card--blue' },
+    { icon: Layers, label: t('apartments.label_floor'), value: formatFloor(apartment.floorNumber), accent: 'info-card--green' },
+    { icon: Maximize2, label: t('apartments.label_area'), value: `${formatArea(apartment.areaSqft)} sq ft`, accent: 'info-card--purple' },
+    { icon: Home, label: t('apartments.label_type'), value: apartmentTypeLabels[apartment.type] ?? apartment.type, accent: 'info-card--amber' },
   ];
 
   return (
@@ -182,7 +184,7 @@ const ApartmentDetailPage = () => {
 
       <button className="back-btn" onClick={() => navigate('/apartments')}>
         <ArrowLeft size={16} strokeWidth={2} />
-        Back to apartments
+        {t('apartments.back_to_apartments')}
       </button>
 
       {/* ── Header ── */}
@@ -197,13 +199,13 @@ const ApartmentDetailPage = () => {
           <div>
             <div className="detail-header__name-row">
               <h4 className="detail-header__name">{apartment.block}-{apartment.floorNumber}{apartment.unitNumber}</h4>
-              <StatusBadge variant={apartment.isOccupied ? 'success' : 'secondary'} label={apartment.isOccupied ? 'Occupied' : 'Vacant'} />
+              <StatusBadge variant={apartment.isOccupied ? 'success' : 'secondary'} label={apartment.isOccupied ? t('apartments.status_occupied') : t('apartments.status_vacant')} />
               <span className="badge-pill badge-pill--type">
                 {apartmentTypeLabels[apartment.type] ?? apartment.type}
               </span>
             </div>
             <div className="detail-header__meta">
-              <span>Block {apartment.block}</span>
+              <span>{t('apartments.block_prefix', { block: apartment.block })}</span>
               <span>·</span>
               <span>{formatFloor(apartment.floorNumber)}</span>
               <span>·</span>
@@ -235,7 +237,7 @@ const ApartmentDetailPage = () => {
       <div className="section-card">
         <div className="section-card__header">
           <h6 className="section-card__title d-flex align-items-center gap-2">
-            <Crown size={16} style={{ color: '#d97706' }} /> Owner
+            <Crown size={16} style={{ color: '#d97706' }} /> {t('apartments.owner')}
           </h6>
         </div>
 
@@ -278,7 +280,7 @@ const ApartmentDetailPage = () => {
         ) : (
           <div className="section-card__body--empty">
             <i className="bi bi-person placeholder-icon" />
-            <p className="placeholder-text">No owner linked to this apartment</p>
+            <p className="placeholder-text">{t('apartments.no_owner_linked')}</p>
           </div>
         )}
       </div>
@@ -286,12 +288,12 @@ const ApartmentDetailPage = () => {
       {/* ── Tenant History ── */}
       <div className="section-card">
         <div className="section-card__header">
-          <h6 className="section-card__title">Tenant History</h6>
+          <h6 className="section-card__title">{t('apartments.tenant_history')}</h6>
         </div>
 
         {residentsLoading ? (
           <div className="section-card__body--empty">
-            <p className="placeholder-text">Loading tenants…</p>
+            <p className="placeholder-text">{t('apartments.loading_tenants')}</p>
           </div>
         ) : tenantHistory.length > 0 ? (
           <AppTable
@@ -299,14 +301,14 @@ const ApartmentDetailPage = () => {
             data={tenantHistory}
             loading={residentsLoading}
             rowKey={(r) => r.id!}
-            emptyTitle="No tenants found"
-            emptySubtitle="No tenant history for this apartment."
+            emptyTitle={t('apartments.no_tenants_found')}
+            emptySubtitle={t('apartments.no_tenant_history')}
             emptyIcon="bi-people"
           />
         ) : (
           <div className="section-card__body--empty">
             <i className="bi bi-people placeholder-icon" />
-            <p className="placeholder-text">No tenant history for this apartment</p>
+            <p className="placeholder-text">{t('apartments.no_tenant_history')}</p>
           </div>
         )}
       </div>

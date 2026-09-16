@@ -1,5 +1,6 @@
 import { UserPlus, Upload } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useResidentsPage } from "../hooks/useResidentsPage";
 import ResidentStatsCards from "../components/ResidentStatsCards";
 import ResidentFiltersComponent from "../components/ResidentFilters";
@@ -15,6 +16,7 @@ import ImportResultsModal, { type FailedImportItem } from "../../../components/I
 import { ImportModal } from "../../../components/ImportModal/ImportModal";
 
 const ResidentsPage = () => {
+  const { t } = useTranslation();
   const {
     residents, pagination, stats, filters, loading,
     updateFilters, changePage,
@@ -43,11 +45,11 @@ const ResidentsPage = () => {
       const result = await residentApi.promoteOccupants();
       showSuccess(
         result.promoted > 0
-          ? `Occupant promotion ran — ${result.promoted} resident(s) promoted.`
-          : "Occupant promotion ran — no pending promotions."
+          ? t('residents.promotion_ran_promoted', { count: result.promoted })
+          : t('residents.promotion_ran_none')
       );
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to run occupant promotion"));
+      showError(getErrorMessage(err, t('residents.promotion_failed')));
     } finally {
       setPromoting(false);
     }
@@ -60,10 +62,10 @@ const ResidentsPage = () => {
       <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
         <div>
           <h4 className="fw-bold mb-2 fs-4 fs-sm-3" style={{ color: '#1a1f36' }}>
-            Residents Management
+            {t('residents.title')}
           </h4>
           <p className="text-muted mb-0 small">
-            Oversee all resident accounts, tenancy status, and unit allocations.
+            {t('residents.subtitle')}
           </p>
         </div>
 
@@ -74,14 +76,14 @@ const ResidentsPage = () => {
             onClick={() => setShowPromoteConfirm(true)}
             disabled={promoting}
             style={{ fontSize: "0.875rem", borderRadius: "8px" }}
-            title="Manually run the occupant promotion job (normally run by the hourly cron)"
+            title={t('residents.run_occupant_promotion')}
           >
             {promoting ? (
               <span className="spinner-border spinner-border-sm" />
             ) : (
               <i className="bi bi-arrow-repeat" />
             )}
-            Run Occupant Promotion
+            {t('residents.run_occupant_promotion')}
           </button>
 
           <button
@@ -96,7 +98,7 @@ const ResidentsPage = () => {
             ) : (
               <Upload size={16} strokeWidth={2} />
             )}
-            {importLoading ? "Importing..." : "Import Excel"}
+            {importLoading ? t('apartments.importing') : t('apartments.import_excel')}
           </button>
 
           <button
@@ -106,7 +108,7 @@ const ResidentsPage = () => {
             style={{ fontSize: "0.875rem", borderRadius: "8px", backgroundColor: "#1a1f36", borderColor: "#1a1f36" }}
           >
             <UserPlus size={16} strokeWidth={2} />
-            Add Resident
+            {t('residents.add_resident')}
           </button>
         </div>
       </div>
@@ -160,13 +162,14 @@ const ResidentsPage = () => {
       {/* Status Warning Triggers */}
       <ConfirmDialog
         show={showDeactivateModal}
-        title="Deactivate Resident"
+        title={t('residents.deactivate_confirm_title')}
         message={
           selectedResident
-            ? `Are you sure you want to deactivate ${selectedResident.user.name}? They will lose access to the system.`
-            : "Are you sure you want to deactivate this resident?"
+            ? t('residents.deactivate_confirm_msg', { name: selectedResident.user.name })
+            : t('residents.deactivate_confirm_generic')
         }
-        confirmLabel="Yes, Deactivate"
+        confirmLabel={t('residents.deactivate_btn')}
+        cancelLabel={t('common.cancel')}
         variant="warning"
         loading={deactivateLoading}
         onConfirm={async () => {
@@ -186,13 +189,13 @@ const ResidentsPage = () => {
         successCount={importResults?.successCount ?? 0}
         failedCount={importResults?.failedCount ?? 0}
         failedItems={importResults?.failedItems ?? []}
-        title="Resident Import Results"
+        title={t('import.results_title_residents')}
       />
 
       <ImportModal
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
-        title="Import Residents"
+        title={t('import.title_residents')}
         templateUrl="/templates/residents_template.xlsx"
         templateName="residents_template.xlsx"
         loading={importLoading}
@@ -203,7 +206,7 @@ const ResidentsPage = () => {
               setImportResults(result);
               setShowResultsModal(true);
             } else {
-              showSuccess(`Successfully imported ${result.successCount} resident(s). Welcome emails sent!`);
+              showSuccess(t('residents.import_success', { count: result.successCount }));
             }
           }
         }}
@@ -212,10 +215,10 @@ const ResidentsPage = () => {
       {/* ── Promote Occupants Confirm ── */}
       <ConfirmDialog
         show={showPromoteConfirm}
-        title="Run Occupant Promotion"
-        message="Are you sure you want to run the occupant promotion job? This will promote pending tenant-to-owner transitions based on tenancy end dates."
-        confirmLabel="Run Job"
-        cancelLabel="Cancel"
+        title={t('residents.run_promotion_confirm_title')}
+        message={t('residents.run_promotion_confirm_msg')}
+        confirmLabel={t('residents.run_promotion_confirm_btn')}
+        cancelLabel={t('common.cancel')}
         variant="warning"
         loading={promoting}
         onConfirm={async () => {

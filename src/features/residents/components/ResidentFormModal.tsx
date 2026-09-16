@@ -1,9 +1,11 @@
+import { useTranslation } from "react-i18next";
 import ApartmentSelect from "../../apartments/components/ApartmentSelect";
 import DatePicker from "../../../components/DatePicker/DatePicker";
 import { useResidentForm } from "../hooks/useResidentForm";
 import type { ResidentFormModalProps } from "../types/resident.types";
 
 const ResidentFormModal = ({ show, mode, resident, loading, onClose, onSubmit }: ResidentFormModalProps) => {
+  const { t } = useTranslation();
   const { isEdit, formik, handleClose, setApartmentId } =
     useResidentForm({ show, mode, resident, onSubmit, onClose });
 
@@ -21,10 +23,10 @@ const ResidentFormModal = ({ show, mode, resident, loading, onClose, onSubmit }:
           <div className="modal-header d-flex align-items-start justify-content-between border-bottom border-light-subtle px-4 py-3 position-relative">
             <div>
               <h5 className="modal-title fw-bold m-0 text-dark" style={{ fontSize: "1rem", color: "#1a1f36" }}>
-                {isEdit ? `Edit Resident — ${resident?.user.name}` : "Add New Resident"}
+                {isEdit ? t("residents.edit_resident", { name: resident?.user.name }) : t("residents.add_new_resident")}
               </h5>
               <p className="text-muted m-0 small" style={{ fontSize: "0.8rem" }}>
-                {isEdit ? "Update the resident's details below." : "Fill in the details to create a resident account."}
+                {isEdit ? t("residents.edit_desc") : t("residents.add_desc")}
               </p>
             </div>
 
@@ -34,7 +36,7 @@ const ResidentFormModal = ({ show, mode, resident, loading, onClose, onSubmit }:
               style={{ top: 18, right: 18, width: 28, height: 28, border: '1px solid #e9ecef', background: '#fff', fontSize: '1.1rem', borderRadius: '6px' }}
               onClick={handleClose}
               disabled={loading}
-              aria-label="Close"
+              aria-label={t("common.close")}
             >
               <i className="bi bi-x" />
             </button>
@@ -46,13 +48,13 @@ const ResidentFormModal = ({ show, mode, resident, loading, onClose, onSubmit }:
 
                 {/* Full Name */}
                 <div>
-                  <label className="form-label fw-medium text-secondary small mb-1">Full name <span className="text-danger">*</span></label>
+                  <label className="form-label fw-medium text-secondary small mb-1">{t("residents.label_full_name")} <span className="text-danger">*</span></label>
                   <input
                     type="text"
                     name="name"
                     autoComplete="name"
                     className={`form-control shadow-none rounded-2 text-dark ${formik.touched.name && formik.errors.name ? "is-invalid" : ""}`}
-                    placeholder="Enter full name"
+                    placeholder={t("residents.placeholder_name")}
                     value={formik.values.name}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
@@ -64,20 +66,20 @@ const ResidentFormModal = ({ show, mode, resident, loading, onClose, onSubmit }:
                   {formik.touched.name && formik.errors.name ? (
                     <div className="invalid-feedback d-block text-danger mt-1" style={{ fontSize: "0.8rem" }}>{formik.errors.name}</div>
                   ) : formik.values.name.length > 100 ? (
-                    <small className="text-danger d-block mt-1" style={{ fontSize: '0.78rem' }}>Maximum 100 characters allowed.</small>
+                    <small className="text-danger d-block mt-1" style={{ fontSize: '0.78rem' }}>{t("residents.max_100_chars")}</small>
                   ) : null}
                 </div>
 
                 {/* Email — add only */}
                 {!isEdit && (
                   <div>
-                    <label className="form-label fw-medium text-secondary small mb-1">Email <span className="text-danger">*</span></label>
+                    <label className="form-label fw-medium text-secondary small mb-1">{t("residents.label_email")} <span className="text-danger">*</span></label>
                     <input
                       type="email"
                       name="email"
                       autoComplete="email"
                       className={`form-control shadow-none rounded-2 text-dark ${formik.touched.email && formik.errors.email ? "is-invalid" : ""}`}
-                      placeholder="Enter email address"
+                      placeholder={t("residents.placeholder_email")}
                       value={formik.values.email ?? ""}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
@@ -94,13 +96,13 @@ const ResidentFormModal = ({ show, mode, resident, loading, onClose, onSubmit }:
 
                 {/* Phone */}
                 <div>
-                  <label className="form-label fw-medium text-secondary small mb-1">Phone <span className="text-danger">*</span></label>
+                  <label className="form-label fw-medium text-secondary small mb-1">{t("residents.label_phone")} <span className="text-danger">*</span></label>
                   <input
                     type="text"
                     name="phone"
                     autoComplete="phone"
                     className={`form-control shadow-none rounded-2 text-dark ${formik.touched.phone && formik.errors.phone ? "is-invalid" : ""}`}
-                    placeholder="Enter 10-digit phone number"
+                    placeholder={t("residents.placeholder_phone")}
                     value={formik.values.phone}
                     onChange={(e) => {
                       const val = e.target.value.replace(/\D/g, '');
@@ -115,14 +117,14 @@ const ResidentFormModal = ({ show, mode, resident, loading, onClose, onSubmit }:
                   {formik.touched.phone && formik.errors.phone ? (
                     <div className="invalid-feedback d-block text-danger mt-1" style={{ fontSize: "0.8rem" }}>{formik.errors.phone}</div>
                   ) : formik.values.phone.length > 10 ? (
-                    <small className="text-danger d-block mt-1" style={{ fontSize: '0.78rem' }}>Maximum 10 digits allowed.</small>
+                    <small className="text-danger d-block mt-1" style={{ fontSize: '0.78rem' }}>{t("residents.max_10_digits")}</small>
                   ) : null}
                 </div>
 
                 {/* Apartment Select (Add mode) */}
                 {!isEdit && (
                   <div>
-                    <label className="form-label fw-medium text-secondary small mb-1">Apartment <span className="text-danger">*</span></label>
+                    <label className="form-label fw-medium text-secondary small mb-1">{t("residents.label_apartment")} <span className="text-danger">*</span></label>
                     <ApartmentSelect
                       value={formik.values.apartmentId ?? 0}
                       onChange={async (id) => {
@@ -141,7 +143,7 @@ const ResidentFormModal = ({ show, mode, resident, loading, onClose, onSubmit }:
                 {/* Apartment Readonly (Edit mode) */}
                 {isEdit && resident?.apartment && (
                   <div>
-                    <label className="form-label fw-medium text-secondary small mb-1">Apartment</label>
+                    <label className="form-label fw-medium text-secondary small mb-1">{t("residents.label_apartment")}</label>
                     <input
                       type="text"
                       className="form-control rfm-input"
@@ -156,7 +158,7 @@ const ResidentFormModal = ({ show, mode, resident, loading, onClose, onSubmit }:
                 {isEdit && (
                   <div>
                     <DatePicker
-                      label="Move-out date"
+                      label={t("residents.label_move_out_date")}
                       name="moveOutDate"
                       maxDate={new Date().toISOString().split('T')[0]}
                       value={formik.values.moveOutDate ?? ""}
@@ -172,7 +174,7 @@ const ResidentFormModal = ({ show, mode, resident, loading, onClose, onSubmit }:
                     {formik.values.moveOutDate && (
                       <div className="d-flex align-items-center gap-1 mt-2 small" style={{ color: '#b45309', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 6, padding: '6px 10px' }}>
                         <i className="bi bi-exclamation-triangle" />
-                        Setting a move-out date will deactivate this resident and free their apartment.
+                        {t("residents.move_out_warning")}
                       </div>
                     )}
                   </div>
@@ -190,7 +192,7 @@ const ResidentFormModal = ({ show, mode, resident, loading, onClose, onSubmit }:
                 disabled={loading}
                 style={{ height: "38px", fontSize: "0.875rem" }}
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="submit"
@@ -208,7 +210,7 @@ const ResidentFormModal = ({ show, mode, resident, loading, onClose, onSubmit }:
                 ) : (
                   <>
                     <i className={`bi ${isEdit ? "bi-check-lg" : "bi-person-plus"} me-1`} />
-                    {isEdit ? "Save Changes" : "Create Resident"}
+                    {isEdit ? t("residents.save_changes") : t("residents.create_resident")}
                   </>
                 )}
               </button>

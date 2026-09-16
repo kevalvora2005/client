@@ -1,4 +1,6 @@
+import { useMemo } from "react";
 import { useFormik } from "formik";
+import { useTranslation } from "react-i18next";
 import * as Yup from "yup";
 import type { Apartment, CreateApartmentPayload, UpdateApartmentPayload, ApartmentType } from "../types/apartment.types";
 import { ApartmentType as ApartmentTypeEnum } from "../types/apartment.types";
@@ -10,46 +12,6 @@ interface UseApartmentFormProps {
   onClose: () => void;
 }
 
-// ── Validation schemas ─────────────────────────────────────────────
-
-const addSchema = Yup.object({
-  block: Yup.string()
-    .trim()
-    .length(1, "Block must be a single character")
-    .matches(/^[A-Z]$/, "Block must be a letter")
-    .required("Block is required"),
-  floorNumber: Yup.number()
-    .transform((value, originalValue) => originalValue === "" ? undefined : value)
-    .min(1, "Floor number must be at least 1")
-    .required("Floor number is required")
-    .typeError("Floor number is required"),
-  unitNumber: Yup.string().trim().required("Unit number is required"),
-  areaSqft: Yup.number()
-    .transform((value, originalValue) => originalValue === "" ? undefined : value)
-    .positive("Area must be a positive number")
-    .required("Area is required")
-    .typeError("Area is required"),
-  type: Yup.string()
-    .oneOf(Object.values(ApartmentTypeEnum), "Please select a valid type")
-    .required("Type is required"),
-});
-
-const editSchema = Yup.object({
-  block: Yup.string().trim().optional(),
-  floorNumber: Yup.number()
-    .transform((value, originalValue) => originalValue === "" ? undefined : value)
-    .min(1, "Floor number must be at least 1")
-    .optional(),
-  unitNumber: Yup.string().trim().optional(),
-  areaSqft: Yup.number()
-    .transform((value, originalValue) => originalValue === "" ? undefined : value)
-    .positive("Area must be a positive number")
-    .optional(),
-  type: Yup.string()
-    .oneOf(Object.values(ApartmentTypeEnum), "Please select a valid type")
-    .optional(),
-});
-
 // ── Hook ──────────────────────────────────────────────────────────
 
 export const useApartmentForm = ({
@@ -58,7 +20,46 @@ export const useApartmentForm = ({
   onSubmit,
   onClose,
 }: UseApartmentFormProps) => {
+  const { t } = useTranslation();
   const isEdit = mode === "edit";
+
+  const addSchema = useMemo(() => Yup.object({
+    block: Yup.string()
+      .trim()
+      .length(1, t('validation.block_char'))
+      .matches(/^[A-Z]$/, t('validation.block_letter'))
+      .required(t('validation.block_req')),
+    floorNumber: Yup.number()
+      .transform((value, originalValue) => originalValue === "" ? undefined : value)
+      .min(1, t('validation.floor_min1'))
+      .required(t('validation.floor_req'))
+      .typeError(t('validation.floor_req')),
+    unitNumber: Yup.string().trim().required(t('validation.unit_req')),
+    areaSqft: Yup.number()
+      .transform((value, originalValue) => originalValue === "" ? undefined : value)
+      .positive(t('validation.area_positive'))
+      .required(t('validation.area_req'))
+      .typeError(t('validation.area_req')),
+    type: Yup.string()
+      .oneOf(Object.values(ApartmentTypeEnum), t('validation.type_valid'))
+      .required(t('validation.type_req')),
+  }), [t]);
+
+  const editSchema = useMemo(() => Yup.object({
+    block: Yup.string().trim().optional(),
+    floorNumber: Yup.number()
+      .transform((value, originalValue) => originalValue === "" ? undefined : value)
+      .min(1, t('validation.floor_min1'))
+      .optional(),
+    unitNumber: Yup.string().trim().optional(),
+    areaSqft: Yup.number()
+      .transform((value, originalValue) => originalValue === "" ? undefined : value)
+      .positive(t('validation.area_positive'))
+      .optional(),
+    type: Yup.string()
+      .oneOf(Object.values(ApartmentTypeEnum), t('validation.type_valid'))
+      .optional(),
+  }), [t]);
 
   const formik = useFormik({
     initialValues: isEdit
@@ -83,10 +84,10 @@ export const useApartmentForm = ({
 
     onSubmit: async (values, { resetForm }) => {
       if (isEdit) {
-        const success = await onSubmit(values as UpdateApartmentPayload, apartment?.id);
+        const success = await onSubmit(values as unknown as UpdateApartmentPayload, apartment?.id);
         if (success) onClose();
       } else {
-        const success = await onSubmit(values as CreateApartmentPayload);
+        const success = await onSubmit(values as unknown as CreateApartmentPayload);
         if (success) { resetForm(); onClose(); }
       }
     },

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Users, UserCheck, ShieldAlert, UserPlus } from "lucide-react";
 import type { ResidentStats } from "../types/resident.types";
 
@@ -7,29 +8,30 @@ interface ResidentStatsCardsProps {
 }
 
 const ResidentStatsCards = ({ stats, loading = false }: ResidentStatsCardsProps) => {
+  const { t } = useTranslation();
   const { totalCount, totalActive, totalOwners, totalTenants } = stats;
 
   const statItems = [
     {
-      label: "Total Residents",
+      label: t("residents.stats_total_residents"),
       value: totalCount,
-      subtext: "Total registered residents",
+      subtext: t("residents.stats_total_residents_desc"),
       icon: Users,
       bgClass: "bg-primary-subtle text-primary",
       subtextColor: "#0d6efd"
     },
     {
-      label: "Active",
+      label: t("residents.stats_active"),
       value: totalActive,
-      subtext: "Across all residents",
+      subtext: t("residents.stats_active_desc"),
       icon: UserCheck,
       bgClass: "bg-success-subtle text-success",
       subtextColor: "#198754"
     },
     {
-      label: "Owners",
+      label: t("residents.stats_owners"),
       value: totalOwners,
-      subtext: `out of ${totalActive} active`,
+      subtext: t("residents.stats_out_of_active", { total: totalActive }),
       icon: ShieldAlert,
       bgClass: "bg-indigo-subtle text-indigo",
       customBg: "#eef2ff",
@@ -37,9 +39,9 @@ const ResidentStatsCards = ({ stats, loading = false }: ResidentStatsCardsProps)
       subtextColor: "#4338ca"
     },
     {
-      label: "Tenants",
+      label: t("residents.stats_tenants"),
       value: totalTenants,
-      subtext: `out of ${totalActive} active`,
+      subtext: t("residents.stats_out_of_active", { total: totalActive }),
       icon: UserPlus,
       bgClass: "bg-warning-subtle text-warning-emphasis",
       subtextColor: "#b45309"

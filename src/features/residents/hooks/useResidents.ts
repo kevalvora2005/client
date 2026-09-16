@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { residentApi } from "../api/residentApi";
 import type { ResidentDetail, ResidentStats } from "../types/resident.types";
 import type { PaginatedResult } from "../../../types/pagination.types";
@@ -7,6 +8,7 @@ import { showError } from "../../../utils/toast";
 import { useResidentStore } from "./useResidentStore";
 
 export const useResidents = () => {
+  const { t } = useTranslation();
   const { filters, updateFilters, changePage } = useResidentStore();
 
   const [residents, setResidents] = useState<ResidentDetail[]>([]);
@@ -47,7 +49,7 @@ export const useResidents = () => {
           setStats(response.stats);
         }
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, "Failed to fetch residents"));
+        if (!cancelled) showError(getErrorMessage(err, t("residents.fetch_failed")));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -55,7 +57,7 @@ export const useResidents = () => {
 
     fetch();
     return () => { cancelled = true; };
-  }, [filters, refreshKey]);
+  }, [filters, refreshKey, t]);
 
   const refetch = () => setRefreshKey((prev) => prev + 1);
 

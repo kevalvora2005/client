@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Select from "../../../components/Select/Select";
 import { ApartmentType, type ApartmentFilters } from "../types/apartment.types";
 
@@ -15,6 +16,7 @@ const apartmentTypeLabels: Record<ApartmentType, string> = {
 };
 
 const ApartmentFiltersComponent = ({ filters, onFilterChange }: ApartmentFiltersProps) => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState(filters.search ?? "");
 
   // debounce — 300ms
@@ -59,7 +61,7 @@ const ApartmentFiltersComponent = ({ filters, onFilterChange }: ApartmentFilters
           <input
             type="text"
             className="w-100 border-0 p-0 bg-transparent text-dark"
-            placeholder="Search by Flat No. (e.g. A-101)..."
+            placeholder={t("apartments.search_placeholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ fontSize: "0.875rem", outline: "none" }}
@@ -71,7 +73,7 @@ const ApartmentFiltersComponent = ({ filters, onFilterChange }: ApartmentFilters
       <div style={{ minWidth: "140px" }}>
         <Select
           options={Object.entries(apartmentTypeLabels).map(([value, label]) => ({ value, label }))}
-          placeholder="All types"
+          placeholder={t("apartments.all_types")}
           value={filters.type ?? ""}
           onChange={handleTypeChange}
           style={{ height: "46px" }}
@@ -82,10 +84,10 @@ const ApartmentFiltersComponent = ({ filters, onFilterChange }: ApartmentFilters
       <div style={{ minWidth: "140px" }}>
         <Select
           options={[
-            { value: 'true', label: 'Occupied' },
-            { value: 'false', label: 'Vacant' },
+            { value: 'true', label: t("apartments.status_occupied") },
+            { value: 'false', label: t("apartments.status_vacant") },
           ]}
-          placeholder="All status"
+          placeholder={t("apartments.all_statuses")}
           value={filters.isOccupied === undefined ? '' : String(filters.isOccupied)}
           onChange={handleOccupiedChange}
           style={{ height: '46px' }}
@@ -101,7 +103,7 @@ const ApartmentFiltersComponent = ({ filters, onFilterChange }: ApartmentFilters
             style={{ height: "46px", fontSize: "0.85rem" }}
           >
             <i className="bi bi-x-circle me-2"></i>
-            Clear filters
+            {t("apartments.clear_filters")}
           </button>
         </div>
       )}

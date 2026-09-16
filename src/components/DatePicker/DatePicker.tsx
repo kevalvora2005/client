@@ -10,7 +10,7 @@ export interface DatePickerProps {
   maxDate?: string; // "YYYY-MM-DD"
   placeholder?: string;
   required?: boolean;
-  error?: string;
+  error?: string | string[];
   touched?: boolean;
   containerClassName?: string;
   name?: string;
@@ -102,7 +102,8 @@ const DatePicker = ({
     }
   }
 
-  const showError = touched && error;
+  const errorMessage = Array.isArray(error) ? error[0] : error;
+  const showError = Boolean(touched && errorMessage);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -414,7 +415,7 @@ const DatePicker = ({
         )}
       </div>
 
-      {showError && <div className="invalid-feedback d-block">{error}</div>}
+      {showError && <div className="invalid-feedback d-block">{errorMessage}</div>}
     </div>
   );
 };

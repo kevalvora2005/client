@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { residentApi, type ResidentImportResponse } from "../api/residentApi";
 import type { CreateResidentPayload, UpdateResidentPayload, CreateResidentResponse } from "../types/resident.types";
 import { getErrorMessage } from "../../../utils/getErrorMessage";
 import { showError } from "../../../utils/toast";
 
 export const useResidentMutations = (onSuccess?: () => void) => {
+  const { t } = useTranslation();
   const [createLoading, setCreateLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [deactivateLoading, setDeactivateLoading] = useState(false);
@@ -17,7 +19,7 @@ export const useResidentMutations = (onSuccess?: () => void) => {
       onSuccess?.();
       return res;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to create resident"));
+      showError(getErrorMessage(err, t("residents.create_failed")));
       return null;
     } finally {
       setCreateLoading(false);
@@ -31,7 +33,7 @@ export const useResidentMutations = (onSuccess?: () => void) => {
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to update resident"));
+      showError(getErrorMessage(err, t("residents.update_failed")));
       return false;
     } finally {
       setUpdateLoading(false);
@@ -45,7 +47,7 @@ export const useResidentMutations = (onSuccess?: () => void) => {
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to deactivate resident"));
+      showError(getErrorMessage(err, t("residents.deactivate_failed")));
       return false;
     } finally {
       setDeactivateLoading(false);
@@ -59,7 +61,7 @@ export const useResidentMutations = (onSuccess?: () => void) => {
       onSuccess?.();
       return res;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to import residents"));
+      showError(getErrorMessage(err, t("residents.import_failed")));
       return null;
     } finally {
       setImportLoading(false);

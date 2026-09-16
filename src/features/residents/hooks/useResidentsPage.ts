@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useResidents } from "./useResidents";
 import { useResidentMutations } from "./useResidentMutations";
 import type {
@@ -10,6 +11,7 @@ import { showSuccess } from "../../../utils/toast";
 import { useNavigate } from "react-router-dom";
 
 export const useResidentsPage = () => {
+  const { t } = useTranslation();
   // ── Data ──────────────────────────────────────────────────
   const {
     residents,
@@ -54,7 +56,7 @@ export const useResidentsPage = () => {
     const result = await createResident(payload);
     if (result) {
       setShowAddModal(false);
-      showSuccess("Resident created successfully. Welcome email with credentials sent!");
+      showSuccess(t("residents.create_success"));
       return true;
     }
     return false;
@@ -62,13 +64,13 @@ export const useResidentsPage = () => {
 
   const handleUpdate = async (id: number, payload: UpdateResidentPayload): Promise<boolean> => {
     const success = await updateResident(id, payload);
-    if (success) showSuccess("Resident updated successfully");
+    if (success) showSuccess(t("residents.update_success"));
     return success;
   };
 
   const handleDeactivateConfirm = async (id: number): Promise<boolean> => {
     const success = await deactivateResident(id);
-    if (success) showSuccess("Resident deactivated successfully");
+    if (success) showSuccess(t("residents.deactivate_success"));
     return success;
   };
 
