@@ -2,7 +2,7 @@ import i18n from 'i18next';
 
 export const formatRelativeTime = (
   dateInput?: string | Date | null,
-  locale = i18n.language || 'en'
+  locale = i18n.t('locale') || i18n.language || 'en-IN'
 ): string => {
   if (!dateInput) return '';
   const d = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;

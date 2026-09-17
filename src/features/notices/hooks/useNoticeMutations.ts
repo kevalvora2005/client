@@ -1,21 +1,23 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { noticeApi } from '../api/noticeApi';
 import type { CreateNoticePayload, UpdateNoticePayload } from '../types/notice.types';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { showSuccess, showError } from '../../../utils/toast';
 
 export const useNoticeMutations = (onSuccess?: () => void) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const createNotice = async (payload: CreateNoticePayload): Promise<boolean> => {
     try {
       setLoading(true);
       await noticeApi.createNotice(payload);
-      showSuccess('Notice created successfully');
+      showSuccess(t('notices.create_success'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to create notice'));
+      showError(getErrorMessage(err, t('notices.create_failed')));
       return false;
     } finally {
       setLoading(false);
@@ -26,11 +28,11 @@ export const useNoticeMutations = (onSuccess?: () => void) => {
     try {
       setLoading(true);
       await noticeApi.updateNotice(id, payload);
-      showSuccess('Notice updated successfully');
+      showSuccess(t('notices.update_success'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to update notice'));
+      showError(getErrorMessage(err, t('notices.update_failed')));
       return false;
     } finally {
       setLoading(false);
@@ -41,11 +43,11 @@ export const useNoticeMutations = (onSuccess?: () => void) => {
     try {
       setLoading(true);
       await noticeApi.deleteNotice(id);
-      showSuccess('Notice deleted successfully');
+      showSuccess(t('notices.delete_success'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to delete notice'));
+      showError(getErrorMessage(err, t('notices.delete_failed')));
       return false;
     } finally {
       setLoading(false);
@@ -56,11 +58,11 @@ export const useNoticeMutations = (onSuccess?: () => void) => {
     try {
       setLoading(true);
       await noticeApi.togglePin(id);
-      showSuccess('Notice pin status updated');
+      showSuccess(t('notices.pin_success'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to toggle pin'));
+      showError(getErrorMessage(err, t('notices.pin_failed')));
       return false;
     } finally {
       setLoading(false);

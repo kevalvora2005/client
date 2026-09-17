@@ -3,7 +3,7 @@ import i18n from 'i18next';
 export const formatCurrency = (
   amount: number | null | undefined,
   currency = 'INR',
-  locale = i18n.language || 'en-IN'
+  locale = i18n.t('locale') || i18n.language || 'en-IN'
 ): string => {
   if (amount === null || amount === undefined || isNaN(Number(amount))) {
     return '';

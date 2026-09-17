@@ -24,7 +24,8 @@ const GenerateInvoicesForm = ({ loading, onSubmit, onCancel }: GenerateInvoicesF
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-  const monthOptions = useMemo(() => getMonthOptions(i18n.language || 'en'), [i18n.language]);
+  const currentLocale = t('locale') || i18n.language || 'en-IN';
+  const monthOptions = useMemo(() => getMonthOptions(currentLocale), [currentLocale]);
   const [extraChargesTouched, setExtraChargesTouched] = useState<{ label: boolean; amount: boolean }[]>([]);
 
   const validationSchema = useMemo(() => Yup.object({

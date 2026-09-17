@@ -1,15 +1,11 @@
+import { useMemo } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { useTranslation } from 'react-i18next';
 import Select from '../../../components/Select/Select';
 import type { Notice, NoticeCategory, CreateNoticePayload, UpdateNoticePayload } from '../types/notice.types';
 
 const CATEGORIES: NoticeCategory[] = ['General', 'Maintenance', 'Emergency', 'Event'];
-
-const schema = Yup.object({
-  title: Yup.string().trim().required('Title is required'),
-  body: Yup.string().trim().required('Body is required'),
-  category: Yup.string().oneOf(CATEGORIES, 'Invalid category').required('Category is required'),
-});
 
 interface NoticeFormProps {
   notice?: Notice | null;
@@ -19,7 +15,30 @@ interface NoticeFormProps {
 }
 
 const NoticeForm = ({ notice, loading, onSubmit, onCancel }: NoticeFormProps) => {
+  const { t } = useTranslation();
   const isEdit = !!notice;
+
+  const schema = useMemo(
+    () =>
+      Yup.object({
+        title: Yup.string().trim().required(t('validation.title_req')),
+        body: Yup.string().trim().required(t('validation.body_req')),
+        category: Yup.string()
+          .oneOf(CATEGORIES, t('validation.category_invalid'))
+          .required(t('validation.category_req')),
+      }),
+    [t]
+  );
+
+  const categoryOptions = useMemo(
+    () => [
+      { value: 'General', label: t('notices.category_general') },
+      { value: 'Maintenance', label: t('notices.category_maintenance') },
+      { value: 'Emergency', label: t('notices.category_emergency') },
+      { value: 'Event', label: t('notices.category_event') },
+    ],
+    [t]
+  );
 
   const formik = useFormik({
     initialValues: {
@@ -41,13 +60,13 @@ const NoticeForm = ({ notice, loading, onSubmit, onCancel }: NoticeFormProps) =>
         {/* Title */}
         <div className="col-12">
           <label className="form-label fw-medium text-secondary small mb-1">
-            Title <span className="text-danger">*</span>
+            {t('notices.label_title')} <span className="text-danger">*</span>
           </label>
           <input
             type="text"
             name="title"
             className={`form-control shadow-none ${formik.touched.title && formik.errors.title ? 'is-invalid' : 'border-light-subtle'}`}
-            placeholder="e.g. Fire Safety Drill"
+            placeholder={t('notices.placeholder_title')}
             value={formik.values.title}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -56,18 +75,18 @@ const NoticeForm = ({ notice, loading, onSubmit, onCancel }: NoticeFormProps) =>
           {formik.touched.title && formik.errors.title ? (
             <div className="invalid-feedback">{formik.errors.title}</div>
           ) : formik.values.title.length > 150 ? (
-            <small className="text-danger d-block mt-1" style={{ fontSize: '0.78rem' }}>Maximum 150 characters allowed.</small>
+            <small className="text-danger d-block mt-1" style={{ fontSize: '0.78rem' }}>{t('notices.max_150_chars')}</small>
           ) : null}
         </div>
 
         {/* Category */}
         <div className="col-12">
           <Select
-            label="Category"
+            label={t('notices.label_category')}
             name="category"
             required
-            options={CATEGORIES}
-            placeholder="Select category"
+            options={categoryOptions}
+            placeholder={t('notices.select_category')}
             value={formik.values.category}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -80,13 +99,13 @@ const NoticeForm = ({ notice, loading, onSubmit, onCancel }: NoticeFormProps) =>
         {/* Body */}
         <div className="col-12">
           <label className="form-label fw-medium text-secondary small mb-1">
-            Body <span className="text-danger">*</span>
+            {t('notices.label_body')} <span className="text-danger">*</span>
           </label>
           <textarea
             name="body"
             rows={6}
             className={`form-control shadow-none ${formik.touched.body && formik.errors.body ? 'is-invalid' : 'border-light-subtle'}`}
-            placeholder="Write the notice content here..."
+            placeholder={t('notices.placeholder_body')}
             value={formik.values.body}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -95,7 +114,7 @@ const NoticeForm = ({ notice, loading, onSubmit, onCancel }: NoticeFormProps) =>
           {formik.touched.body && formik.errors.body ? (
             <div className="invalid-feedback">{formik.errors.body}</div>
           ) : formik.values.body.length > 2000 ? (
-            <small className="text-danger d-block mt-1" style={{ fontSize: '0.78rem' }}>Maximum 2000 characters allowed.</small>
+            <small className="text-danger d-block mt-1" style={{ fontSize: '0.78rem' }}>{t('notices.max_2000_chars')}</small>
           ) : null}
         </div>
 
@@ -109,7 +128,7 @@ const NoticeForm = ({ notice, loading, onSubmit, onCancel }: NoticeFormProps) =>
               disabled={loading}
               style={{ height: '38px', fontSize: '0.875rem' }}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
@@ -119,7 +138,7 @@ const NoticeForm = ({ notice, loading, onSubmit, onCancel }: NoticeFormProps) =>
             >
               {loading
                 ? <span className="spinner-border spinner-border-sm" />
-                : <><i className={`bi ${isEdit ? 'bi-check-lg' : 'bi-plus-lg'} me-1`} /> {isEdit ? 'Save Changes' : 'Add Notice'}</>
+                : <><i className={`bi ${isEdit ? 'bi-check-lg' : 'bi-plus-lg'} me-1`} /> {isEdit ? t('notices.save_changes') : t('notices.add_notice')}</>
               }
             </button>
           </div>

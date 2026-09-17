@@ -70,7 +70,7 @@ const DatePicker = ({
   align = 'auto',
 }: DatePickerProps) => {
   const { t, i18n } = useTranslation();
-  const currentLocale = i18n.language || 'en';
+  const currentLocale = t('locale') || i18n.language || 'en-IN';
   const effectivePlaceholder = placeholder || t('common.select_date');
 
   const months = useMemo(() => getLocalizedMonths(currentLocale), [currentLocale]);

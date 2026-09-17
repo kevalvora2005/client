@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { noticeApi } from '../api/noticeApi';
 import type { Notice, NoticeListParams, PaginatedNotices } from '../types/notice.types';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { showError } from '../../../utils/toast';
 
 export const useNotices = (params?: NoticeListParams) => {
+  const { t } = useTranslation();
   const [notices, setNotices] = useState<PaginatedNotices | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -17,11 +19,11 @@ export const useNotices = (params?: NoticeListParams) => {
       const response = await noticeApi.getNotices(parsed);
       setNotices(response);
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to fetch notices'));
+      showError(getErrorMessage(err, t('notices.fetch_failed')));
     } finally {
       setLoading(false);
     }
-  }, [serializedParams]);
+  }, [serializedParams, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,7 +35,7 @@ export const useNotices = (params?: NoticeListParams) => {
         const response = await noticeApi.getNotices(parsed);
         if (!cancelled) setNotices(response);
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, 'Failed to fetch notices'));
+        if (!cancelled) showError(getErrorMessage(err, t('notices.fetch_failed')));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -42,12 +44,13 @@ export const useNotices = (params?: NoticeListParams) => {
     load();
 
     return () => { cancelled = true; };
-  }, [serializedParams]);
+  }, [serializedParams, t]);
 
   return { notices, loading, refetch: fetchNotices };
 };
 
 export const useNotice = (id: number) => {
+  const { t } = useTranslation();
   const [notice, setNotice] = useState<Notice | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -57,11 +60,11 @@ export const useNotice = (id: number) => {
       const response = await noticeApi.getNotice(id);
       setNotice(response);
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to fetch notice'));
+      showError(getErrorMessage(err, t('notices.fetch_single_failed')));
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,7 +75,7 @@ export const useNotice = (id: number) => {
         const response = await noticeApi.getNotice(id);
         if (!cancelled) setNotice(response);
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, 'Failed to fetch notice'));
+        if (!cancelled) showError(getErrorMessage(err, t('notices.fetch_single_failed')));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -81,7 +84,7 @@ export const useNotice = (id: number) => {
     load();
 
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, t]);
 
   return { notice, loading, refetch: fetchNotice };
 };

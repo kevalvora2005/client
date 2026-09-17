@@ -1,21 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import Select from '../../../components/Select/Select';
 import type { SelectOption } from '../../../components/Select/Select';
 import type { NoticeCategory, NoticeListParams } from '../types/notice.types';
-
-const CATEGORY_OPTIONS: SelectOption[] = [
-  { value: '', label: 'All categories' },
-  { value: 'General', label: 'General' },
-  { value: 'Maintenance', label: 'Maintenance' },
-  { value: 'Emergency', label: 'Emergency' },
-  { value: 'Event', label: 'Event' },
-];
-
-const PINNED_OPTIONS: SelectOption[] = [
-  { value: '', label: 'All notices' },
-  { value: 'true', label: 'Pinned only' },
-  { value: 'false', label: 'Unpinned only' },
-];
 
 interface NoticeFiltersProps {
   filters: NoticeListParams;
@@ -23,7 +10,28 @@ interface NoticeFiltersProps {
 }
 
 const NoticeFilters = ({ filters, onFilterChange }: NoticeFiltersProps) => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState(filters.search ?? '');
+
+  const categoryOptions: SelectOption[] = useMemo(
+    () => [
+      { value: '', label: t('notices.all_categories') },
+      { value: 'General', label: t('notices.category_general') },
+      { value: 'Maintenance', label: t('notices.category_maintenance') },
+      { value: 'Emergency', label: t('notices.category_emergency') },
+      { value: 'Event', label: t('notices.category_event') },
+    ],
+    [t]
+  );
+
+  const pinnedOptions: SelectOption[] = useMemo(
+    () => [
+      { value: '', label: t('notices.all_notices') },
+      { value: 'true', label: t('notices.pinned_only') },
+      { value: 'false', label: t('notices.unpinned_only') },
+    ],
+    [t]
+  );
 
   useEffect(() => {
     if (search === (filters.search ?? '')) return;
@@ -48,7 +56,7 @@ const NoticeFilters = ({ filters, onFilterChange }: NoticeFiltersProps) => {
           <input
             type="text"
             className="form-control shadow-none border-light-subtle ps-5"
-            placeholder="Search notices..."
+            placeholder={t('notices.search_placeholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ borderRadius: '8px', fontSize: '0.875rem', height: '38px' }}
@@ -64,8 +72,8 @@ const NoticeFilters = ({ filters, onFilterChange }: NoticeFiltersProps) => {
       <div className="col-12 col-md-6 col-lg-4">
         <Select
           name="category"
-          options={CATEGORY_OPTIONS}
-          placeholder="All categories"
+          options={categoryOptions}
+          placeholder={t('notices.all_categories')}
           value={filters.category ?? ''}
           onChange={(e) =>
             onFilterChange({
@@ -84,8 +92,8 @@ const NoticeFilters = ({ filters, onFilterChange }: NoticeFiltersProps) => {
           <div className="flex-grow-1">
             <Select
               name="isPinned"
-              options={PINNED_OPTIONS}
-              placeholder="All notices"
+              options={pinnedOptions}
+              placeholder={t('notices.all_notices')}
               value={filters.isPinned === undefined ? '' : String(filters.isPinned)}
               onChange={(e) =>
                 onFilterChange({
@@ -102,17 +110,16 @@ const NoticeFilters = ({ filters, onFilterChange }: NoticeFiltersProps) => {
               className="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-1 px-3 fw-medium flex-shrink-0"
               onClick={handleReset}
               style={{ height: '38px', fontSize: '0.85rem', borderRadius: '8px' }}
-              title="Clear Filters"
+              title={t('notices.clear_filters')}
             >
               <i className="bi bi-x-circle" />
-              Clear
+              {t('common.clear')}
             </button>
           )}
         </div>
       </div>
     </div>
   );
-
 };
 
 export default NoticeFilters;

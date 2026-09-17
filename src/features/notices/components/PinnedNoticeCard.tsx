@@ -1,7 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import type { Notice } from '../types/notice.types';
 import { useNoticeStore } from '../hooks/useNoticeStore';
+import { formatDateOnly } from '../../../utils/formatDate';
 
 const CATEGORY_BADGE: Record<string, { bg: string; color: string; border: string }> = {
   General: { bg: '#e8f0fe', color: '#1a56db', border: '#3b82f6' },
@@ -29,6 +31,7 @@ const PinnedNoticeCard = ({
   isExpanded,
   onToggleExpand,
 }: PinnedNoticeCardProps) => {
+  const { t } = useTranslation();
   const badge = CATEGORY_BADGE[notice.category] ?? CATEGORY_BADGE.General;
   const [showMenu, setShowMenu] = useState(false);
   const [internalExpanded, setInternalExpanded] = useState(false);
@@ -36,7 +39,13 @@ const PinnedNoticeCard = ({
   const modalRef = useRef<HTMLDivElement>(null);
 
   const expanded = isExpanded !== undefined ? isExpanded : internalExpanded;
-  const handleToggleExpand = onToggleExpand ?? (() => setInternalExpanded(!internalExpanded));
+  const handleToggleExpand = useCallback(() => {
+    if (onToggleExpand) {
+      onToggleExpand();
+    } else {
+      setInternalExpanded((prev) => !prev);
+    }
+  }, [onToggleExpand]);
 
   useEffect(() => {
     if (!showMenu) return;
@@ -91,9 +100,6 @@ const PinnedNoticeCard = ({
     );
   };
 
-  const formatDate = (dateStr: string) =>
-    new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-
   return (
     <>
       {/* ── Normal In-Flow Card ── */}
@@ -106,7 +112,7 @@ const PinnedNoticeCard = ({
             className="fw-medium"
             style={{ background: badge.bg, color: badge.color, fontSize: '0.72rem', padding: '3px 10px', borderRadius: '20px' }}
           >
-            {notice.category}
+            {t(`notices.category_${notice.category.toLowerCase()}`)}
           </span>
           {!readOnly && (
             <div className="position-relative" ref={menuRef}>
@@ -128,14 +134,14 @@ const PinnedNoticeCard = ({
                     style={{ fontSize: '0.85rem' }}
                   >
                     <i className={`bi ${notice.isPinned ? 'bi-pin' : 'bi-pin-fill'}`} />
-                    {notice.isPinned ? 'Unpin' : 'Pin'}
+                    {notice.isPinned ? t('notices.unpin') : t('notices.pin')}
                   </button>
                   <button
                     className="dropdown-item d-flex align-items-center gap-2 px-3 py-2 rounded-2 small"
                     onClick={() => { onEdit(notice); setShowMenu(false); }}
                     style={{ fontSize: '0.85rem' }}
                   >
-                    <i className="bi bi-pencil" /> Edit
+                    <i className="bi bi-pencil" /> {t('common.edit')}
                   </button>
                   {onDelete && (
                     <button
@@ -143,7 +149,7 @@ const PinnedNoticeCard = ({
                       onClick={() => { onDelete(notice); setShowMenu(false); }}
                       style={{ fontSize: '0.85rem' }}
                     >
-                      <i className="bi bi-trash3" /> Delete
+                      <i className="bi bi-trash3" /> {t('common.delete')}
                     </button>
                   )}
                 </div>
@@ -163,14 +169,14 @@ const PinnedNoticeCard = ({
         <div className="d-flex align-items-center justify-content-between">
           <span className="text-muted" style={{ fontSize: '0.72rem' }}>
             <i className="bi bi-calendar3 me-1" />
-            {formatDate(notice.publishedAt)}
+            {formatDateOnly(notice.publishedAt)}
           </span>
           <button
             className="btn btn-link p-0 fw-medium text-decoration-none"
             onClick={handleToggleExpand}
             style={{ fontSize: '0.78rem', color: badge.color }}
           >
-            View Details →
+            {t('notices.view_details')} →
           </button>
         </div>
       </div>
@@ -202,14 +208,14 @@ const PinnedNoticeCard = ({
                 className="fw-medium"
                 style={{ background: badge.bg, color: badge.color, fontSize: '0.75rem', padding: '4px 12px', borderRadius: '20px' }}
               >
-                {notice.category}
+                {t(`notices.category_${notice.category.toLowerCase()}`)}
               </span>
               <button
                 type="button"
                 className="btn position-absolute d-flex align-items-center justify-content-center p-0 text-secondary"
                 style={{ top: 16, right: 16, width: 28, height: 28, border: '1px solid #e9ecef', background: '#fff', fontSize: '1.1rem', borderRadius: '6px' }}
                 onClick={handleToggleExpand}
-                aria-label="Close"
+                aria-label={t('common.close')}
               >
                 <i className="bi bi-x" />
               </button>
@@ -228,10 +234,10 @@ const PinnedNoticeCard = ({
             <div className="d-flex align-items-center justify-content-between pt-1">
               <span className="text-muted small" style={{ fontSize: '0.78rem' }}>
                 <i className="bi bi-person me-1" />
-                {notice.admin?.name ?? 'Admin'}
+                {notice.admin?.name ?? t('roles.admin')}
                 <span className="mx-2">•</span>
                 <i className="bi bi-calendar3 me-1" />
-                {formatDate(notice.publishedAt)}
+                {formatDateOnly(notice.publishedAt)}
               </span>
 
               <button
@@ -240,7 +246,7 @@ const PinnedNoticeCard = ({
                 onClick={handleToggleExpand}
                 style={{ borderRadius: '6px', fontSize: '0.82rem' }}
               >
-                Close
+                {t('common.close')}
               </button>
             </div>
           </div>

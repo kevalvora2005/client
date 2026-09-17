@@ -2,7 +2,7 @@ import i18n from 'i18next';
 
 export const formatDate = (
   dateInput?: string | Date | null,
-  locale = i18n.language || 'en-IN'
+  locale = i18n.t('locale') || i18n.language || 'en-IN'
 ): string => {
   if (!dateInput) return '';
   try {
@@ -23,7 +23,7 @@ export const formatDate = (
 
 export const formatDateOnly = (
   dateInput?: string | Date | null,
-  locale = i18n.language || 'en-IN'
+  locale = i18n.t('locale') || i18n.language || 'en-IN'
 ): string => {
   if (!dateInput) return '';
   try {

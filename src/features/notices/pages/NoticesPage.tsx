@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNoticesPage } from '../hooks/useNoticesPage';
 import { useNoticeMutations } from '../hooks/useNoticeMutations';
 import NoticeFilters from '../components/NoticeFilters';
@@ -15,6 +16,7 @@ interface NoticesPageProps {
 }
 
 const NoticesPage = ({ readOnly: readOnlyProp }: NoticesPageProps) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const readOnly = readOnlyProp ?? user?.role !== 'admin';
 
@@ -65,10 +67,10 @@ const NoticesPage = ({ readOnly: readOnlyProp }: NoticesPageProps) => {
       <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
         <div>
           <h4 className="fw-bold mb-2 fs-4 fs-sm-3" style={{ color: '#1a1f36' }}>
-            Notices Management
+            {t('notices.title')}
           </h4>
           <p className="text-muted mb-0 small">
-            Broadcast official announcements to society residents.
+            {t('notices.subtitle')}
           </p>
         </div>
         {!readOnly && (
@@ -78,7 +80,7 @@ const NoticesPage = ({ readOnly: readOnlyProp }: NoticesPageProps) => {
               onClick={openAddModal}
               style={{ fontSize: '0.875rem', borderRadius: '8px', backgroundColor: '#1a1f36', borderColor: '#1a1f36' }}
             >
-              <i className="bi bi-plus-lg" /> Add Notice
+              <i className="bi bi-plus-lg" /> {t('notices.add_notice')}
             </button>
           </div>
         )}
@@ -93,7 +95,7 @@ const NoticesPage = ({ readOnly: readOnlyProp }: NoticesPageProps) => {
       {pinnedItems.length > 0 && (
         <div className="mb-4">
           <p className="text-uppercase fw-semibold mb-3" style={{ fontSize: '0.72rem', color: '#6b7280', letterSpacing: '0.08em' }}>
-            <i className="bi bi-pin-angle-fill me-1" /> Pinned Announcements
+            <i className="bi bi-pin-angle-fill me-1" /> {t('notices.pinned_announcements')}
           </p>
           <div className="row g-3">
             {pinnedItems.map((notice) => (
@@ -116,7 +118,7 @@ const NoticesPage = ({ readOnly: readOnlyProp }: NoticesPageProps) => {
       {!loading && regularItems.length > 0 && (
         <div className="mb-4">
           <p className="text-uppercase fw-semibold mb-3" style={{ fontSize: '0.72rem', color: '#6b7280', letterSpacing: '0.08em' }}>
-            <i className="bi bi-megaphone me-1" /> Recent Notices
+            <i className="bi bi-megaphone me-1" /> {t('notices.recent_notices')}
           </p>
           <div className="row g-3">
             {regularItems.map((notice) => (
@@ -158,9 +160,9 @@ const NoticesPage = ({ readOnly: readOnlyProp }: NoticesPageProps) => {
           <div className="rounded-circle d-flex align-items-center justify-content-center mb-3" style={{ width: 64, height: 64, backgroundColor: '#f3f4f6' }}>
             <i className="bi bi-megaphone" style={{ fontSize: '1.6rem', color: '#9ca3af' }} />
           </div>
-          <p className="fw-semibold mb-1" style={{ fontSize: '0.95rem', color: '#4b5563' }}>No notices found</p>
+          <p className="fw-semibold mb-1" style={{ fontSize: '0.95rem', color: '#4b5563' }}>{t('notices.empty_title')}</p>
           <p className="text-secondary small mb-0" style={{ maxWidth: 280 }}>
-            There are no notices matching your criteria.
+            {t('notices.empty_desc')}
           </p>
         </div>
       )}
@@ -184,10 +186,10 @@ const NoticesPage = ({ readOnly: readOnlyProp }: NoticesPageProps) => {
               <div className="modal-header border-bottom border-light-subtle px-3 px-sm-4 pt-4 pb-3 align-items-start position-relative">
                 <div>
                   <h5 className="modal-title fw-bold fs-6" style={{ color: '#1a1f36' }}>
-                    {editingNotice ? `Edit Notice — ${editingNotice.title}` : 'Add Notice'}
+                    {editingNotice ? t('notices.edit_notice', { title: editingNotice.title }) : t('notices.add_notice')}
                   </h5>
                   <p className="text-muted mb-0" style={{ fontSize: '0.8rem' }}>
-                    {editingNotice ? 'Update the notice details below.' : 'Fill in the details to create a notice.'}
+                    {editingNotice ? t('notices.edit_desc') : t('notices.add_desc')}
                   </p>
                 </div>
                 <button
@@ -196,7 +198,7 @@ const NoticesPage = ({ readOnly: readOnlyProp }: NoticesPageProps) => {
                   style={{ top: 22, right: 22, width: 28, height: 28, border: '1px solid #e9ecef', background: '#fff', fontSize: '1.1rem', borderRadius: '6px' }}
                   onClick={closeModal}
                   disabled={mutationLoading}
-                  aria-label="Close"
+                  aria-label={t('common.close')}
                 >
                   <i className="bi bi-x" />
                 </button>
@@ -216,9 +218,10 @@ const NoticesPage = ({ readOnly: readOnlyProp }: NoticesPageProps) => {
 
       <ConfirmDialog
         show={!!deletingNotice}
-        title="Delete Notice"
-        message={deletingNotice ? `Are you sure you want to delete "${deletingNotice.title}"?` : ''}
-        confirmLabel="Yes, Delete"
+        title={t('notices.delete_confirm_title')}
+        message={deletingNotice ? t('notices.delete_confirm_msg', { title: deletingNotice.title }) : ''}
+        confirmLabel={t('notices.delete_btn')}
+        cancelLabel={t('common.cancel')}
         variant="danger"
         loading={mutationLoading}
         onConfirm={handleDeleteConfirm}
