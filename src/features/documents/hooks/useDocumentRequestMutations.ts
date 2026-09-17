@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { documentRequestApi } from "../api/documentRequestApi";
 import { getErrorMessage } from "../../../utils/getErrorMessage";
 import { showSuccess, showError } from "../../../utils/toast";
 
 export const useDocumentRequestMutations = (onSuccess?: () => void) => {
+  const { t } = useTranslation();
   const [submittingRequest, setSubmittingRequest] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [rejecting, setRejecting] = useState(false);
@@ -12,11 +14,11 @@ export const useDocumentRequestMutations = (onSuccess?: () => void) => {
     setSubmittingRequest(true);
     try {
       await documentRequestApi.createRequest(payload);
-      showSuccess("Document request sent successfully!");
+      showSuccess(t("documents.toast_create_request_success"));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to create document request."));
+      showError(getErrorMessage(err, t("documents.toast_create_request_failed")));
       return false;
     } finally {
       setSubmittingRequest(false);
@@ -27,11 +29,11 @@ export const useDocumentRequestMutations = (onSuccess?: () => void) => {
     setUploading(true);
     try {
       await documentRequestApi.uploadDocument(requestId, file);
-      showSuccess("Document uploaded and request fulfilled!");
+      showSuccess(t("documents.toast_upload_success"));
       onSuccess?.();
       return true;
     } catch {
-      showError("Failed to upload document.");
+      showError(t("documents.toast_upload_failed"));
       return false;
     } finally {
       setUploading(false);
@@ -42,11 +44,11 @@ export const useDocumentRequestMutations = (onSuccess?: () => void) => {
     setRejecting(true);
     try {
       await documentRequestApi.rejectRequest(requestId, reason || "");
-      showSuccess("Request declined.");
+      showSuccess(t("documents.toast_reject_success"));
       onSuccess?.();
       return true;
     } catch {
-      showError("Failed to reject request.");
+      showError(t("documents.toast_reject_failed"));
       return false;
     } finally {
       setRejecting(false);
@@ -56,11 +58,11 @@ export const useDocumentRequestMutations = (onSuccess?: () => void) => {
   const cancelRequest = async (requestId: number): Promise<boolean> => {
     try {
       await documentRequestApi.cancelRequest(requestId);
-      showSuccess("Request cancelled.");
+      showSuccess(t("documents.toast_cancel_success"));
       onSuccess?.();
       return true;
     } catch {
-      showError("Failed to cancel request.");
+      showError(t("documents.toast_cancel_failed"));
       return false;
     }
   };

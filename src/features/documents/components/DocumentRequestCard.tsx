@@ -1,5 +1,8 @@
 import { CheckCircle, Clock, Ban, User, Building, Download, Upload, Trash2, AlertCircle, FileText, FileSignature, FileSpreadsheet, FileImage, Eye } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { DocumentRequestItem } from "../types/documentRequest.types";
+import { formatRelativeTime } from "../../../utils/formatRelativeTime";
+import { getDocTypeLabel } from "../utils/getDocTypeLabel";
 
 const DOCUMENT_TYPE_ICONS: Record<string, typeof FileText> = {
   "Rent / Lease Agreement": FileSignature,
@@ -8,23 +11,6 @@ const DOCUMENT_TYPE_ICONS: Record<string, typeof FileText> = {
   "Utility Bill Copy (Electricity/Water)": FileText,
   "Rent Receipt (HRA Claim)": FileSignature,
   "NOC for Wi-Fi / Gas / DTH Connection": FileText,
-};
-
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return "Today, " + date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays} days ago`;
-  return date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-};
-
-const statusMeta = (status: string) => {
-  if (status === "UPLOADED") return { label: "Uploaded", bg: "bg-success-subtle", text: "text-success", border: "border-success-subtle", icon: CheckCircle };
-  if (status === "REJECTED") return { label: "Declined", bg: "bg-danger-subtle", text: "text-danger", border: "border-danger-subtle", icon: Ban };
-  return { label: "Pending", bg: "bg-warning-subtle", text: "text-warning-emphasis", border: "border-warning-subtle", icon: Clock };
 };
 
 const cardAccentBorder = (status: string) => {
@@ -44,7 +30,15 @@ interface Props {
 }
 
 const DocumentRequestCard = ({ item, isSent, isAdmin, onUpload, onReject, onCancel, onViewDetail }: Props) => {
+  const { t } = useTranslation();
   const otherParty = isSent ? item.target : item.requester;
+
+  const statusMeta = (status: string) => {
+    if (status === "UPLOADED") return { label: t("documents.status_uploaded"), bg: "bg-success-subtle", text: "text-success", border: "border-success-subtle", icon: CheckCircle };
+    if (status === "REJECTED") return { label: t("documents.status_declined"), bg: "bg-danger-subtle", text: "text-danger", border: "border-danger-subtle", icon: Ban };
+    return { label: t("documents.status_pending"), bg: "bg-warning-subtle", text: "text-warning-emphasis", border: "border-warning-subtle", icon: Clock };
+  };
+
   const sm = statusMeta(item.status);
   const StatusIcon = sm.icon;
   const DocIcon = DOCUMENT_TYPE_ICONS[item.documentType] || FileText;
@@ -65,14 +59,14 @@ const DocumentRequestCard = ({ item, isSent, isAdmin, onUpload, onReject, onCanc
             <div className="min-w-0">
               <div className="d-flex align-items-center gap-2 flex-wrap mb-1">
                 <h6 className="fw-bold text-dark mb-0 text-truncate" style={{ fontSize: "0.95rem" }}>
-                  {item.documentType}
+                  {getDocTypeLabel(item.documentType, t)}
                 </h6>
                 <span className={`badge rounded-pill ${sm.bg} ${sm.text} ${sm.border} d-inline-flex align-items-center gap-1 px-3 py-1 text-nowrap`} style={{ fontSize: "0.72rem", fontWeight: 600, borderWidth: 1 }}>
                   <StatusIcon size={12} /> {sm.label}
                 </span>
               </div>
               <div className="d-flex align-items-center gap-3 text-muted flex-wrap" style={{ fontSize: "0.78rem" }}>
-                <span className="d-inline-flex align-items-center gap-1"><Clock size={12} /> {formatDate(item.createdAt)}</span>
+                <span className="d-inline-flex align-items-center gap-1"><Clock size={12} /> {formatRelativeTime(item.createdAt)}</span>
                 {item.apartment && (
                   <span className="d-inline-flex align-items-center gap-1">
                     <Building size={12} /> {item.apartment.block}-{item.apartment.floorNumber}{item.apartment.unitNumber}
@@ -85,25 +79,25 @@ const DocumentRequestCard = ({ item, isSent, isAdmin, onUpload, onReject, onCanc
           <div className="d-flex align-items-center gap-2 flex-shrink-0 flex-wrap">
             <button className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center px-2 py-1.5 rounded-2"
               style={{ fontSize: "0.8rem", width: 34, height: 34 }} onClick={() => onViewDetail(item)}
-              title="View details">
+              title={t("documents.view_details")}>
               <Eye size={15} />
             </button>
             {item.status === "UPLOADED" && item.documentUrl && (
               <a href={item.documentUrl} target="_blank" rel="noreferrer"
                 className="btn btn-sm btn-success d-inline-flex align-items-center gap-1.5 fw-semibold px-3 py-1.5 rounded-2"
                 style={{ fontSize: "0.8rem" }}>
-                <Download size={14} /> Download
+                <Download size={14} /> {t("documents.download")}
               </a>
             )}
             {isAdmin && item.status === "APPROVED" && (
               <>
                 <button className="btn btn-sm btn-dark d-inline-flex align-items-center gap-1.5 fw-semibold px-3 py-1.5 rounded-2"
                   style={{ fontSize: "0.8rem" }} onClick={() => onUpload(item)}>
-                  <Upload size={14} /> Upload
+                  <Upload size={14} /> {t("documents.upload")}
                 </button>
                 <button className="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1.5 fw-semibold px-2.5 py-1.5 rounded-2"
                   style={{ fontSize: "0.8rem" }} onClick={() => onReject(item)}>
-                  <Ban size={14} /> Decline
+                  <Ban size={14} /> {t("documents.decline")}
                 </button>
               </>
             )}
@@ -111,18 +105,18 @@ const DocumentRequestCard = ({ item, isSent, isAdmin, onUpload, onReject, onCanc
               <>
                 <button className="btn btn-sm btn-dark d-inline-flex align-items-center gap-1.5 fw-semibold px-3 py-1.5 rounded-2"
                   style={{ fontSize: "0.8rem" }} onClick={() => onUpload(item)}>
-                  <Upload size={14} /> Upload
+                  <Upload size={14} /> {t("documents.upload")}
                 </button>
                 <button className="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1.5 fw-semibold px-2.5 py-1.5 rounded-2"
                   style={{ fontSize: "0.8rem" }} onClick={() => onReject(item)}>
-                  <Ban size={14} /> Decline
+                  <Ban size={14} /> {t("documents.decline")}
                 </button>
               </>
             )}
             {isSent && item.status === "PENDING" && (
               <button className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1 px-2.5 py-1.5 rounded-2"
                 style={{ fontSize: "0.8rem" }} onClick={() => onCancel(item.id)}>
-                <Trash2 size={14} /> Cancel
+                <Trash2 size={14} /> {t("common.cancel")}
               </button>
             )}
           </div>
@@ -132,7 +126,11 @@ const DocumentRequestCard = ({ item, isSent, isAdmin, onUpload, onReject, onCanc
           {otherParty && (
             <span className="d-inline-flex align-items-center gap-1 small text-dark fw-medium" style={{ fontSize: "0.8rem" }}>
               <User size={13} />
-              {isAdmin ? `From ${otherParty.user.name}` : isSent ? `To ${otherParty.user.name}` : `From ${otherParty.user.name}`}
+              {isAdmin
+                ? t("documents.from_user", { name: otherParty.user.name })
+                : isSent
+                ? t("documents.to_user", { name: otherParty.user.name })
+                : t("documents.from_user", { name: otherParty.user.name })}
             </span>
           )}
           {item.note && (
@@ -140,7 +138,7 @@ const DocumentRequestCard = ({ item, isSent, isAdmin, onUpload, onReject, onCanc
           )}
           {item.status === "REJECTED" && item.rejectionReason && (
             <span className="small text-danger d-inline-flex align-items-center gap-1" style={{ fontSize: "0.78rem" }}>
-              <AlertCircle size={12} /> {item.rejectionReason}
+              <AlertCircle size={12} /> {t("documents.reason_prefix", { reason: item.rejectionReason })}
             </span>
           )}
         </div>

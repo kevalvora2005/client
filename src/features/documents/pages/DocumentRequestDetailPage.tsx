@@ -1,19 +1,23 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Check, X, Gavel, FileText, User, Building, Calendar, Clock } from 'lucide-react';
 import useDocumentRequestDetail from '../hooks/useDocumentRequestDetail';
 import useAuth from '../../../hooks/useAuth';
 import ConfirmDialog from '../../../components/ConfirmDialog/ConfirmDialog';
 import type { DocumentRequestVote, CommitteeMember } from '../types/documentRequest.types';
+import { formatDate } from '../../../utils/formatDate';
+import { getDocTypeLabel } from '../utils/getDocTypeLabel';
 
 type VoteChoice = 'Approve' | 'Reject';
 
 const StatusBadge = ({ status }: { status: string }) => {
+  const { t } = useTranslation();
   const map: Record<string, { label: string; bg: string; color: string }> = {
-    PENDING: { label: 'Pending', bg: '#fef3c7', color: '#92400e' },
-    APPROVED: { label: 'Approved', bg: '#dcfce7', color: '#166534' },
-    REJECTED: { label: 'Rejected', bg: '#fee2e2', color: '#991b1b' },
-    UPLOADED: { label: 'Uploaded', bg: '#dbeafe', color: '#1e40af' },
+    PENDING: { label: t('documents.status_pending'), bg: '#fef3c7', color: '#92400e' },
+    APPROVED: { label: t('documents.status_approved'), bg: '#dcfce7', color: '#166534' },
+    REJECTED: { label: t('documents.status_declined'), bg: '#fee2e2', color: '#991b1b' },
+    UPLOADED: { label: t('documents.status_uploaded'), bg: '#dbeafe', color: '#1e40af' },
   };
   const s = map[status] ?? map.PENDING;
   return (
@@ -39,112 +43,85 @@ const VoterRow = ({
   pending: boolean;
   actionLoading: boolean;
   onVote: (choice: VoteChoice) => void;
-}) => (
-  <div className="d-flex align-items-center justify-content-between p-3 rounded-3 border border-light-subtle flex-wrap gap-2">
-    <div className="min-w-0" style={{ flex: '1 1 auto' }}>
-      <div className="d-flex align-items-center gap-2">
-        <span className="fw-semibold text-dark" style={{ fontSize: '0.9rem' }}>{name}</span>
-        {tag && (
-          <span className="badge" style={{ backgroundColor: '#e8eaf6', color: '#3949ab', fontSize: '0.68rem', fontWeight: 600 }}>
-            {tag}
-          </span>
-        )}
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div className="d-flex align-items-center justify-content-between p-3 rounded-3 border border-light-subtle flex-wrap gap-2">
+      <div className="min-w-0" style={{ flex: '1 1 auto' }}>
+        <div className="d-flex align-items-center gap-2">
+          <span className="fw-semibold text-dark" style={{ fontSize: '0.9rem' }}>{name}</span>
+          {tag && (
+            <span className="badge" style={{ backgroundColor: '#e8eaf6', color: '#3949ab', fontSize: '0.68rem', fontWeight: 600 }}>
+              {tag}
+            </span>
+          )}
+        </div>
+        <div className="text-muted mt-0" style={{ fontSize: '0.78rem' }}>{email}</div>
       </div>
-      <div className="text-muted mt-0" style={{ fontSize: '0.78rem' }}>{email}</div>
+      {pending ? (
+        <div className="d-flex rounded-3 overflow-hidden flex-shrink-0" style={{ border: '1px solid #e5e7eb' }}>
+          <button
+            disabled={actionLoading}
+            onClick={() => onVote('Approve' as VoteChoice)}
+            className="d-flex align-items-center gap-1 px-3 fw-semibold border-0"
+            style={{
+              fontSize: '0.82rem',
+              paddingTop: '6px',
+              paddingBottom: '6px',
+              backgroundColor: draft === 'Approve' ? '#166534' : '#fff',
+              color: draft === 'Approve' ? '#fff' : '#6b7280',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <Check size={14} /> {t('documents.approve')}
+          </button>
+          <div style={{ width: '1px', background: '#e5e7eb' }} />
+          <button
+            disabled={actionLoading}
+            onClick={() => onVote('Reject' as VoteChoice)}
+            className="d-flex align-items-center gap-1 px-3 fw-semibold border-0"
+            style={{
+              fontSize: '0.82rem',
+              paddingTop: '6px',
+              paddingBottom: '6px',
+              backgroundColor: draft === 'Reject' ? '#991b1b' : '#fff',
+              color: draft === 'Reject' ? '#fff' : '#6b7280',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <X size={14} /> {t('documents.reject')}
+          </button>
+        </div>
+      ) : draft ? (
+        <span
+          className="d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill fw-semibold flex-shrink-0"
+          style={{
+            fontSize: '0.78rem',
+            backgroundColor: draft === 'Approve' ? '#dcfce7' : '#fee2e2',
+            color: draft === 'Approve' ? '#166534' : '#991b1b',
+          }}
+        >
+          {draft === 'Approve' ? <Check size={13} /> : <X size={13} />}
+          {draft === 'Approve' ? t('documents.approve') : t('documents.reject')}
+        </span>
+      ) : (
+        <span
+          className="d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill fw-semibold flex-shrink-0"
+          style={{
+            fontSize: '0.78rem',
+            backgroundColor: '#f3f4f6',
+            color: '#6b7280',
+          }}
+        >
+          {t('documents.not_voted')}
+        </span>
+      )}
     </div>
-    {pending ? (
-      <div className="d-flex rounded-3 overflow-hidden flex-shrink-0" style={{ border: '1px solid #e5e7eb' }}>
-        <button
-          disabled={actionLoading}
-          onClick={() => onVote('Approve' as VoteChoice)}
-          className="d-flex align-items-center gap-1 px-3 fw-semibold border-0"
-          style={{
-            fontSize: '0.82rem',
-            paddingTop: '6px',
-            paddingBottom: '6px',
-            backgroundColor: draft === 'Approve' ? '#166534' : '#fff',
-            color: draft === 'Approve' ? '#fff' : '#6b7280',
-            transition: 'all 0.15s ease',
-          }}
-        >
-          <Check size={14} /> Approve
-        </button>
-        <div style={{ width: '1px', background: '#e5e7eb' }} />
-        <button
-          disabled={actionLoading}
-          onClick={() => onVote('Reject' as VoteChoice)}
-          className="d-flex align-items-center gap-1 px-3 fw-semibold border-0"
-          style={{
-            fontSize: '0.82rem',
-            paddingTop: '6px',
-            paddingBottom: '6px',
-            backgroundColor: draft === 'Reject' ? '#991b1b' : '#fff',
-            color: draft === 'Reject' ? '#fff' : '#6b7280',
-            transition: 'all 0.15s ease',
-          }}
-        >
-          <X size={14} /> Reject
-        </button>
-      </div>
-    ) : draft ? (
-      <span
-        className="d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill fw-semibold flex-shrink-0"
-        style={{
-          fontSize: '0.78rem',
-          backgroundColor: draft === 'Approve' ? '#dcfce7' : '#fee2e2',
-          color: draft === 'Approve' ? '#166534' : '#991b1b',
-        }}
-      >
-        {draft === 'Approve' ? <Check size={13} /> : <X size={13} />}
-        {draft}
-      </span>
-    ) : (
-      <span
-        className="d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill fw-semibold flex-shrink-0"
-        style={{
-          fontSize: '0.78rem',
-          backgroundColor: '#f3f4f6',
-          color: '#6b7280',
-        }}
-      >
-        Not Voted
-      </span>
-    )}
-  </div>
-);
-
-const formatDetailedDate = (dateString: string | Date, includeTime = true): string => {
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return '—';
-
-  const day = date.getDate();
-  const year = date.getFullYear();
-
-  const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-  const month = monthNames[date.getMonth()];
-
-  let suffix = 'th';
-  if (day === 1 || day === 21 || day === 31) suffix = 'st';
-  else if (day === 2 || day === 22) suffix = 'nd';
-  else if (day === 3 || day === 23) suffix = 'rd';
-
-  const datePart = `${day}${suffix} ${month}, ${year}`;
-  if (!includeTime) return datePart;
-
-  let hours = date.getHours();
-  const minutes = date.getMinutes();
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  hours = hours ? hours : 12;
-  const minutesStr = minutes < 10 ? '0' + minutes : minutes;
-
-  return `${datePart}, ${hours}:${minutesStr} ${ampm}`;
+  );
 };
 
 const DocumentRequestDetailPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const requestId = Number(id);
@@ -177,7 +154,7 @@ const DocumentRequestDetailPage = () => {
     votes.find((v: DocumentRequestVote) => v.committeeMemberId === memberId);
   const adminVoteFromDb = votes.find((v: DocumentRequestVote) => !v.committeeMemberId);
 
-  const handleFinalize = async () => {
+  const handleFinalize = () => {
     setShowFinalizeConfirm(true);
   };
 
@@ -186,14 +163,14 @@ const DocumentRequestDetailPage = () => {
     try {
       await finalize();
     } catch {
-      /* toast handles error */
+      void 0;
     }
   };
 
   const infoCards = [
-    { icon: User, label: 'Requester', value: request.requester?.user?.name ?? `Resident #${request.requesterId}`, accent: 'info-card--green' },
-    { icon: Building, label: 'Apartment', value: request.apartment ? `${request.apartment.block}-${request.apartment.floorNumber}${request.apartment.unitNumber}` : `Apt #${request.apartmentId}`, accent: 'info-card--purple' },
-    { icon: Calendar, label: 'Submitted', value: formatDetailedDate(request.createdAt), accent: 'info-card--amber' },
+    { icon: User, label: t('documents.card_requester'), value: request.requester?.user?.name ?? t('documents.resident_fallback', { id: request.requesterId }), accent: 'info-card--green' },
+    { icon: Building, label: t('documents.card_apartment'), value: request.apartment ? `${request.apartment.block}-${request.apartment.floorNumber}${request.apartment.unitNumber}` : t('documents.apartment_fallback', { id: request.apartmentId }), accent: 'info-card--purple' },
+    { icon: Calendar, label: t('documents.card_submitted'), value: formatDate(request.createdAt), accent: 'info-card--amber' },
   ];
 
   return (
@@ -201,10 +178,9 @@ const DocumentRequestDetailPage = () => {
 
       <button className="back-btn" onClick={() => navigate('/documents')}>
         <ArrowLeft size={16} strokeWidth={2} />
-        Back to documents
+        {t('documents.back_to_documents')}
       </button>
 
-      {/* ── Result banner (after decision) ── */}
       {!isPending && request.status !== 'UPLOADED' && (
         <div
           className="d-flex align-items-center gap-2 px-3 px-sm-4 py-3 rounded-3"
@@ -217,10 +193,10 @@ const DocumentRequestDetailPage = () => {
         >
           {request.status === 'APPROVED' ? <Check size={18} /> : <X size={18} />}
           <div>
-            <span>This request was {request.status.toLowerCase()}.</span>
+            <span>{request.status === 'APPROVED' ? t('documents.banner_approved') : t('documents.banner_rejected')}</span>
             {request.status === 'REJECTED' && request.rejectionReason && (
               <div className="fw-medium mt-1" style={{ fontSize: '0.85rem' }}>
-                Decline Reason: {request.rejectionReason}
+                {t('documents.decline_reason_prefix', { reason: request.rejectionReason })}
               </div>
             )}
           </div>
@@ -238,30 +214,28 @@ const DocumentRequestDetailPage = () => {
           }}
         >
           <Check size={18} />
-          Document has been uploaded and fulfilled.
+          {t('documents.banner_uploaded')}
         </div>
       )}
 
-      {/* ── Header ── */}
       <div className="detail-header">
         <div className="detail-header__left">
           <div>
             <div className="detail-header__name-row">
-              <h4 className="detail-header__name">{request.documentType}</h4>
+              <h4 className="detail-header__name">{getDocTypeLabel(request.documentType, t)}</h4>
               <StatusBadge status={request.status} />
             </div>
             <div className="detail-header__meta">
               {request.customDocumentName && <span><FileText size={13} strokeWidth={1.75} /> {request.customDocumentName}</span>}
               {request.note && <span><Clock size={13} strokeWidth={1.75} /> {request.note}</span>}
               {request.status === 'REJECTED' && request.rejectionReason && (
-                <span className="text-danger"><X size={13} strokeWidth={1.75} /> Reason: {request.rejectionReason}</span>
+                <span className="text-danger"><X size={13} strokeWidth={1.75} /> {t('documents.reason_prefix', { reason: request.rejectionReason })}</span>
               )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Info cards ── */}
       <div className="info-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
         {infoCards.map((card) => {
           const Icon = card.icon;
@@ -279,29 +253,27 @@ const DocumentRequestDetailPage = () => {
         })}
       </div>
 
-      {/* ── Committee Voting ── */}
       <div className="section-card">
         <div className="section-card__header d-flex align-items-center gap-2">
           <Gavel size={18} />
-          <h6 className="section-card__title mb-0">Committee Votes</h6>
+          <h6 className="section-card__title mb-0">{t('documents.committee_votes_title')}</h6>
         </div>
         <div className="p-3 p-sm-4">
           {committeeMembers.length === 0 && !(isAdmin && isPending) ? (
-            <p className="text-muted mb-0" style={{ fontSize: '0.85rem' }}>No committee members available to vote.</p>
+            <p className="text-muted mb-0" style={{ fontSize: '0.85rem' }}>{t('documents.no_committee_members_available')}</p>
           ) : (
             <>
-              {/* ── Vote progress ── */}
               {isPending && (
                 <div className="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom border-light-subtle">
                   <div className="d-flex align-items-center gap-3">
                     <span className="d-flex align-items-center gap-1" style={{ fontSize: '0.82rem', color: '#166534' }}>
-                      <Check size={14} /> <span className="fw-semibold">{Object.values(draftVotes).filter(v => v === 'Approve').length + (draftAdminVote === 'Approve' ? 1 : 0)}</span> Approved
+                      <Check size={14} /> <span className="fw-semibold">{Object.values(draftVotes).filter(v => v === 'Approve').length + (draftAdminVote === 'Approve' ? 1 : 0)}</span> {t('documents.approved_count')}
                     </span>
                     <span className="d-flex align-items-center gap-1" style={{ fontSize: '0.82rem', color: '#991b1b' }}>
-                      <X size={14} /> <span className="fw-semibold">{Object.values(draftVotes).filter(v => v === 'Reject').length + (draftAdminVote === 'Reject' ? 1 : 0)}</span> Rejected
+                      <X size={14} /> <span className="fw-semibold">{Object.values(draftVotes).filter(v => v === 'Reject').length + (draftAdminVote === 'Reject' ? 1 : 0)}</span> {t('documents.rejected_count')}
                     </span>
                     <span className="text-muted d-flex align-items-center gap-1" style={{ fontSize: '0.82rem' }}>
-                      <span className="fw-semibold">{committeeMembers.length + (isAdmin ? 1 : 0) - Object.keys(draftVotes).length - (draftAdminVote ? 1 : 0)}</span> Not yet voted
+                      <span className="fw-semibold">{committeeMembers.length + (isAdmin ? 1 : 0) - Object.keys(draftVotes).length - (draftAdminVote ? 1 : 0)}</span> {t('documents.not_voted_count')}
                     </span>
                   </div>
                   <div style={{ width: '120px', height: '6px', background: '#f3f4f6', borderRadius: '99px', overflow: 'hidden' }}>
@@ -322,7 +294,6 @@ const DocumentRequestDetailPage = () => {
                 </div>
               )}
 
-              {/* ── Committee member rows ── */}
               <div className="d-flex flex-column gap-2">
                 {committeeMembers.map((m: CommitteeMember) => {
                   const existing = voteForMember(m.id);
@@ -330,7 +301,7 @@ const DocumentRequestDetailPage = () => {
                   return (
                     <VoterRow
                       key={m.id}
-                      name={m.fullName ?? `Member #${m.id}`}
+                      name={m.fullName ?? t('documents.member_fallback', { id: m.id })}
                       email={m.email}
                       draft={draft}
                       pending={isPending}
@@ -340,12 +311,11 @@ const DocumentRequestDetailPage = () => {
                   );
                 })}
 
-                {/* ── Admin vote ── */}
                 {((isAdmin && isPending) || draftAdminVote || adminVoteFromDb?.vote) && (
                   <VoterRow
-                    name={user?.name ?? 'Admin'}
+                    name={user?.name ?? t('documents.admin_tag')}
                     email={user?.email ?? ''}
-                    tag="Admin"
+                    tag={t('documents.admin_tag')}
                     draft={draftAdminVote ?? adminVoteFromDb?.vote}
                     pending={isPending}
                     actionLoading={actionLoading}
@@ -355,7 +325,6 @@ const DocumentRequestDetailPage = () => {
 
               </div>
 
-              {/* ── Finalize button ── */}
               {isPending && (
                 <div className="d-flex justify-content-end mt-3">
                   <button
@@ -365,11 +334,10 @@ const DocumentRequestDetailPage = () => {
                     style={{ backgroundColor: '#111827', color: '#fff', height: '38px', borderRadius: '8px', paddingInline: '20px', fontSize: '0.85rem' }}
                   >
                     {actionLoading ? <span className="spinner-border spinner-border-sm" /> : <Gavel size={16} />}
-                    {actionLoading ? 'Saving\u2026' : 'Save Votes'}
+                    {actionLoading ? t('documents.saving') : t('documents.save_votes')}
                   </button>
                 </div>
               )}
-
 
             </>
           )}
@@ -378,9 +346,10 @@ const DocumentRequestDetailPage = () => {
 
       <ConfirmDialog
         show={showFinalizeConfirm}
-        title="Finalize Request"
-        message="All recorded votes will be saved and this document request will be finalized. This action cannot be undone."
-        confirmLabel="Finalize"
+        title={t('documents.finalize_dialog_title')}
+        message={t('documents.finalize_dialog_message')}
+        confirmLabel={t('documents.finalize_dialog_confirm')}
+        cancelLabel={t('common.cancel')}
         variant="info"
         loading={actionLoading}
         onConfirm={confirmFinalize}

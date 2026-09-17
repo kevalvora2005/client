@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { DocumentRequestItem } from '../types/documentRequest.types';
 
 interface DocumentRowActionsProps {
@@ -20,6 +21,7 @@ const DocumentRowActions = ({
   onCancel,
   onViewDetail,
 }: DocumentRowActionsProps) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -76,7 +78,7 @@ const DocumentRowActions = ({
         style={{ width: '28px', height: '28px' }}
         onMouseEnter={(e) => (e.currentTarget.style.color = '#212529')}
         onMouseLeave={(e) => (e.currentTarget.style.color = '#6c757d')}
-        title="Actions"
+        title={t('documents.col_actions')}
       >
         <i className="bi bi-three-dots-vertical fs-5" />
       </button>
@@ -97,7 +99,7 @@ const DocumentRowActions = ({
                 }}
                 style={{ fontSize: '0.85rem' }}
               >
-                <i className="bi bi-eye text-muted" /> View Details
+                <i className="bi bi-eye text-muted" /> {t('documents.view_details')}
               </button>
             </li>
           )}
@@ -112,7 +114,7 @@ const DocumentRowActions = ({
                 onClick={() => setIsOpen(false)}
                 style={{ fontSize: '0.85rem' }}
               >
-                <i className="bi bi-download text-muted" /> Download
+                <i className="bi bi-download text-muted" /> {t('documents.download')}
               </a>
             </li>
           )}
@@ -128,7 +130,7 @@ const DocumentRowActions = ({
                 }}
                 style={{ fontSize: '0.85rem' }}
               >
-                <i className="bi bi-upload text-muted" /> Upload Document
+                <i className="bi bi-upload text-muted" /> {t('documents.upload_document')}
               </button>
             </li>
           )}
@@ -144,7 +146,7 @@ const DocumentRowActions = ({
                 }}
                 style={{ fontSize: '0.85rem' }}
               >
-                <i className="bi bi-x-circle text-danger" /> Decline Request
+                <i className="bi bi-x-circle text-danger" /> {t('documents.decline_request')}
               </button>
             </li>
           )}
@@ -160,7 +162,7 @@ const DocumentRowActions = ({
                 }}
                 style={{ fontSize: '0.85rem' }}
               >
-                <i className="bi bi-trash text-danger" /> Cancel Request
+                <i className="bi bi-trash text-danger" /> {t('documents.cancel_request')}
               </button>
             </li>
           )}

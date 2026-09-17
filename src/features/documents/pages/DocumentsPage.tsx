@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 import useAuth from "../../../hooks/useAuth";
 import { useDocumentRequests } from "../hooks/useDocumentRequests";
@@ -13,6 +14,7 @@ import Pagination from "../../../components/Pagination/Pagination";
 import type { DocumentRequestItem } from "../types/documentRequest.types";
 
 const DocumentsPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
@@ -59,35 +61,32 @@ const DocumentsPage = () => {
 
   return (
     <div className="container-fluid p-3 p-md-4">
-      {/* ── Header ── */}
       <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
         <div>
           <h4 className="fw-bold mb-2 fs-4 fs-sm-3" style={{ color: '#1a1f36' }}>
-            Document Requests
+            {t('documents.page_title')}
           </h4>
           <p className="text-muted small mb-0">
             {isAdmin
-              ? "Review and fulfill document requests from property owners."
-              : "Request official agreements, NOCs, rent receipts, and verification forms."}
+              ? t('documents.page_desc_admin')
+              : t('documents.page_desc_resident')}
           </p>
         </div>
 
         {!isAdmin && activeTab === "my-requests" && (
           <button className="page-add-btn" onClick={() => setShowRequestModal(true)}>
-            <Plus size={16} /> Request Document
+            <Plus size={16} /> {t('documents.request_document_btn')}
           </button>
         )}
       </div>
 
-      {/* ── Tabs (owners only) ── */}
       {!isAdmin && isOwner && (
         <div className="d-flex flex-wrap gap-2 mb-3">
-          <TabButton label="My Sent Requests" count={myRequests.length} active={activeTab === "my-requests"} onClick={() => handleTabChange("my-requests")} />
-          <TabButton label="Received from Tenant" count={receivedRequests.length} active={activeTab === "received-requests"} onClick={() => handleTabChange("received-requests")} />
+          <TabButton label={t('documents.tab_my_sent')} count={myRequests.length} active={activeTab === "my-requests"} onClick={() => handleTabChange("my-requests")} />
+          <TabButton label={t('documents.tab_received_tenant')} count={receivedRequests.length} active={activeTab === "received-requests"} onClick={() => handleTabChange("received-requests")} />
         </div>
       )}
 
-      {/* ── Table Card ── */}
       <div className="card bg-white border border-light-subtle rounded-3 shadow-sm">
         <DocumentRequestTable
           requests={paginatedList}
@@ -114,15 +113,15 @@ const DocumentsPage = () => {
         )}
       </div>
 
-      {/* ── Modals ── */}
       <RequestDocumentModal open={!isAdmin && showRequestModal} onClose={() => setShowRequestModal(false)} isOwner={isOwner} onSubmit={createRequest} />
       <UploadDocumentModal target={uploadTarget} onClose={() => setUploadTarget(null)} onSubmit={uploadDocument} />
       <RejectDocumentModal target={rejectTarget} onClose={() => setRejectTarget(null)} onSubmit={rejectRequest} />
       <ConfirmDialog
         show={!!cancelTargetId}
-        title="Cancel Request"
-        message="Are you sure you want to cancel this document request? This action cannot be undone."
-        confirmLabel="Yes, Cancel"
+        title={t('documents.cancel_dialog_title')}
+        message={t('documents.cancel_dialog_message')}
+        confirmLabel={t('documents.cancel_dialog_confirm')}
+        cancelLabel={t('common.cancel')}
         variant="danger"
         onConfirm={handleCancelConfirm}
         onCancel={() => setCancelTargetId(null)}

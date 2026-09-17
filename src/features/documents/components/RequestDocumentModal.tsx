@@ -1,37 +1,13 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import Select from "../../../components/Select/Select";
+import type { SelectOption } from "../../../components/Select/Select";
 import ConfirmDialog from "../../../components/ConfirmDialog/ConfirmDialog";
 import { DocModal } from "./DocModal";
 
-const TENANT_DOC_TYPES = [
-  "Rent / Lease Agreement",
-  "NOC for Address Proof (Passport/Aadhaar)",
-  "Police Verification Certificate Form",
-  "Utility Bill Copy (Electricity/Water)",
-  "Rent Receipt (HRA Claim)",
-  "NOC for Wi-Fi / Gas / DTH Connection",
-  "Maintenance / Sinking Fund Receipt",
-  "Property Tax Paid Certificate",
-  "Water / Electricity Meter Reading Statement",
-  "Society ID Card / Gate Pass Letter",
-  "Other",
-];
-
-const OWNER_DOC_TYPES = [
-  "No Due Certificate / Clearance Certificate",
-  "Society Maintenance Ledger / Statement",
-  "NOC for Property Sale / Rental",
-  "Building Plan / Layout Approval Copy",
-  "Membership Transfer / Share Certificate",
-  "AGM / Committee Meeting Minutes",
-  "Fire Safety Compliance Certificate",
-  "Parking Slot Allocation / Transfer Letter",
-  "Property Tax Receipt (Society-Level)",
-  "Common Area Maintenance Certificate",
-  "Other",
-];
+import { OWNER_DOC_TYPES, TENANT_DOC_TYPES, getDocTypeLabel } from "../utils/getDocTypeLabel";
 
 interface Props {
   open: boolean;
@@ -41,23 +17,41 @@ interface Props {
 }
 
 const RequestDocumentModal = ({ open, onClose, isOwner, onSubmit }: Props) => {
-  const docTypes = isOwner ? OWNER_DOC_TYPES : TENANT_DOC_TYPES;
+  const { t } = useTranslation();
   const [submitting, setSubmitting] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
-  const validationSchema = Yup.object().shape({
-    selectedDocType: Yup.string().required("Document type is required"),
-    customDocName: Yup.string().when("selectedDocType", {
-      is: "Other",
-      then: (schema) => schema.trim().max(150, "Must be at most 150 characters").required("Document name is required"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-    requestNote: Yup.string().trim().max(500, "Must be at most 500 characters").optional(),
-  });
+  const docOptions: SelectOption[] = useMemo(() => {
+    const list = isOwner ? OWNER_DOC_TYPES : TENANT_DOC_TYPES;
+    return list.map((type) => ({
+      value: type,
+      label: getDocTypeLabel(type, t),
+    }));
+  }, [isOwner, t]);
+
+  const validationSchema = useMemo(
+    () =>
+      Yup.object().shape({
+        selectedDocType: Yup.string().required(t("documents.error_doc_type_required")),
+        customDocName: Yup.string().when("selectedDocType", {
+          is: "Other",
+          then: (schema) =>
+            schema
+              .trim()
+              .max(150, t("documents.error_custom_doc_max"))
+              .required(t("documents.error_custom_doc_required")),
+          otherwise: (schema) => schema.notRequired(),
+        }),
+        requestNote: Yup.string().trim().max(500, t("documents.error_note_max")).optional(),
+      }),
+    [t]
+  );
+
+  const defaultDocType = docOptions[0]?.value ?? "";
 
   const formik = useFormik({
     initialValues: {
-      selectedDocType: docTypes[0],
+      selectedDocType: defaultDocType,
       customDocName: "",
       requestNote: "",
     },
@@ -78,16 +72,15 @@ const RequestDocumentModal = ({ open, onClose, isOwner, onSubmit }: Props) => {
     },
   });
 
-  // Reset document list when the modal type changes
   const [prevIsOwner, setPrevIsOwner] = useState(isOwner);
   if (isOwner !== prevIsOwner) {
     setPrevIsOwner(isOwner);
-    formik.setFieldValue("selectedDocType", docTypes[0]);
+    formik.setFieldValue("selectedDocType", defaultDocType);
   }
 
   const handleCancel = () => {
     const hasChanges =
-      formik.values.selectedDocType !== docTypes[0] ||
+      formik.values.selectedDocType !== defaultDocType ||
       formik.values.customDocName ||
       formik.values.requestNote;
     if (hasChanges) {
@@ -110,15 +103,19 @@ const RequestDocumentModal = ({ open, onClose, isOwner, onSubmit }: Props) => {
   const getBorderColor = (field: keyof typeof formik.values) =>
     hasError(field) ? "#dc3545" : undefined;
 
+  const modalTitle = isOwner
+    ? t("documents.modal_title_request_admin")
+    : t("documents.modal_title_request_owner");
+
   return (
     <>
-      <DocModal open={open} onClose={handleCancel} title={`Request Document (${isOwner ? "Admin" : "Owner"})`} maxWidth="520px">
+      <DocModal open={open} onClose={handleCancel} title={modalTitle} maxWidth="520px">
         <form onSubmit={formik.handleSubmit}>
           <div className="modal-body p-3 p-sm-4 d-flex flex-column gap-3">
             <Select
-              label="Document Type"
+              label={t("documents.document_type_label")}
               required
-              options={docTypes}
+              options={docOptions}
               value={formik.values.selectedDocType}
               onChange={(e) => formik.setFieldValue("selectedDocType", e.target.value)}
             />
@@ -129,11 +126,13 @@ const RequestDocumentModal = ({ open, onClose, isOwner, onSubmit }: Props) => {
             )}
             {formik.values.selectedDocType === "Other" && (
               <div>
-                <label className="form-label fw-medium text-secondary small mb-1">Custom Document Name <span className="text-danger">*</span></label>
+                <label className="form-label fw-medium text-secondary small mb-1">
+                  {t("documents.custom_doc_name_label")} <span className="text-danger">*</span>
+                </label>
                 <input
                   type="text"
                   className="form-control rounded-2 shadow-none small"
-                  placeholder="e.g. Electricity Meter Registration Copy"
+                  placeholder={t("documents.custom_doc_placeholder")}
                   value={formik.values.customDocName}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -148,11 +147,13 @@ const RequestDocumentModal = ({ open, onClose, isOwner, onSubmit }: Props) => {
               </div>
             )}
             <div>
-              <label className="form-label fw-medium text-secondary small mb-1">Note / Reason <span className="text-muted fw-normal">(optional)</span></label>
+              <label className="form-label fw-medium text-secondary small mb-1">
+                {t("documents.note_label")} <span className="text-muted fw-normal">{t("documents.optional")}</span>
+              </label>
               <textarea
                 rows={3}
                 className="form-control rounded-2 shadow-none small"
-                placeholder={isOwner ? "e.g. Required for property registration process..." : "e.g. Needed for passport address update application..."}
+                placeholder={isOwner ? t("documents.note_placeholder_owner") : t("documents.note_placeholder_tenant")}
                 value={formik.values.requestNote}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -167,10 +168,16 @@ const RequestDocumentModal = ({ open, onClose, isOwner, onSubmit }: Props) => {
             </div>
           </div>
           <div className="modal-footer border-top-0 px-3 px-sm-4 py-3 gap-2 d-flex justify-content-end align-items-center">
-            <button type="button" className="btn btn-outline-secondary rounded-2 px-3 small" onClick={handleCancel} disabled={submitting} style={{ height: '38px', fontSize: '0.875rem' }}>Cancel</button>
-            <button type="submit" className="btn btn-dark fw-medium px-3 d-inline-flex align-items-center justify-content-center"
-              disabled={submitting} style={{ height: '38px', fontSize: '0.875rem', borderRadius: '8px', opacity: submitting ? 0.55 : 1, minWidth: '130px' }}>
-              {submitting ? <span className="spinner-border spinner-border-sm" /> : "Submit Request"}
+            <button type="button" className="btn btn-outline-secondary rounded-2 px-3 small" onClick={handleCancel} disabled={submitting} style={{ height: '38px', fontSize: '0.875rem' }}>
+              {t("common.cancel")}
+            </button>
+            <button
+              type="submit"
+              className="btn btn-dark fw-medium px-3 d-inline-flex align-items-center justify-content-center"
+              disabled={submitting}
+              style={{ height: '38px', fontSize: '0.875rem', borderRadius: '8px', opacity: submitting ? 0.55 : 1, minWidth: '130px' }}
+            >
+              {submitting ? <span className="spinner-border spinner-border-sm" /> : t("documents.submit_request")}
             </button>
           </div>
         </form>
@@ -178,10 +185,10 @@ const RequestDocumentModal = ({ open, onClose, isOwner, onSubmit }: Props) => {
 
       <ConfirmDialog
         show={showCancelConfirm}
-        title="Discard Changes?"
-        message="You have unsaved changes. Are you sure you want to discard them?"
-        confirmLabel="Discard"
-        cancelLabel="Keep Editing"
+        title={t("documents.discard_dialog_title")}
+        message={t("documents.discard_dialog_message")}
+        confirmLabel={t("documents.discard_dialog_confirm")}
+        cancelLabel={t("documents.discard_dialog_cancel")}
         variant="warning"
         onConfirm={confirmCancel}
         onCancel={() => setShowCancelConfirm(false)}

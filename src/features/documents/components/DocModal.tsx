@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   open: boolean;
@@ -9,6 +10,8 @@ interface Props {
 }
 
 const DocModal = ({ open, onClose, title, maxWidth, children }: Props) => {
+  const { t } = useTranslation();
+
   if (!open) return null;
   return (
     <div className="modal d-block bg-dark bg-opacity-50" style={{ backdropFilter: "blur(4px)", zIndex: 1055 }} onClick={onClose}>
@@ -19,7 +22,7 @@ const DocModal = ({ open, onClose, title, maxWidth, children }: Props) => {
             className="btn position-absolute d-flex align-items-center justify-content-center p-0"
             style={{ top: 16, right: 16, width: 28, height: 28, border: "1px solid #e9ecef", background: "#fff", borderRadius: "6px", zIndex: 1 }}
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("common.close")}
           >
             <X size={15} />
           </button>

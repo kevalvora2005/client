@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { documentRequestApi } from "../api/documentRequestApi";
 import type { DocumentRequestItem } from "../types/documentRequest.types";
 import { getErrorMessage } from "../../../utils/getErrorMessage";
@@ -16,6 +17,7 @@ const DOC_REQUEST_TYPES = new Set([
 ]);
 
 export const useDocumentRequests = (isAdmin: boolean, isOwner: boolean) => {
+  const { t } = useTranslation();
   const [myRequests, setMyRequests] = useState<DocumentRequestItem[]>([]);
   const [receivedRequests, setReceivedRequests] = useState<DocumentRequestItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,18 +38,20 @@ export const useDocumentRequests = (isAdmin: boolean, isOwner: boolean) => {
             try {
               const recRes = await documentRequestApi.getReceivedRequests();
               if (!cancelled) setReceivedRequests(recRes || []);
-            } catch { /* ignore */ }
+            } catch {
+              void 0;
+            }
           }
         }
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, "Failed to load document requests."));
+        if (!cancelled) showError(getErrorMessage(err, t("documents.toast_load_requests_failed")));
       } finally {
         if (!cancelled) setLoading(false);
       }
     };
     load();
     return () => { cancelled = true; };
-  }, [isAdmin, isOwner, refreshKey]);
+  }, [isAdmin, isOwner, refreshKey, t]);
 
   useEffect(() => {
     if (!socket) return;

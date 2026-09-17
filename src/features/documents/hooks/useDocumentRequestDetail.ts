@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useReducer, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { documentRequestApi } from '../api/documentRequestApi';
 import type { DocumentRequestDetail } from '../types/documentRequest.types';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
@@ -31,6 +32,7 @@ function draftReducer(state: Record<number, VoteChoice>, action: DraftAction) {
 }
 
 const useDocumentRequestDetail = (id: number) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const [data, setData] = useState<DocumentRequestDetail | null>(null);
@@ -61,13 +63,13 @@ const useDocumentRequestDetail = (id: number) => {
         setDraftAdminVote(admin);
       } catch (err: unknown) {
         if (!mounted) return;
-        showError(getErrorMessage(err, 'Failed to fetch document request'));
+        showError(getErrorMessage(err, t('documents.toast_fetch_request_failed')));
       } finally {
         if (mounted) setLoading(false);
       }
     })();
     return () => { mounted = false; };
-  }, [id]);
+  }, [id, t]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -87,11 +89,11 @@ const useDocumentRequestDetail = (id: number) => {
       dispatch({ type: 'INIT', votes: draft });
       setDraftAdminVote(admin);
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to fetch document request'));
+      showError(getErrorMessage(err, t('documents.toast_fetch_request_failed')));
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   const setMemberVote = useCallback((committeeMemberId: number, vote: VoteChoice) => {
     dispatch({ type: 'TOGGLE', memberId: committeeMemberId, vote });
@@ -112,15 +114,15 @@ const useDocumentRequestDetail = (id: number) => {
 
       await documentRequestApi.bulkRecordVotes(id, votes, draftAdminVote ?? undefined);
       const result = await documentRequestApi.finalizeRequest(id);
-      showSuccess(result.status === 'APPROVED' ? 'Document request approved' : 'Document request rejected');
+      showSuccess(result.status === 'APPROVED' ? t('documents.toast_request_approved') : t('documents.toast_request_rejected'));
       await load();
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to finalize request'));
+      showError(getErrorMessage(err, t('documents.toast_finalize_failed')));
       throw err;
     } finally {
       setActionLoading(false);
     }
-  }, [id, data, draftVotes, draftAdminVote, load]);
+  }, [id, data, draftVotes, draftAdminVote, load, t]);
 
   return {
     data,
