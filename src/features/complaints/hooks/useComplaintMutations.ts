@@ -1,21 +1,23 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { complaintApi } from '../api/complaintApi';
 import type { UpdateComplaintStatusPayload } from '../types/complaint.types';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { showSuccess, showError } from '../../../utils/toast';
 
 export const useComplaintMutations = (onSuccess?: () => void) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const createComplaint = async (formData: FormData): Promise<boolean> => {
     try {
       setLoading(true);
       await complaintApi.createComplaint(formData);
-      showSuccess('Complaint raised successfully');
+      showSuccess(t('complaints.create_success'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to create complaint'));
+      showError(getErrorMessage(err, t('complaints.create_failed')));
       return false;
     } finally {
       setLoading(false);
@@ -26,11 +28,11 @@ export const useComplaintMutations = (onSuccess?: () => void) => {
     try {
       setLoading(true);
       await complaintApi.updateStatus(id, payload);
-      showSuccess('Complaint status updated successfully');
+      showSuccess(t('complaints.update_status_success'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to update complaint status'));
+      showError(getErrorMessage(err, t('complaints.update_status_failed')));
       return false;
     } finally {
       setLoading(false);
@@ -41,11 +43,11 @@ export const useComplaintMutations = (onSuccess?: () => void) => {
     try {
       setLoading(true);
       await complaintApi.addComment(id, content);
-      showSuccess('Comment added successfully');
+      showSuccess(t('complaints.comment_success'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to add comment'));
+      showError(getErrorMessage(err, t('complaints.comment_failed')));
       return false;
     } finally {
       setLoading(false);
@@ -56,11 +58,11 @@ export const useComplaintMutations = (onSuccess?: () => void) => {
     try {
       setLoading(true);
       await complaintApi.deleteComplaint(id);
-      showSuccess('Complaint deleted successfully');
+      showSuccess(t('complaints.delete_success'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to delete complaint'));
+      showError(getErrorMessage(err, t('complaints.delete_failed')));
       return false;
     } finally {
       setLoading(false);

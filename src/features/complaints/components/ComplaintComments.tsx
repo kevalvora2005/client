@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { complaintApi } from '../api/complaintApi';
 import type { Comment, ComplaintStatus } from '../types/complaint.types';
 import useAuth from '../../../hooks/useAuth';
@@ -6,6 +7,8 @@ import useSocket from '../../../hooks/useSocket';
 import { SOCKET_EVENTS } from '../../../services/socket';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { showError } from '../../../utils/toast';
+import { formatRelativeTime } from '../../../utils/formatRelativeTime';
+import { formatDate } from '../../../utils/formatDate';
 
 interface ComplaintCommentsProps {
   complaintId: number;
@@ -26,27 +29,8 @@ function getInitials(name: string): string {
   return parts[0][0].toUpperCase();
 }
 
-function timeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const mins = Math.floor((now - then) / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return 'Yesterday';
-  if (days < 30) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-}
-
-function formatFullDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-IN', {
-    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
-  });
-}
-
 const ComplaintComments = ({ complaintId, status, residentName, isAdmin }: ComplaintCommentsProps) => {
+  const { t } = useTranslation();
   const socket = useSocket();
   const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
@@ -63,8 +47,8 @@ const ComplaintComments = ({ complaintId, status, residentName, isAdmin }: Compl
     if (isAdmin) {
       return { name: residentName, initials: getInitials(residentName), color: getAvatarColor(0) };
     }
-    return { name: 'Admin', initials: 'AD', color: getAvatarColor(1) };
-  }, [isAdmin, residentName]);
+    return { name: t('roles.admin'), initials: 'AD', color: getAvatarColor(1) };
+  }, [isAdmin, residentName, t]);
 
   useEffect(() => {
     if (loaded) return;
@@ -75,13 +59,13 @@ const ComplaintComments = ({ complaintId, status, residentName, isAdmin }: Compl
         setLoaded(true);
       })
       .catch((err: unknown) => {
-        showError(getErrorMessage(err, 'Failed to load chat messages'));
+        showError(getErrorMessage(err, t('complaints.load_messages_failed')));
       })
       .finally(() => {
         setLoading(false);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [complaintId]);
+  }, [complaintId, t]);
 
   // Real-time Socket.io listener for new chat messages
   useEffect(() => {
@@ -123,7 +107,7 @@ const ComplaintComments = ({ complaintId, status, residentName, isAdmin }: Compl
       const data = await complaintApi.getComments(complaintId);
       setComments(data);
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to send message'));
+      showError(getErrorMessage(err, t('complaints.send_message_failed')));
     } finally {
       setSubmitting(false);
     }
@@ -182,7 +166,7 @@ const ComplaintComments = ({ complaintId, status, residentName, isAdmin }: Compl
           <div className="d-flex flex-column align-items-center justify-content-center flex-grow-1 h-100 py-5 text-center my-auto">
             <i className="bi bi-chat-dots text-secondary mb-2" style={{ fontSize: '2.4rem', opacity: 0.35 }} />
             <p className="text-secondary fw-medium mb-0" style={{ fontSize: '0.875rem' }}>
-              No messages yet. Start the conversation!
+              {t('complaints.no_messages')}
             </p>
           </div>
         ) : (
@@ -211,9 +195,9 @@ const ComplaintComments = ({ complaintId, status, residentName, isAdmin }: Compl
                       <span
                         className="text-secondary"
                         style={{ fontSize: '0.65rem', whiteSpace: 'nowrap' }}
-                        title={formatFullDate(comment.createdAt)}
+                        title={formatDate(comment.createdAt)}
                       >
-                        {timeAgo(comment.createdAt)}
+                        {formatRelativeTime(comment.createdAt)}
                       </span>
                     </div>
                   </div>
@@ -242,9 +226,9 @@ const ComplaintComments = ({ complaintId, status, residentName, isAdmin }: Compl
                     <span
                       className="text-secondary"
                       style={{ fontSize: '0.65rem', whiteSpace: 'nowrap' }}
-                      title={formatFullDate(comment.createdAt)}
+                      title={formatDate(comment.createdAt)}
                     >
-                      {timeAgo(comment.createdAt)}
+                      {formatRelativeTime(comment.createdAt)}
                     </span>
                   </div>
                 </div>
@@ -258,7 +242,7 @@ const ComplaintComments = ({ complaintId, status, residentName, isAdmin }: Compl
       {isResolved ? (
         <div className="px-3 py-2 flex-shrink-0 text-center" style={{ borderTop: '1px solid #e5e7eb', backgroundColor: '#fff' }}>
           <p className="text-secondary fst-italic mb-0" style={{ fontSize: '0.8rem' }}>
-            This complaint is resolved. Chat is disabled.
+            {t('complaints.chat_disabled_resolved')}
           </p>
         </div>
       ) : (
@@ -267,7 +251,7 @@ const ComplaintComments = ({ complaintId, status, residentName, isAdmin }: Compl
             <input
               type="text"
               className="form-control shadow-none"
-              placeholder="Type a message..."
+              placeholder={t('complaints.placeholder_type_message')}
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
@@ -298,7 +282,7 @@ const ComplaintComments = ({ complaintId, status, residentName, isAdmin }: Compl
             </button>
           </div>
           {newComment.length > 1000 && (
-            <div className="text-danger mt-1" style={{ fontSize: '0.78rem' }}>Maximum 1000 characters allowed.</div>
+            <div className="text-danger mt-1" style={{ fontSize: '0.78rem' }}>{t('complaints.max_1000_chars')}</div>
           )}
         </div>
       )}

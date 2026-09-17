@@ -1,7 +1,15 @@
+import { useTranslation } from 'react-i18next';
 import { STATUS_CONFIG } from '../constants/complaintStyles';
 import type { ComplaintStatus } from '../types/complaint.types';
 
+const STATUS_KEY_MAP: Record<ComplaintStatus, string> = {
+  'Open': 'status.open',
+  'In Progress': 'status.in_progress',
+  'Resolved': 'status.resolved',
+};
+
 const ComplaintStatusBadge = ({ status }: { status: ComplaintStatus }) => {
+  const { t } = useTranslation();
   const cfg = STATUS_CONFIG[status];
 
   return (
@@ -16,7 +24,7 @@ const ComplaintStatusBadge = ({ status }: { status: ComplaintStatus }) => {
       }}
     >
       <i className={`bi ${cfg.icon}`} style={{ fontSize: '0.7rem' }} />
-      {status}
+      {t(STATUS_KEY_MAP[status])}
     </span>
   );
 };

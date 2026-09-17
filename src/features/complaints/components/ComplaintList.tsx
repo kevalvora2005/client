@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { complaintApi } from '../api/complaintApi';
 import Select from '../../../components/Select/Select';
 import Pagination from '../../../components/Pagination/Pagination';
@@ -11,6 +12,7 @@ import ComplaintComments from './ComplaintComments';
 import type { Complaint, ComplaintStatus } from '../types/complaint.types';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { showError } from '../../../utils/toast';
+import { formatRelativeTime } from '../../../utils/formatRelativeTime';
 import ConfirmDialog from '../../../components/ConfirmDialog/ConfirmDialog';
 import { useComplaintStore } from '../hooks/useComplaintStore';
 
@@ -28,26 +30,6 @@ interface ComplaintListProps {
   pagination?: Omit<PaginatedResult<unknown>, 'items'> | null;
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
-}
-
-const STATUS_OPTIONS: SelectOption[] = [
-  { value: 'Open', label: 'Open' },
-  { value: 'In Progress', label: 'In Progress' },
-  { value: 'Resolved', label: 'Resolved' },
-];
-
-function timeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const mins = Math.floor((now - then) / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return 'Yesterday';
-  if (days < 30) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 }
 
 const getStatusBorderColor = (status: string): string => {
@@ -73,6 +55,17 @@ const ComplaintList = ({
   onPageChange,
   onPageSizeChange
 }: ComplaintListProps) => {
+  const { t } = useTranslation();
+
+  const statusOptions: SelectOption[] = useMemo(
+    () => [
+      { value: 'Open', label: t('status.open') },
+      { value: 'In Progress', label: t('status.in_progress') },
+      { value: 'Resolved', label: t('status.resolved') },
+    ],
+    [t]
+  );
+
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const urlExpId = searchParams.get('expandedId');
@@ -171,7 +164,7 @@ const ComplaintList = ({
         const detail = await complaintApi.getComplaint(expandedId);
         if (!cancelled) setExpandedDetail(detail);
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, 'Failed to load complaint details'));
+        if (!cancelled) showError(getErrorMessage(err, t('complaints.load_details_failed')));
       }
     })();
 
@@ -180,7 +173,7 @@ const ComplaintList = ({
       document.body.classList.remove('drawer-open');
       cancelled = true;
     };
-  }, [expandedId, setExpandedId]);
+  }, [expandedId, setExpandedId, t]);
 
   const handleCloseDrawer = () => {
     setExpandedId(null);
@@ -215,8 +208,8 @@ const ComplaintList = ({
       ) : (complaints?.length ?? 0) === 0 ? (
         <div className="text-center py-5 px-3 bg-white rounded-3 border border-light-subtle shadow-sm">
           <i className="bi bi-clipboard-check d-block mb-2 text-muted" style={{ fontSize: '2.2rem' }} />
-          <h6 className="fw-bold text-dark mb-1">No complaints found</h6>
-          <p className="text-muted small mb-0">There are no complaints matching your criteria.</p>
+          <h6 className="fw-bold text-dark mb-1">{t('complaints.no_complaints_found')}</h6>
+          <p className="text-muted small mb-0">{t('complaints.no_complaints_desc')}</p>
         </div>
       ) : (
         <div className="accordion d-flex flex-column gap-3 w-100" id="complaintsAccordion">
@@ -278,7 +271,7 @@ const ComplaintList = ({
                           <ComplaintPriorityBadge priority={c.priority} />
                           {isAdmin && aptLabel && (
                             <span className="badge bg-body-secondary text-secondary border border-light-subtle" style={{ fontSize: '0.72rem', fontWeight: 500 }}>
-                              Apartment: {aptLabel}
+                              {t('complaints.apartment_label', { label: aptLabel })}
                             </span>
                           )}
 
@@ -298,7 +291,7 @@ const ComplaintList = ({
                                   e.stopPropagation();
                                   handleExpand(c);
                                 }}
-                                title={c.status === 'Resolved' ? "View Chat History (Resolved)" : "Open Chat"}
+                                title={c.status === 'Resolved' ? t('complaints.view_chat_history') : t('complaints.open_chat')}
                               >
                                 <i className="bi bi-chat-left-text" style={{ fontSize: '1.15rem' }} />
                               </button>
@@ -307,7 +300,7 @@ const ComplaintList = ({
 
                           {showResidentName && c.resident?.user?.name && (
                             <span className="badge bg-primary-subtle text-primary-emphasis" style={{ fontSize: '0.72rem', fontWeight: 500 }}>
-                              Submitted by: {c.resident.user.name}
+                              {t('complaints.submitted_by', { name: c.resident.user.name })}
                             </span>
                           )}
                         </div>
@@ -316,7 +309,7 @@ const ComplaintList = ({
 
                     {/* Far Right Area: Submitted Timestamp (ALWAYS AT LAST) */}
                     <div className="flex-shrink-0 ms-2 text-muted small" style={{ fontSize: '0.73rem', whiteSpace: 'nowrap' }}>
-                      <span className="d-none d-sm-inline">Submitted: </span>{timeAgo(c.createdAt)}
+                      <span className="d-none d-sm-inline">{t('complaints.submitted_prefix')}</span>{formatRelativeTime(c.createdAt)}
                     </div>
                   </div>
                 </h2>
@@ -331,12 +324,12 @@ const ComplaintList = ({
                     {/* Attached Images */}
                     {isLoadingImages ? (
                       <div className="p-3 bg-white rounded-3 border border-light-subtle d-flex align-items-center gap-2 text-secondary small">
-                        <span className="spinner-border spinner-border-sm text-primary" /> Loading images & details...
+                        <span className="spinner-border spinner-border-sm text-primary" /> {t('complaints.loading_details')}
                       </div>
                     ) : images.length > 0 ? (
                       <div className="p-3 bg-white rounded-3 border border-light-subtle shadow-xs">
                         <span className="text-uppercase text-muted fw-bold d-block mb-2" style={{ fontSize: '0.68rem', letterSpacing: '0.06em' }}>
-                          Attached Images ({images.length})
+                          {t('complaints.attached_images', { count: images.length })}
                         </span>
                         <div className="d-flex gap-2 flex-wrap">
                           {images.map((img) => (
@@ -348,11 +341,11 @@ const ComplaintList = ({
                                 e.stopPropagation();
                                 setSelectedImage(img.imageUrl);
                               }}
-                              title="Click to view larger image"
+                              title={t('complaints.click_to_enlarge')}
                             >
                               <img
                                 src={img.imageUrl}
-                                alt="Complaint image attachment"
+                                alt={t('complaints.image_attachment_alt')}
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                               />
                             </div>
@@ -365,7 +358,7 @@ const ComplaintList = ({
                     {c.description && (
                       <div className="p-3 bg-white rounded-3 border border-light-subtle shadow-xs">
                         <span className="text-uppercase text-muted fw-bold d-block mb-1" style={{ fontSize: '0.68rem', letterSpacing: '0.06em' }}>
-                          Description
+                          {t('complaints.label_desc')}
                         </span>
                         <p className="text-secondary mb-0" style={{ fontSize: '0.875rem', lineHeight: '1.6', whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                           {highlightMatch(c.description, searchVal)}
@@ -377,12 +370,12 @@ const ComplaintList = ({
                     {isAdmin && c.status !== 'Resolved' && onUpdateStatus && (
                       <div className="d-flex align-items-center justify-content-end gap-2 pt-1" onClick={(e) => e.stopPropagation()}>
                         <span className="text-uppercase text-muted fw-bold" style={{ fontSize: '0.72rem', letterSpacing: '0.05em' }}>
-                          Update Status:
+                          {t('complaints.update_status_label')}
                         </span>
                         <div style={{ width: '160px' }}>
                           <Select
                             name="status"
-                            options={STATUS_OPTIONS}
+                            options={statusOptions}
                             value={c.status}
                             onChange={(e) => handleStatusChange(c, e.target.value)}
                             className="shadow-none border-light-subtle bg-white"
@@ -407,9 +400,9 @@ const ComplaintList = ({
                             fontSize: '0.82rem',
                             transition: 'all 0.2s ease',
                           }}
-                          title="Delete complaint"
+                          title={t('complaints.delete_btn')}
                         >
-                          <i className="bi bi-trash3" style={{ fontSize: '0.9rem' }} /> Delete Complaint
+                          <i className="bi bi-trash3" style={{ fontSize: '0.9rem' }} /> {t('complaints.delete_btn')}
                         </button>
                       </div>
                     )}
@@ -450,19 +443,19 @@ const ComplaintList = ({
                     <ComplaintPriorityBadge priority={activeDetail.priority} />
                     {isAdmin && activeDetail.resident?.apartment && (
                       <span className="text-secondary small">
-                        Apartment: {activeDetail.resident.apartment.block}-{activeDetail.resident.apartment.floorNumber}{activeDetail.resident.apartment.unitNumber}
+                        {t('complaints.apartment_label', { label: `${activeDetail.resident.apartment.block}-${activeDetail.resident.apartment.floorNumber}${activeDetail.resident.apartment.unitNumber}` })}
                       </span>
                     )}
                   </div>
                 </div>
               ) : (
-                <h6 className="mb-0 fw-bold text-dark">Complaint Chat</h6>
+                <h6 className="mb-0 fw-bold text-dark">{t('complaints.chat_title')}</h6>
               )}
               <button
                 type="button"
                 className="btn-close shadow-none flex-shrink-0"
                 onClick={handleCloseDrawer}
-                aria-label="Close"
+                aria-label={t('common.close')}
               />
             </div>
 
@@ -471,7 +464,7 @@ const ComplaintList = ({
               {!expandedDetail || expandedDetail.id !== expandedId ? (
                 <div className="d-flex flex-column align-items-center justify-content-center h-100 flex-grow-1">
                   <span className="spinner-border spinner-border-sm text-primary mb-2" />
-                  <span className="text-secondary small">Loading chat...</span>
+                  <span className="text-secondary small">{t('complaints.loading_chat')}</span>
                 </div>
               ) : (
                 <div className="h-100 d-flex flex-column">
@@ -491,9 +484,10 @@ const ComplaintList = ({
       {deletingComplaint && (
         <ConfirmDialog
           show={!!deletingComplaint}
-          title="Delete Complaint"
-          message={deletingComplaint ? `Are you sure you want to delete "${deletingComplaint.title}"? This action cannot be undone.` : ''}
-          confirmLabel="Delete"
+          title={t('complaints.delete_confirm_title')}
+          message={deletingComplaint ? t('complaints.delete_confirm_msg', { title: deletingComplaint.title }) : ''}
+          confirmLabel={t('common.delete')}
+          cancelLabel={t('common.cancel')}
           variant="danger"
           loading={deleteLoading}
           onConfirm={async () => {
@@ -536,11 +530,11 @@ const ComplaintList = ({
               className="btn-close btn-close-white position-absolute top-0 end-0 m-3 shadow-none p-2"
               onClick={() => setSelectedImage(null)}
               style={{ zIndex: 10, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: '50%' }}
-              aria-label="Close"
+              aria-label={t('common.close')}
             />
             <img
               src={selectedImage}
-              alt="Complaint attachment preview"
+              alt={t('complaints.image_attachment_alt')}
               style={{
                 maxWidth: '100%',
                 maxHeight: '85vh',

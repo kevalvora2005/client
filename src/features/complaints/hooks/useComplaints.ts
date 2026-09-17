@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { complaintApi } from '../api/complaintApi';
 import type { PaginatedComplaints, ComplaintListParams } from '../types/complaint.types';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { showError } from '../../../utils/toast';
 
 export const useComplaints = (params?: ComplaintListParams, isAdmin: boolean = true, ownOnly: boolean = false) => {
+  const { t } = useTranslation();
   const [complaints, setComplaints] = useState<PaginatedComplaints | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -23,12 +25,12 @@ export const useComplaints = (params?: ComplaintListParams, isAdmin: boolean = t
       const response = await fetchFn(parsed);
       setComplaints(response);
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to fetch complaints'));
+      showError(getErrorMessage(err, t('complaints.fetch_failed')));
     } finally {
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serializedParams, isAdmin, ownOnly]);
+  }, [serializedParams, isAdmin, ownOnly, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -40,7 +42,7 @@ export const useComplaints = (params?: ComplaintListParams, isAdmin: boolean = t
         const response = await fetchFn(parsed);
         if (!cancelled) setComplaints(response);
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, 'Failed to fetch complaints'));
+        if (!cancelled) showError(getErrorMessage(err, t('complaints.fetch_failed')));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -50,7 +52,7 @@ export const useComplaints = (params?: ComplaintListParams, isAdmin: boolean = t
 
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serializedParams, isAdmin, ownOnly]);
+  }, [serializedParams, isAdmin, ownOnly, t]);
 
   return { complaints, loading, refetch: fetchComplaints };
 };

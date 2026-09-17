@@ -1,19 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import Select from '../../../components/Select/Select';
 import type { SelectOption } from '../../../components/Select/Select';
 import type { ComplaintPriority, ComplaintStatus, ComplaintListParams } from '../types/complaint.types';
-
-const STATUS_OPTIONS: SelectOption[] = [
-  { value: 'Open', label: 'Open' },
-  { value: 'In Progress', label: 'In Progress' },
-  { value: 'Resolved', label: 'Resolved' },
-];
-
-const PRIORITY_OPTIONS: SelectOption[] = [
-  { value: 'Low', label: 'Low' },
-  { value: 'Medium', label: 'Medium' },
-  { value: 'High', label: 'High' },
-];
 
 interface ComplaintFiltersProps {
   filters: ComplaintListParams;
@@ -21,7 +10,26 @@ interface ComplaintFiltersProps {
 }
 
 const ComplaintFilters = ({ filters, onFilterChange }: ComplaintFiltersProps) => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState(filters.search ?? '');
+
+  const statusOptions: SelectOption[] = useMemo(
+    () => [
+      { value: 'Open', label: t('status.open') },
+      { value: 'In Progress', label: t('status.in_progress') },
+      { value: 'Resolved', label: t('status.resolved') },
+    ],
+    [t]
+  );
+
+  const priorityOptions: SelectOption[] = useMemo(
+    () => [
+      { value: 'Low', label: t('priority.low') },
+      { value: 'Medium', label: t('priority.medium') },
+      { value: 'High', label: t('priority.high') },
+    ],
+    [t]
+  );
 
   useEffect(() => {
     if (search === (filters.search ?? '')) return;
@@ -46,7 +54,7 @@ const ComplaintFilters = ({ filters, onFilterChange }: ComplaintFiltersProps) =>
         <input
           type="text"
           className="form-control shadow-none border-light-subtle"
-          placeholder="Search complaints..."
+          placeholder={t('complaints.search_placeholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{ width: '100%', borderRadius: '8px', fontSize: '0.875rem', height: '38px' }}
@@ -57,8 +65,8 @@ const ComplaintFilters = ({ filters, onFilterChange }: ComplaintFiltersProps) =>
       <div style={{ minWidth: '130px' }}>
         <Select
           name="status"
-          options={STATUS_OPTIONS}
-          placeholder="All statuses"
+          options={statusOptions}
+          placeholder={t('complaints.all_statuses')}
           value={filters.status ?? ''}
           onChange={(e) =>
             onFilterChange({
@@ -75,8 +83,8 @@ const ComplaintFilters = ({ filters, onFilterChange }: ComplaintFiltersProps) =>
       <div style={{ minWidth: '130px' }}>
         <Select
           name="priority"
-          options={PRIORITY_OPTIONS}
-          placeholder="All priorities"
+          options={priorityOptions}
+          placeholder={t('complaints.all_priorities')}
           value={filters.priority ?? ''}
           onChange={(e) =>
             onFilterChange({
@@ -97,7 +105,7 @@ const ComplaintFilters = ({ filters, onFilterChange }: ComplaintFiltersProps) =>
           style={{ height: '38px', fontSize: '0.85rem', borderRadius: '8px' }}
         >
           <i className="bi bi-x-circle" />
-          Clear
+          {t('complaints.clear_filters')}
         </button>
       )}
 

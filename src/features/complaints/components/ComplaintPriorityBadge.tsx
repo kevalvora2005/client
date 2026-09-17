@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import { PRIORITY_CONFIG } from '../constants/complaintStyles';
 import type { ComplaintPriority } from '../types/complaint.types';
 
 const ComplaintPriorityBadge = ({ priority }: { priority: ComplaintPriority }) => {
+  const { t } = useTranslation();
   const cfg = PRIORITY_CONFIG[priority];
 
   return (
@@ -15,7 +17,7 @@ const ComplaintPriorityBadge = ({ priority }: { priority: ComplaintPriority }) =
         borderRadius: '6px',
       }}
     >
-      {priority}
+      {t(`priority.${priority.toLowerCase()}`)}
     </span>
   );
 };
