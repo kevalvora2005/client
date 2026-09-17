@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Visitor } from '../types/visitor.types';
 import VisitorStatusBadge from './VisitorStatusBadge';
 import { User, Phone, Car, Tag, Calendar, Check, X, LogIn, LogOut, Trash2 } from 'lucide-react';
@@ -32,6 +33,7 @@ export const VisitorCard: React.FC<VisitorCardProps> = ({
   actionLoading,
   actionVariant = 'primary',
 }) => {
+  const { t } = useTranslation();
   return (
     <div
       className="card border-0 shadow-sm rounded-3 overflow-hidden h-100 bg-white"
@@ -83,7 +85,7 @@ export const VisitorCard: React.FC<VisitorCardProps> = ({
                   className="badge rounded-pill px-2"
                   style={{ backgroundColor: '#e0e7ff', color: '#3730a3', fontSize: '0.7rem' }}
                 >
-                  Pre-Registered
+                  {t('visitors.pre_registered_badge')}
                 </span>
               )}
             </div>
@@ -95,7 +97,7 @@ export const VisitorCard: React.FC<VisitorCardProps> = ({
           <div className="row g-2" style={{ fontSize: '0.83rem' }}>
             <div className="col-12">
               <span className="text-muted d-block small mb-1 fw-medium" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Purpose of Visit
+                {t('visitors.label_purpose')}
               </span>
               <div className="fw-medium text-dark d-flex align-items-center gap-1.5">
                 <Tag size={14} className="text-secondary flex-shrink-0" />
@@ -106,7 +108,7 @@ export const VisitorCard: React.FC<VisitorCardProps> = ({
             {visitor.vehicleNumber && (
               <div className="col-12 col-sm-6 mt-2">
                 <span className="text-muted d-block small mb-0.5 fw-medium" style={{ fontSize: '0.72rem', textTransform: 'uppercase' }}>
-                  Vehicle Plate
+                  {t('visitors.label_vehicle')}
                 </span>
                 <div className="fw-semibold text-dark d-flex align-items-center gap-1.5">
                   <Car size={14} className="text-secondary flex-shrink-0" />
@@ -118,7 +120,7 @@ export const VisitorCard: React.FC<VisitorCardProps> = ({
             {visitor.expectedAt && (
               <div className="col-12 col-sm-6 mt-2">
                 <span className="text-muted d-block small mb-0.5 fw-medium" style={{ fontSize: '0.72rem', textTransform: 'uppercase' }}>
-                  Expected Arrival
+                  {t('visitors.label_expected_arrival')}
                 </span>
                 <div className="text-dark d-flex align-items-center gap-1.5">
                   <Calendar size={14} className="text-secondary flex-shrink-0" />
@@ -130,7 +132,7 @@ export const VisitorCard: React.FC<VisitorCardProps> = ({
             {visitor.checkedInAt && (
               <div className="col-12 col-sm-6 mt-2">
                 <span className="text-muted d-block small mb-0.5 fw-medium" style={{ fontSize: '0.72rem', textTransform: 'uppercase' }}>
-                  Checked In
+                  {t('visitors.label_checked_in')}
                 </span>
                 <div className="text-success fw-medium d-flex align-items-center gap-1.5">
                   <LogIn size={14} className="flex-shrink-0" />
@@ -142,7 +144,7 @@ export const VisitorCard: React.FC<VisitorCardProps> = ({
             {visitor.checkedOutAt && (
               <div className="col-12 col-sm-6 mt-2">
                 <span className="text-muted d-block small mb-0.5 fw-medium" style={{ fontSize: '0.72rem', textTransform: 'uppercase' }}>
-                  Checked Out
+                  {t('visitors.label_checked_out')}
                 </span>
                 <div className="text-secondary fw-medium d-flex align-items-center gap-1.5">
                   <LogOut size={14} className="flex-shrink-0" />
@@ -177,14 +179,14 @@ export const VisitorCard: React.FC<VisitorCardProps> = ({
                 onClick={() => onReject?.(visitor.id)}
               >
                 <X size={15} />
-                Reject
+                {t('visitors.reject')}
               </button>
               <button
                 className="btn btn-success btn-sm rounded-2 d-flex align-items-center gap-1 px-3 text-white fw-semibold shadow-xs"
                 onClick={() => onApprove?.(visitor.id)}
               >
                 <Check size={15} />
-                Approve
+                {t('visitors.approve')}
               </button>
             </>
           )}
@@ -195,7 +197,7 @@ export const VisitorCard: React.FC<VisitorCardProps> = ({
               onClick={() => onCancel?.(visitor.id)}
             >
               <Trash2 size={14} />
-              Cancel Pre-Registration
+              {t('visitors.cancel_pre_registration')}
             </button>
           )}
 
@@ -206,7 +208,7 @@ export const VisitorCard: React.FC<VisitorCardProps> = ({
               onClick={() => onCheckIn?.(visitor.id)}
             >
               <LogIn size={15} />
-              Check In Visitor
+              {t('visitors.check_in_visitor')}
             </button>
           )}
 
@@ -216,7 +218,7 @@ export const VisitorCard: React.FC<VisitorCardProps> = ({
               onClick={() => onCheckOut?.(visitor.id)}
             >
               <LogOut size={15} />
-              Check Out Visitor
+              {t('visitors.check_out_visitor')}
             </button>
           )}
         </div>

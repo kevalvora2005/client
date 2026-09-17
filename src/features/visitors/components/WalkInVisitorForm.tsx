@@ -1,4 +1,5 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import ApartmentSelect from '../../apartments/components/ApartmentSelect';
@@ -12,29 +13,8 @@ interface WalkInVisitorFormProps {
   onCancel?: () => void;
 }
 
-const validationSchema = Yup.object({
-  apartmentId: Yup.number()
-    .min(1, 'Please select an apartment')
-    .required('Apartment is required'),
-  name: Yup.string()
-    .trim()
-    .min(2, 'Visitor name is required')
-    .required('Visitor name is required'),
-  phone: Yup.string()
-    .trim()
-    .length(10, 'Phone must be exactly 10 digits')
-    .matches(/^\d+$/, 'Phone must contain only numbers')
-    .required('Phone is required'),
-  purpose: Yup.string()
-    .trim()
-    .min(2, 'Purpose of visit is required')
-    .required('Purpose of visit is required'),
-  vehicleNumber: Yup.string()
-    .trim()
-    .optional(),
-});
-
 const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisitorFormProps) => {
+  const { t } = useTranslation();
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
@@ -42,6 +22,33 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  const validationSchema = useMemo(
+    () =>
+      Yup.object({
+        apartmentId: Yup.number()
+          .min(1, t('visitors.apartment_req'))
+          .required(t('visitors.apartment_req')),
+        name: Yup.string()
+          .trim()
+          .min(2, t('visitors.name_req'))
+          .required(t('visitors.name_req')),
+        phone: Yup.string()
+          .trim()
+          .length(10, t('visitors.phone_digits'))
+          .matches(/^\d+$/, t('visitors.phone_digits'))
+          .required(t('visitors.phone_req')),
+        purpose: Yup.string()
+          .trim()
+          .min(2, t('visitors.purpose_req'))
+          .required(t('visitors.purpose_req')),
+        vehicleNumber: Yup.string()
+          .trim()
+          .max(20, t('visitors.vehicle_max20'))
+          .optional(),
+      }),
+    [t]
+  );
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
@@ -68,9 +75,9 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
       streamRef.current = mediaStream;
       setCameraOpen(true);
     } catch {
-      showError('Unable to access camera. Please upload a photo instead.');
+      showError(t('visitors.camera_access_error'));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (cameraOpen && videoRef.current && streamRef.current) {
@@ -134,7 +141,7 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
     validationSchema,
     onSubmit: async (values) => {
       if (!photo) {
-        setPhotoError('Visitor photo is required for security verification');
+        setPhotoError(t('visitors.photo_required_error'));
         return;
       }
 
@@ -161,7 +168,7 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
     <form onSubmit={formik.handleSubmit} noValidate>
       <div className="mb-3">
         <label className="form-label fw-medium text-secondary small mb-1">
-          Apartment <span className="text-danger">*</span>
+          {t('visitors.col_apartment')} <span className="text-danger">*</span>
         </label>
         <ApartmentSelect
           value={formik.values.apartmentId}
@@ -176,12 +183,12 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
       <div className="row g-3 mb-3">
         <div className="col-md-6">
           <label className="form-label fw-medium text-secondary small mb-1">
-            Visitor Name <span className="text-danger">*</span>
+            {t('visitors.label_name')} <span className="text-danger">*</span>
           </label>
           <input
             type="text"
             className={`form-control shadow-none rounded-2 text-dark ${formik.touched.name && formik.errors.name ? 'is-invalid' : ''}`}
-            placeholder="Enter visitor full name"
+            placeholder={t('visitors.placeholder_name')}
             {...formik.getFieldProps('name')}
             style={{ fontSize: '0.875rem', borderColor: formik.touched.name && formik.errors.name ? '#dc3545' : '#e5e7eb' }}
           />
@@ -193,12 +200,12 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
         </div>
         <div className="col-md-6">
           <label className="form-label fw-medium text-secondary small mb-1">
-            Phone Number <span className="text-danger">*</span>
+            {t('visitors.label_phone')} <span className="text-danger">*</span>
           </label>
           <input
             type="tel"
             className={`form-control shadow-none rounded-2 text-dark ${formik.touched.phone && formik.errors.phone ? 'is-invalid' : ''}`}
-            placeholder="Enter 10-digit mobile number"
+            placeholder={t('visitors.placeholder_phone')}
             value={formik.values.phone}
             onChange={(e) => {
               const val = e.target.value.replace(/\D/g, '').slice(0, 10);
@@ -217,12 +224,12 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
 
       <div className="mb-3">
         <label className="form-label fw-medium text-secondary small mb-1">
-          Purpose of Visit <span className="text-danger">*</span>
+          {t('visitors.label_purpose')} <span className="text-danger">*</span>
         </label>
         <input
           type="text"
           className={`form-control shadow-none rounded-2 text-dark ${formik.touched.purpose && formik.errors.purpose ? 'is-invalid' : ''}`}
-          placeholder="e.g. Delivery, Guest, Maintenance work"
+          placeholder={t('visitors.placeholder_purpose')}
           {...formik.getFieldProps('purpose')}
           style={{ fontSize: '0.875rem', borderColor: formik.touched.purpose && formik.errors.purpose ? '#dc3545' : '#e5e7eb' }}
         />
@@ -235,12 +242,12 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
 
       <div className="mb-3">
         <label className="form-label fw-medium text-secondary small mb-1">
-          Vehicle Number <span className="text-muted fw-normal">(optional)</span>
+          {t('visitors.label_vehicle')} <span className="text-muted fw-normal">{t('visitors.optional_label')}</span>
         </label>
         <input
           type="text"
           className="form-control shadow-none rounded-2 text-dark"
-          placeholder="e.g. GJ-01-AB-1234"
+          placeholder={t('visitors.vehicle_placeholder')}
           {...formik.getFieldProps('vehicleNumber')}
           style={{ fontSize: '0.875rem', borderColor: '#e5e7eb' }}
         />
@@ -249,7 +256,7 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
       {/* Photo Capture Section */}
       <div className="mb-3">
         <label className="form-label fw-medium text-secondary small mb-1">
-          Visitor Photo <span className="text-danger">*</span>
+          {t('visitors.label_visitor_photo')} <span className="text-danger">*</span>
         </label>
 
         {!cameraOpen && !photoPreview && (
@@ -268,7 +275,7 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
               }}
             >
               <Camera size={16} />
-              Open Camera
+              {t('visitors.open_camera')}
             </button>
             <label
               className="btn fw-medium d-inline-flex align-items-center justify-content-center gap-2 flex-grow-1 mb-0"
@@ -283,7 +290,7 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
               }}
             >
               <i className="bi bi-upload" />
-              Upload Photo
+              {t('visitors.upload_photo')}
               <input
                 type="file"
                 accept="image/*"
@@ -312,7 +319,7 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
                 style={{ borderRadius: '24px', fontSize: '0.85rem' }}
               >
                 <Camera size={16} />
-                Capture
+                {t('visitors.capture_photo')}
               </button>
               <button
                 type="button"
@@ -321,7 +328,7 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
                 style={{ borderRadius: '24px', fontSize: '0.85rem' }}
               >
                 <X size={16} />
-                Cancel
+                {t('common.cancel')}
               </button>
             </div>
           </div>
@@ -331,7 +338,7 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
           <div className="d-flex align-items-center gap-3">
             <img
               src={photoPreview}
-              alt="Visitor preview"
+              alt={t('visitors.photo_preview_alt')}
               className="rounded-2 border"
               style={{ width: '80px', height: '80px', objectFit: 'cover' }}
             />
@@ -342,7 +349,7 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
                 onClick={() => { removePhoto(); startCamera(); }}
                 style={{ fontSize: '0.78rem' }}
               >
-                <RefreshCw size={12} /> Retake
+                <RefreshCw size={12} /> {t('visitors.retake_photo')}
               </button>
               <button
                 type="button"
@@ -350,7 +357,7 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
                 onClick={removePhoto}
                 style={{ fontSize: '0.78rem' }}
               >
-                <X size={12} /> Remove
+                <X size={12} /> {t('visitors.remove_photo')}
               </button>
             </div>
           </div>
@@ -374,7 +381,7 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
             disabled={loading}
             style={{ height: '38px', fontSize: '0.875rem' }}
           >
-            Cancel
+            {t('common.cancel')}
           </button>
         )}
         <button
@@ -393,7 +400,7 @@ const WalkInVisitorForm = ({ loading = false, onSubmit, onCancel }: WalkInVisito
           ) : (
             <>
               <i className="bi bi-person-plus me-1" />
-              Log Visitor
+              {t('visitors.log_visitor_btn')}
             </>
           )}
         </button>

@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { visitorApi } from '../api/visitorApi';
 import type { Visitor } from '../types/visitor.types';
 import { X, Phone, MapPin, Car, Clock, Check, User } from 'lucide-react';
-import { toast } from 'react-toastify';
+import { showError, showSuccess } from '../../../utils/toast';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
+import { formatRelativeTime } from '../../../utils/formatRelativeTime';
 
 interface VisitorApprovalDialogProps {
   visitorId: number;
@@ -11,17 +13,8 @@ interface VisitorApprovalDialogProps {
   onDecision: (decision: 'Approve' | 'Reject') => void;
 }
 
-function timeAgo(dateStr: string, nowMs: number): string {
-  const then = new Date(dateStr).getTime();
-  const diff = nowMs - then;
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  return `${hours}h ago`;
-}
-
 const VisitorApprovalDialog = ({ visitorId, onClose, onDecision }: VisitorApprovalDialogProps) => {
+  const { t } = useTranslation();
   const [visitor, setVisitor] = useState<Visitor | null>(null);
   const [loading, setLoading] = useState(true);
   const [deciding, setDeciding] = useState(false);
@@ -51,14 +44,14 @@ const VisitorApprovalDialog = ({ visitorId, onClose, onDecision }: VisitorApprov
           }
         }
       } catch {
-        toast.error('Failed to load visitor details');
+        showError(t('visitors.load_details_failed'));
         onClose();
       } finally {
         if (!cancelled) setLoading(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [visitorId, onClose]);
+  }, [visitorId, onClose, t]);
 
   const elapsedMs = visitor?.approvalRequestedAt ? now - new Date(visitor.approvalRequestedAt).getTime() : 0;
   const remainingMs = Math.max(0, 10 * 60 * 1000 - elapsedMs);
@@ -72,16 +65,16 @@ const VisitorApprovalDialog = ({ visitorId, onClose, onDecision }: VisitorApprov
     setDecision(d === 'Approve' ? 'Approved' : 'Rejected');
     try {
       await visitorApi.respond(visitorId, d);
-      toast.success(d === 'Approve' ? 'Visitor entry approved!' : 'Visitor entry rejected.');
+      showSuccess(d === 'Approve' ? t('visitors.respond_approved_success') : t('visitors.respond_rejected_success'));
       onDecision(d);
       setTimeout(onClose, 1500);
     } catch (err: unknown) {
       setDecision(null);
-      toast.error(getErrorMessage(err, `Failed to ${d.toLowerCase()} visitor`));
+      showError(getErrorMessage(err, d === 'Approve' ? t('visitors.respond_approved_failed') : t('visitors.respond_rejected_failed')));
     } finally {
       setDeciding(false);
     }
-  }, [visitorId, onDecision, onClose]);
+  }, [visitorId, onDecision, onClose, t]);
 
   return (
     <>
@@ -93,12 +86,14 @@ const VisitorApprovalDialog = ({ visitorId, onClose, onDecision }: VisitorApprov
           <div className="modal-header d-flex align-items-start justify-content-between border-bottom border-light-subtle px-4 py-4 position-relative">
             <div>
               <h5 className="modal-title fw-bold m-0 text-dark" style={{ fontSize: '1rem', color: '#1a1f36' }}>
-                {effectiveDecision ? 'Visitor Entry Decision' : 'Visitor at the Gate'}
+                {effectiveDecision ? t('visitors.entry_decision_title') : t('visitors.at_gate_title')}
               </h5>
               <p className="text-muted m-0 small" style={{ fontSize: '0.8rem' }}>
                 {effectiveDecision
-                  ? `This visitor entry was ${effectiveDecision.toLowerCase()}.`
-                  : 'Entry approval request for incoming guest.'}
+                  ? effectiveDecision === 'Approved'
+                    ? t('visitors.decision_approved_desc')
+                    : t('visitors.decision_rejected_desc')
+                  : t('visitors.approval_request_desc')}
               </p>
             </div>
             <button
@@ -106,7 +101,7 @@ const VisitorApprovalDialog = ({ visitorId, onClose, onDecision }: VisitorApprov
               className="btn position-absolute d-flex align-items-center justify-content-center p-0 text-secondary"
               style={{ top: 22, right: 22, width: 28, height: 28, border: '1px solid #e9ecef', background: '#fff', fontSize: '1.1rem', borderRadius: '6px' }}
               onClick={onClose}
-              aria-label="Close"
+              aria-label={t('common.close')}
             >
               <i className="bi bi-x" />
             </button>
@@ -117,7 +112,7 @@ const VisitorApprovalDialog = ({ visitorId, onClose, onDecision }: VisitorApprov
             {loading ? (
               <div className="text-center py-4">
                 <div className="spinner-border text-secondary mb-2" role="status" style={{ width: '2rem', height: '2rem' }} />
-                <p className="text-muted mb-0" style={{ fontSize: '0.85rem' }}>Loading visitor details...</p>
+                <p className="text-muted mb-0" style={{ fontSize: '0.85rem' }}>{t('visitors.loading_details')}</p>
               </div>
             ) : !visitor ? null : effectiveDecision ? (
               <div className="text-center py-4">
@@ -132,10 +127,10 @@ const VisitorApprovalDialog = ({ visitorId, onClose, onDecision }: VisitorApprov
                   )}
                 </div>
                 <p className="fw-bold mb-1" style={{ fontSize: '1.1rem', color: effectiveDecision === 'Approved' ? '#16a34a' : '#dc2626' }}>
-                  {effectiveDecision === 'Approved' ? 'Entry Approved!' : 'Entry Rejected'}
+                  {effectiveDecision === 'Approved' ? t('visitors.entry_approved') : t('visitors.entry_rejected')}
                 </p>
                 <p className="text-muted mb-0" style={{ fontSize: '0.85rem' }}>
-                  {effectiveDecision === 'Approved' ? 'Visitor has been granted access' : 'Visitor has been denied access'}
+                  {effectiveDecision === 'Approved' ? t('visitors.access_granted') : t('visitors.access_denied')}
                 </p>
               </div>
             ) : (
@@ -149,7 +144,7 @@ const VisitorApprovalDialog = ({ visitorId, onClose, onDecision }: VisitorApprov
                       className="rounded-2 flex-shrink-0 object-fit-cover border"
                       style={{ width: '80px', height: '80px', borderColor: '#e5e7eb', cursor: 'pointer' }}
                       onClick={() => setSelectedImage(visitor.photoUrl)}
-                      title="Click to view larger image"
+                      title={t('visitors.click_view_photo')}
                     />
                   ) : (
                     <div
@@ -173,20 +168,20 @@ const VisitorApprovalDialog = ({ visitorId, onClose, onDecision }: VisitorApprov
                 <div className="rounded-2 p-3 mb-3" style={{ backgroundColor: '#f9fafb' }}>
                   <div className="row g-3" style={{ fontSize: '0.85rem' }}>
                     <div className="col-6">
-                      <span className="text-muted d-block mb-1" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Phone</span>
+                      <span className="text-muted d-block mb-1" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('visitors.label_phone')}</span>
                       <div className="fw-medium text-dark d-flex align-items-center gap-1.5">
                         <Phone size={14} className="text-muted" /> {visitor.phone}
                       </div>
                     </div>
                     <div className="col-6">
-                      <span className="text-muted d-block mb-1" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Purpose</span>
+                      <span className="text-muted d-block mb-1" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('visitors.label_purpose')}</span>
                       <div className="fw-medium text-dark d-flex align-items-center gap-1.5">
                         <MapPin size={14} className="text-muted" /> {visitor.purpose}
                       </div>
                     </div>
                     {visitor.vehicleNumber && (
                       <div className="col-6">
-                        <span className="text-muted d-block mb-1" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Vehicle</span>
+                        <span className="text-muted d-block mb-1" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('visitors.label_vehicle')}</span>
                         <div className="fw-medium text-dark d-flex align-items-center gap-1.5 font-monospace">
                           <Car size={14} className="text-muted" /> {visitor.vehicleNumber}
                         </div>
@@ -194,9 +189,9 @@ const VisitorApprovalDialog = ({ visitorId, onClose, onDecision }: VisitorApprov
                     )}
                     {visitor.approvalRequestedAt && (
                       <div className="col-6">
-                        <span className="text-muted d-block mb-1" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Requested</span>
+                        <span className="text-muted d-block mb-1" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('visitors.label_requested')}</span>
                         <div className="fw-medium text-dark d-flex align-items-center gap-1.5">
-                          <Clock size={14} className="text-muted" /> {timeAgo(visitor.approvalRequestedAt, now)}
+                          <Clock size={14} className="text-muted" /> {formatRelativeTime(visitor.approvalRequestedAt)}
                         </div>
                       </div>
                     )}
@@ -207,7 +202,7 @@ const VisitorApprovalDialog = ({ visitorId, onClose, onDecision }: VisitorApprov
                 {!isExpired && visitor.approvalRequestedAt && (
                   <div className="mb-3">
                     <div className="d-flex align-items-center justify-content-between mb-1">
-                      <span className="text-muted" style={{ fontSize: '0.75rem' }}>Time remaining</span>
+                      <span className="text-muted" style={{ fontSize: '0.75rem' }}>{t('visitors.time_remaining')}</span>
                       <span className="fw-bold" style={{ fontSize: '0.85rem', color: remainingMs < 2 * 60 * 1000 ? '#dc2626' : '#1a1f36' }}>
                         {remainingMins}:{remainingSecs.toString().padStart(2, '0')}
                       </span>
@@ -235,7 +230,7 @@ const VisitorApprovalDialog = ({ visitorId, onClose, onDecision }: VisitorApprov
               {isExpired ? (
                 <div className="text-center w-100">
                   <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2" style={{ fontSize: '0.8rem' }}>
-                    Request Expired (10m limit passed)
+                    {t('visitors.request_expired')}
                   </span>
                 </div>
               ) : (
@@ -247,7 +242,7 @@ const VisitorApprovalDialog = ({ visitorId, onClose, onDecision }: VisitorApprov
                     onClick={() => handleDecision('Reject')}
                     disabled={deciding}
                   >
-                    <X size={16} /> Reject
+                    <X size={16} /> {t('visitors.reject')}
                   </button>
                   <button
                     type="button"
@@ -261,7 +256,7 @@ const VisitorApprovalDialog = ({ visitorId, onClose, onDecision }: VisitorApprov
                     ) : (
                       <Check size={16} />
                     )}
-                    Approve Entry
+                    {t('visitors.approve_entry')}
                   </button>
                 </div>
               )}
@@ -296,11 +291,11 @@ const VisitorApprovalDialog = ({ visitorId, onClose, onDecision }: VisitorApprov
             className="btn-close btn-close-white position-absolute top-0 end-0 m-3 shadow-none p-2"
             onClick={() => setSelectedImage(null)}
             style={{ zIndex: 10, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: '50%' }}
-            aria-label="Close"
+            aria-label={t('common.close')}
           />
           <img
             src={selectedImage}
-            alt="Visitor photo preview"
+            alt={t('visitors.photo_preview_alt')}
             style={{
               maxWidth: '100%',
               maxHeight: '85vh',

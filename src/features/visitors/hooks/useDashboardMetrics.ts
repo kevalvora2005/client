@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { visitorApi } from '../api/visitorApi';
 import type { VisitorDashboardMetrics } from '../types/visitor.types';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { showError } from '../../../utils/toast';
 
 export const useDashboardMetrics = (enabled: boolean = true) => {
+  const { t } = useTranslation();
   const [metrics, setMetrics] = useState<VisitorDashboardMetrics | null>(null);
   const [loading, setLoading] = useState<boolean>(enabled);
 
@@ -15,11 +17,11 @@ export const useDashboardMetrics = (enabled: boolean = true) => {
       const data = await visitorApi.getDashboardMetrics();
       setMetrics(data);
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to fetch dashboard metrics'));
+      showError(getErrorMessage(err, t('visitors.fetch_metrics_failed')));
     } finally {
       setLoading(false);
     }
-  }, [enabled]);
+  }, [enabled, t]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -31,7 +33,7 @@ export const useDashboardMetrics = (enabled: boolean = true) => {
         const data = await visitorApi.getDashboardMetrics();
         if (!cancelled) setMetrics(data);
       } catch (err: unknown) {
-        if (!cancelled && !silent) showError(getErrorMessage(err, 'Failed to fetch dashboard metrics'));
+        if (!cancelled && !silent) showError(getErrorMessage(err, t('visitors.fetch_metrics_failed')));
       } finally {
         if (!cancelled && !silent) setLoading(false);
       }
@@ -48,7 +50,7 @@ export const useDashboardMetrics = (enabled: boolean = true) => {
       window.removeEventListener('visitor-updated', handleVisitorUpdate);
       window.removeEventListener('focus', handleVisitorUpdate);
     };
-  }, [enabled]);
+  }, [enabled, t]);
 
   return { metrics, loading, refetch: fetchMetrics };
 };

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { usePendingVisitors } from '../hooks/usePendingVisitors';
 import { useVisitors } from '../hooks/useVisitors';
 import { useVisitorMutations } from '../hooks/useVisitorMutations';
@@ -16,19 +17,12 @@ import {
 } from 'lucide-react';
 import ConfirmDialog from '../../../components/ConfirmDialog/ConfirmDialog';
 import { visitorApi } from '../api/visitorApi';
-import { toast } from 'react-toastify';
+import { showSuccess, showError } from '../../../utils/toast';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
-
-function timeAgo(dateStr: string | null, nowMs: number): string {
-  if (!dateStr) return '';
-  const mins = Math.floor((nowMs - new Date(dateStr).getTime()) / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  return `${hours}h ago`;
-}
+import { formatRelativeTime } from '../../../utils/formatRelativeTime';
 
 const CheckInPage = () => {
+  const { t } = useTranslation();
   const socket = useSocket();
   const { user } = useAuth();
   const role = user?.role === 'resident' ? 'resident' : 'security';
@@ -93,7 +87,7 @@ const CheckInPage = () => {
 
     try {
       await visitorApi.respond(visitorId, decision);
-      toast.success(decision === 'Approve' ? 'Visitor entry approved at gate!' : 'Visitor entry rejected.');
+      showSuccess(decision === 'Approve' ? t('visitors.respond_approved_success') : t('visitors.respond_rejected_success'));
       refetchPending();
       refetchApproved();
     } catch (err: unknown) {
@@ -102,7 +96,7 @@ const CheckInPage = () => {
         delete next[visitorId];
         return next;
       });
-      toast.error(getErrorMessage(err, `Failed to ${decision.toLowerCase()} visitor`));
+      showError(getErrorMessage(err, decision === 'Approve' ? t('visitors.respond_approved_failed') : t('visitors.respond_rejected_failed')));
     }
   };
 
@@ -110,8 +104,8 @@ const CheckInPage = () => {
   const approvedItems = (Array.isArray(approvedVisitors) ? approvedVisitors : []).filter(v => !v.isPreRegistered);
 
   const tabs = [
-    { key: 'checkin', label: 'Gate Check-In', icon: ShieldCheck, count: approvedItems.length, color: 'success' },
-    { key: 'queue', label: 'Approval Queue', icon: Clock, count: pendingCount, color: 'warning' },
+    { key: 'checkin', label: t('visitors.tab_gate_checkin'), icon: ShieldCheck, count: approvedItems.length, color: 'success' },
+    { key: 'queue', label: t('visitors.tab_approval_queue'), icon: Clock, count: pendingCount, color: 'warning' },
   ] as const;
 
   return (
@@ -121,10 +115,10 @@ const CheckInPage = () => {
       <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
         <div>
           <h4 className="fw-bold mb-2 fs-4 fs-sm-3" style={{ color: '#1a1f36' }}>
-            Visitor Check-In
+            {t('visitors.checkin_page_title')}
           </h4>
           <p className="text-muted mb-0 small">
-            Verify identity, approve entry, and manage gate access
+            {t('visitors.checkin_page_desc')}
           </p>
         </div>
 
@@ -135,7 +129,7 @@ const CheckInPage = () => {
           style={{ fontSize: '0.875rem', borderRadius: '8px' }}
         >
           <Plus size={18} strokeWidth={2.5} />
-          Log Walk-In
+          {t('visitors.log_walkin_btn')}
         </button>
       </div>
 
@@ -197,16 +191,16 @@ const CheckInPage = () => {
                         </div>
                         <div>
                           <h6 className="fw-bold mb-0" style={{ fontSize: '0.95rem', color: '#1a1f36' }}>
-                            Walk-In Approved
+                            {t('visitors.walkin_approved_title')}
                           </h6>
                           <p className="text-muted mb-0" style={{ fontSize: '0.75rem' }}>
-                            Residents approved, waiting at gate
+                            {t('visitors.walkin_approved_desc')}
                           </p>
                         </div>
                       </div>
                       {approvedItems.length > 0 && (
                         <span className="badge bg-success text-white rounded-pill px-2.5 py-1" style={{ fontSize: '0.7rem' }}>
-                          {approvedItems.length} Ready
+                          {t('visitors.count_ready', { count: approvedItems.length })}
                         </span>
                       )}
                     </div>
@@ -221,8 +215,8 @@ const CheckInPage = () => {
                         >
                           <UserCheck size={24} className="text-muted" />
                         </div>
-                        <p className="fw-semibold text-dark mb-1" style={{ fontSize: '0.875rem' }}>No walk-in visitors waiting</p>
-                        <p className="text-muted mb-0" style={{ fontSize: '0.78rem' }}>Approved walk-ins will appear here</p>
+                        <p className="fw-semibold text-dark mb-1" style={{ fontSize: '0.875rem' }}>{t('visitors.no_walkins_waiting')}</p>
+                        <p className="text-muted mb-0" style={{ fontSize: '0.78rem' }}>{t('visitors.approved_walkins_appear_here')}</p>
                       </div>
                     ) : (
                       <div className="d-flex flex-column gap-2">
@@ -291,7 +285,7 @@ const CheckInPage = () => {
                                 ) : (
                                   <>
                                     <Camera size={15} className="me-1.5" />
-                                    Check In
+                                    {t('visitors.check_in_btn')}
                                   </>
                                 )}
                               </button>
@@ -316,11 +310,11 @@ const CheckInPage = () => {
                 <div className="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2 border-light-subtle">
                   <h6 className="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style={{ fontSize: '0.95rem' }}>
                     <Clock size={20} className="text-warning" />
-                    Awaiting Resident Approval
+                    {t('visitors.awaiting_approval_title')}
                   </h6>
                   {pendingCount > 0 && (
                     <span className="badge bg-warning text-dark" style={{ fontSize: '0.75rem' }}>
-                      10m Expiry Limit
+                      {t('visitors.expiry_limit_badge')}
                     </span>
                   )}
                 </div>
@@ -336,8 +330,8 @@ const CheckInPage = () => {
                     <div className="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '64px', height: '64px', backgroundColor: '#e2e8f0' }}>
                       <Clock size={28} className="text-muted" />
                     </div>
-                    <p className="fw-semibold text-dark mb-1" style={{ fontSize: '0.9rem' }}>No visitors awaiting approval</p>
-                    <p className="text-muted small mb-0">Walk-in visitor requests will appear here in real-time</p>
+                    <p className="fw-semibold text-dark mb-1" style={{ fontSize: '0.9rem' }}>{t('visitors.no_awaiting_approval')}</p>
+                    <p className="text-muted small mb-0">{t('visitors.awaiting_realtime_desc')}</p>
                   </div>
                 ) : (
                   <div className="d-flex flex-column gap-2">
@@ -379,7 +373,7 @@ const CheckInPage = () => {
                                   &middot; {visitor.purpose}
                                   {reqTime && (
                                     <>
-                                      {' '}&middot; <Clock size={11} style={{ marginBottom: '1px' }} /> {timeAgo(reqTime, now)}
+                                      {' '}&middot; <Clock size={11} style={{ marginBottom: '1px' }} /> {formatRelativeTime(reqTime)}
                                     </>
                                   )}
                                 </p>
@@ -402,15 +396,15 @@ const CheckInPage = () => {
                             <div className="d-flex align-items-center gap-2 ms-auto flex-shrink-0">
                               {optimisticChoice === 'Approve' ? (
                                 <span className="badge bg-success text-white px-2.5 py-1" style={{ fontSize: '0.72rem' }}>
-                                  <Check size={12} className="me-1" /> Approved
+                                  <Check size={12} className="me-1" /> {t('status.approved')}
                                 </span>
                               ) : optimisticChoice === 'Reject' ? (
                                 <span className="badge bg-danger text-white px-2.5 py-1" style={{ fontSize: '0.72rem' }}>
-                                  <X size={12} className="me-1" /> Rejected
+                                  <X size={12} className="me-1" /> {t('status.rejected')}
                                 </span>
                               ) : isExpired ? (
                                 <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1" style={{ fontSize: '0.72rem' }}>
-                                  Expired
+                                  {t('status.expired')}
                                 </span>
                               ) : (
                                 <>
@@ -421,7 +415,7 @@ const CheckInPage = () => {
                                     onClick={() => handleSecurityRespond(visitor.id, 'Approve')}
                                   >
                                     <Check size={13} strokeWidth={2.5} />
-                                    Approve
+                                    {t('visitors.approve')}
                                   </button>
                                   <button
                                     type="button"
@@ -430,7 +424,7 @@ const CheckInPage = () => {
                                     onClick={() => handleSecurityRespond(visitor.id, 'Reject')}
                                   >
                                     <X size={13} strokeWidth={2.5} />
-                                    Reject
+                                    {t('visitors.reject')}
                                   </button>
                                 </>
                               )}
@@ -451,14 +445,14 @@ const CheckInPage = () => {
       {/* ── Confirmation Dialog for Approve/Reject ── */}
       <ConfirmDialog
         show={confirmAction !== null}
-        title={confirmAction?.decision === 'Approve' ? 'Approve Entry?' : 'Reject Entry?'}
+        title={confirmAction?.decision === 'Approve' ? t('visitors.confirm_approve_title') : t('visitors.confirm_reject_title')}
         message={
           confirmAction?.decision === 'Approve'
-            ? 'This will grant the visitor access to the premises and allow security check-in.'
-            : 'This will deny the visitor access to the society premises.'
+            ? t('visitors.confirm_approve_msg')
+            : t('visitors.confirm_reject_msg')
         }
-        confirmLabel={confirmAction?.decision === 'Approve' ? 'Approve' : 'Reject'}
-        cancelLabel="Cancel"
+        confirmLabel={confirmAction?.decision === 'Approve' ? t('visitors.approve') : t('visitors.reject')}
+        cancelLabel={t('common.cancel')}
         variant={confirmAction?.decision === 'Approve' ? 'success' : 'danger'}
         onConfirm={confirmSecurityDecision}
         onCancel={() => setConfirmAction(null)}
@@ -472,10 +466,10 @@ const CheckInPage = () => {
               <div className="modal-header d-flex align-items-start justify-content-between border-bottom border-light-subtle px-4 py-4 position-relative">
                 <div>
                   <h5 className="modal-title fw-bold m-0 text-dark" style={{ fontSize: '1rem', color: '#1a1f36' }}>
-                    Log Walk-In Visitor
+                    {t('visitors.log_walkin_modal_title')}
                   </h5>
                   <p className="text-muted m-0 small" style={{ fontSize: '0.8rem' }}>
-                    Log an unregistered visitor and request apartment resident entry approval.
+                    {t('visitors.log_walkin_modal_desc')}
                   </p>
                 </div>
                 <button
@@ -483,7 +477,7 @@ const CheckInPage = () => {
                   className="btn position-absolute d-flex align-items-center justify-content-center p-0 text-secondary"
                   style={{ top: 22, right: 22, width: 28, height: 28, border: '1px solid #e9ecef', background: '#fff', fontSize: '1.1rem', borderRadius: '6px' }}
                   onClick={() => setWalkInModalOpen(false)}
-                  aria-label="Close"
+                  aria-label={t('common.close')}
                 >
                   <i className="bi bi-x" />
                 </button>

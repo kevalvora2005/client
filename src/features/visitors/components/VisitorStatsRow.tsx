@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { VisitorDashboardMetrics } from '../types/visitor.types';
 import { Users, LogIn, Clock } from 'lucide-react';
 
@@ -8,25 +9,27 @@ interface VisitorStatsRowProps {
 }
 
 export const VisitorStatsRow: React.FC<VisitorStatsRowProps> = ({ metrics, loading = false }) => {
+  const { t } = useTranslation();
+
   const statItems = [
     {
-      label: 'Visitors Today',
+      label: t('visitors.stat_visitors_today'),
       value: metrics?.visitorsToday ?? 0,
-      subtext: 'Logged visitors today',
+      subtext: t('visitors.stat_visitors_today_subtext'),
       icon: Users,
       bgClass: 'bg-primary-subtle text-primary',
       subtextColor: '#0d6efd',
     },
     {
-      label: 'Currently Inside',
+      label: t('visitors.stat_currently_inside'),
       value: metrics?.currentlyInside ?? 0,
-      subtext: 'Active inside society',
+      subtext: t('visitors.stat_currently_inside_subtext'),
       icon: LogIn,
       bgClass: 'bg-success-subtle text-success',
       subtextColor: '#198754',
     },
     {
-      label: 'Avg Visit Duration',
+      label: t('visitors.stat_avg_duration'),
       value: (() => {
         const mins = metrics?.averageVisitDurationMinutes ?? 0;
         if (mins < 60) return `${mins}m`;
@@ -34,7 +37,7 @@ export const VisitorStatsRow: React.FC<VisitorStatsRowProps> = ({ metrics, loadi
         const m = mins % 60;
         return m > 0 ? `${h}h ${m}m` : `${h}h`;
       })(),
-      subtext: 'Average stay duration',
+      subtext: t('visitors.stat_avg_duration_subtext'),
       icon: Clock,
       bgClass: 'bg-info-subtle text-info',
       customBg: '#e0f2fe',

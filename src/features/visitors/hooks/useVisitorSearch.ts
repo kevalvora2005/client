@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { visitorApi } from '../api/visitorApi';
 import type { Visitor } from '../types/visitor.types';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
@@ -7,6 +8,7 @@ import useSocket from '../../../hooks/useSocket';
 import { SOCKET_EVENTS } from '../../../services/socket';
 
 export const useVisitorSearch = () => {
+  const { t } = useTranslation();
   const socket = useSocket();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Visitor[]>([]);
@@ -18,11 +20,11 @@ export const useVisitorSearch = () => {
       const data = await visitorApi.searchByNameOrPhone(searchQuery.trim());
       setResults(data);
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to search visitors'));
+      showError(getErrorMessage(err, t('visitors.search_failed')));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,7 +34,7 @@ export const useVisitorSearch = () => {
         const data = await visitorApi.searchByNameOrPhone(query.trim());
         if (!cancelled) setResults(data);
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, 'Failed to search visitors'));
+        if (!cancelled) showError(getErrorMessage(err, t('visitors.search_failed')));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -42,7 +44,7 @@ export const useVisitorSearch = () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [query]);
+  }, [query, t]);
 
   useEffect(() => {
     if (!socket) return;

@@ -1,37 +1,20 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCurrentlyInside } from '../hooks/useCurrentlyInside';
 import { useVisitorMutations } from '../hooks/useVisitorMutations';
 import AppTable, { type TableColumn } from '../../../components/AppTable/AppTable';
 import Pagination from '../../../components/Pagination/Pagination';
 import { getAvatarColor, getInitials } from '../../residents/components/residentTableHelpers';
+import { formatDate } from '../../../utils/formatDate';
 import type { Visitor } from '../types/visitor.types';
 
-const formatDateTime = (dateStr: string | null) => {
-  if (!dateStr) return '—';
-  try {
-    const d = new Date(dateStr);
-    return d.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
-  } catch {
-    return dateStr;
-  }
-};
-
 const CheckOutPage = () => {
+  const { t } = useTranslation();
   const { visitors, loading, refetch } = useCurrentlyInside();
   const { checkOut, loading: mutationLoading } = useVisitorMutations(refetch);
   const [search, setSearch] = useState('');
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 10;
-
-  const handleCheckOut = async (visitorId: number) => {
-    await checkOut(visitorId);
-  };
 
   const filteredVisitors = visitors.filter((v) => {
     if (!search.trim()) return true;
@@ -49,101 +32,104 @@ const CheckOutPage = () => {
     pageNumber * pageSize
   );
 
-  const columns: TableColumn<Visitor>[] = [
-    {
-      key: 'name',
-      label: 'Visitor Details',
-      width: '25%',
-      align: 'start',
-      headerAlign: 'start',
-      headerPaddingLeft: '1.25rem',
-      render: (v) => {
-        const { bg, color } = getAvatarColor(v.name);
-        return (
-          <div className="d-flex align-items-center gap-3 py-1.5 ps-2">
-            {v.photoUrl ? (
-              <img
-                src={v.photoUrl}
-                alt={v.name}
-                className="rounded-circle flex-shrink-0 object-fit-cover border border-white shadow-xs"
-                style={{ width: '40px', height: '40px' }}
-              />
-            ) : (
-              <div
-                className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold shadow-xs border border-white"
-                style={{
-                  background: bg,
-                  color: color,
-                  width: '40px',
-                  height: '40px',
-                  fontSize: '0.85rem',
-                }}
-              >
-                {getInitials(v.name)}
-              </div>  
-            )}
-            <div className="min-w-0">
-              <p className="fw-semibold text-dark m-0 text-truncate" style={{ fontSize: '0.9rem', lineHeight: '1.3' }}>
-                {v.name}
-              </p>
-              <p className="m-0 text-muted small d-flex align-items-center gap-1 mt-0.5" style={{ fontSize: '0.78rem' }}>
-                <i className="bi bi-telephone text-secondary" style={{ fontSize: '0.75rem' }} />
-                {v.phone}
-              </p>
-              {v.vehicleNumber && (
-                <span className="badge bg-light text-secondary border border-light-subtle mt-1 font-monospace" style={{ fontSize: '0.68rem', fontWeight: 500 }}>
-                  <i className="bi bi-car-front me-1" />
-                  {v.vehicleNumber}
-                </span>
+  const columns: TableColumn<Visitor>[] = useMemo(
+    () => [
+      {
+        key: 'name',
+        label: t('visitors.col_visitor_details'),
+        width: '25%',
+        align: 'start',
+        headerAlign: 'start',
+        headerPaddingLeft: '1.25rem',
+        render: (v) => {
+          const { bg, color } = getAvatarColor(v.name);
+          return (
+            <div className="d-flex align-items-center gap-3 py-1.5 ps-2">
+              {v.photoUrl ? (
+                <img
+                  src={v.photoUrl}
+                  alt={v.name}
+                  className="rounded-circle flex-shrink-0 object-fit-cover border border-white shadow-xs"
+                  style={{ width: '40px', height: '40px' }}
+                />
+              ) : (
+                <div
+                  className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold shadow-xs border border-white"
+                  style={{
+                    background: bg,
+                    color: color,
+                    width: '40px',
+                    height: '40px',
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  {getInitials(v.name)}
+                </div>  
               )}
+              <div className="min-w-0">
+                <p className="fw-semibold text-dark m-0 text-truncate" style={{ fontSize: '0.9rem', lineHeight: '1.3' }}>
+                  {v.name}
+                </p>
+                <p className="m-0 text-muted small d-flex align-items-center gap-1 mt-0.5" style={{ fontSize: '0.78rem' }}>
+                  <i className="bi bi-telephone text-secondary" style={{ fontSize: '0.75rem' }} />
+                  {v.phone}
+                </p>
+                {v.vehicleNumber && (
+                  <span className="badge bg-light text-secondary border border-light-subtle mt-1 font-monospace" style={{ fontSize: '0.68rem', fontWeight: 500 }}>
+                    <i className="bi bi-car-front me-1" />
+                    {v.vehicleNumber}
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        );
+          );
+        },
       },
-    },
-    {
-      key: 'purpose',
-      label: 'Purpose',
-      width: '25%',
-      align: 'center',
-      headerAlign: 'center',
-      render: (v) => (
-        <p className="m-0 text-secondary small py-1 text-center" style={{ fontSize: '0.84rem', lineHeight: '1.45', wordBreak: 'break-word' }}>
-          {v.purpose || '—'}
-        </p>
-      ),
-    },
-    {
-      key: 'checkedInAt',
-      label: 'Checked In',
-      width: '25%',
-      align: 'center',
-      headerAlign: 'center',
-      render: (v) => (
-        <span className="text-dark small fw-medium" style={{ fontSize: '0.825rem' }}>
-          {formatDateTime(v.checkedInAt)}
-        </span>
-      ),
-    },
-    {
-      key: 'action',
-      label: 'Action',
-      width: '25%',
-      align: 'center',
-      headerAlign: 'center',
-      render: (v) => (
-        <button
-          type="button"
-          className="btn btn-dark btn-sm fw-semibold px-3 py-1.5 rounded-2 d-inline-flex align-items-center gap-1.5 shadow-xs"
-          onClick={() => handleCheckOut(v.id)}
-          disabled={mutationLoading}
-          style={{ fontSize: '0.8rem' }}
-        >
-          <i className="bi bi-box-arrow-right" /> Check Out
-        </button>
-      ),
-    },
-  ];
+      {
+        key: 'purpose',
+        label: t('visitors.col_purpose'),
+        width: '25%',
+        align: 'center',
+        headerAlign: 'center',
+        render: (v) => (
+          <p className="m-0 text-secondary small py-1 text-center" style={{ fontSize: '0.84rem', lineHeight: '1.45', wordBreak: 'break-word' }}>
+            {v.purpose || '—'}
+          </p>
+        ),
+      },
+      {
+        key: 'checkedInAt',
+        label: t('visitors.col_checked_in'),
+        width: '25%',
+        align: 'center',
+        headerAlign: 'center',
+        render: (v) => (
+          <span className="text-dark small fw-medium" style={{ fontSize: '0.825rem' }}>
+            {v.checkedInAt ? formatDate(v.checkedInAt) : '—'}
+          </span>
+        ),
+      },
+      {
+        key: 'action',
+        label: t('common.actions'),
+        width: '25%',
+        align: 'center',
+        headerAlign: 'center',
+        render: (v) => (
+          <button
+            type="button"
+            className="btn btn-dark btn-sm fw-semibold px-3 py-1.5 rounded-2 d-inline-flex align-items-center gap-1.5 shadow-xs"
+            onClick={() => checkOut(v.id)}
+            disabled={mutationLoading}
+            style={{ fontSize: '0.8rem' }}
+          >
+            <i className="bi bi-box-arrow-right" /> {t('visitors.check_out_btn')}
+          </button>
+        ),
+      },
+    ],
+    [t, mutationLoading, checkOut]
+  );
 
   return (
     <div className="container-fluid p-3 p-md-4">
@@ -152,10 +138,10 @@ const CheckOutPage = () => {
       <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
         <div>
           <h4 className="fw-bold mb-2 fs-4 fs-sm-3" style={{ color: '#1a1f36' }}>
-            Visitor Check-Out
+            {t('visitors.checkout_page_title')}
           </h4>
           <p className="text-muted mb-0 small">
-            Manage active entries and record visitor departures from the society.
+            {t('visitors.checkout_page_desc')}
           </p>
         </div>
       </div>
@@ -174,7 +160,7 @@ const CheckOutPage = () => {
                 <input
                   type="text"
                   className="w-100 border-0 p-0 shadow-none bg-transparent text-dark"
-                  placeholder="Search by visitor name, phone, or vehicle..."
+                  placeholder={t('visitors.checkout_search_placeholder')}
                   value={search}
                   onChange={(e) => {
                     setSearch(e.target.value);
@@ -208,8 +194,8 @@ const CheckOutPage = () => {
             loading={loading}
             rowKey={(v) => v.id}
             minWidth="800px"
-            emptyTitle="No visitors currently inside"
-            emptySubtitle={search ? 'No currently inside visitors match your search query.' : 'Everyone who checked in has already checked out.'}
+            emptyTitle={t('visitors.no_visitors_inside_title')}
+            emptySubtitle={search ? t('visitors.no_inside_match') : t('visitors.everyone_checked_out')}
             emptyIcon="bi-door-open"
           />
         </div>

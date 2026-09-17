@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import useAuth from '../../../hooks/useAuth';
 import useMyResident from '../../residents/hooks/useMyResident';
 import useVisitors from '../hooks/useVisitors';
@@ -15,6 +16,7 @@ import type { VisitorStatus } from '../types/visitor.types';
 import { Plus } from 'lucide-react';
 
 const VisitorLogPage = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const role = user?.role ?? 'resident';
@@ -63,6 +65,27 @@ const VisitorLogPage = () => {
     setSearchQuery('');
   };
 
+  const statusOptions = useMemo(
+    () =>
+      role === 'resident'
+        ? [
+            { value: 'ALL', label: t('visitors.all_statuses') },
+            { value: 'Pending', label: t('status.pending') },
+            { value: 'Approved', label: t('status.approved') },
+            { value: 'Rejected', label: t('status.rejected') },
+            { value: 'CheckedIn', label: t('status.checked_in') },
+            { value: 'CheckedOut', label: t('status.checked_out') },
+            { value: 'Cancelled', label: t('status.cancelled') },
+          ]
+        : [
+            { value: 'ALL', label: t('visitors.all_statuses') },
+            { value: 'CheckedOut', label: t('status.checked_out') },
+            { value: 'Cancelled', label: t('status.cancelled') },
+            { value: 'Rejected', label: t('status.rejected') },
+          ],
+    [t, role]
+  );
+
   return (
     <div className="container-fluid p-3 p-md-4">
 
@@ -70,14 +93,14 @@ const VisitorLogPage = () => {
       <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
         <div>
           <h4 className="fw-bold mb-2 fs-4 fs-sm-3" style={{ color: '#1a1f36' }}>
-            {role === 'admin' ? 'Visitor Logs' : role === 'security' ? 'Gate Visitor Logs' : 'My Visitors'}
+            {role === 'admin' ? t('visitors.title_admin') : role === 'security' ? t('visitors.title_security') : t('visitors.title_resident')}
           </h4>
           <p className="text-muted mb-0 small">
             {role === 'admin'
-              ? 'View, search, and monitor all visitor activities across the society.'
+              ? t('visitors.desc_admin')
               : role === 'security'
-                ? 'Track active visitor entries, exits, and verify pre-registrations.'
-                : 'Approve visitor entry requests and pre-register expected guests.'}
+                ? t('visitors.desc_security')
+                : t('visitors.desc_resident')}
           </p>
         </div>
 
@@ -89,7 +112,7 @@ const VisitorLogPage = () => {
               onClick={() => setAddModalOpen(true)}
               style={{ fontSize: '0.875rem', borderRadius: '8px' }}
             >
-              <Plus size={18} /> Pre-register Visitor
+              <Plus size={18} /> {t('visitors.pre_register_visitor_btn')}
             </button>
           </div>
         )}
@@ -118,7 +141,7 @@ const VisitorLogPage = () => {
                 <input
                   type="text"
                   className="w-100 border-0 p-0 shadow-none bg-transparent text-dark"
-                  placeholder="Search by visitor name or phone..."
+                  placeholder={t('visitors.search_logs_placeholder')}
                   value={searchInput}
                   onChange={(e) => {
                     setSearchInput(e.target.value);
@@ -142,25 +165,8 @@ const VisitorLogPage = () => {
             {/* Status Filter Select Component */}
             <div style={{ minWidth: '160px' }}>
               <Select
-                options={
-                  role === 'resident'
-                    ? [
-                        { value: 'ALL', label: 'All Statuses' },
-                        { value: 'Pending', label: 'Pending' },
-                        { value: 'Approved', label: 'Approved' },
-                        { value: 'Rejected', label: 'Rejected' },
-                        { value: 'CheckedIn', label: 'Checked In' },
-                        { value: 'CheckedOut', label: 'Checked Out' },
-                        { value: 'Cancelled', label: 'Cancelled' },
-                      ]
-                    : [
-                        { value: 'ALL', label: 'All Statuses' },
-                        { value: 'CheckedOut', label: 'Checked Out' },
-                        { value: 'Cancelled', label: 'Cancelled' },
-                        { value: 'Rejected', label: 'Rejected' },
-                      ]
-                }
-                placeholder="All Statuses"
+                options={statusOptions}
+                placeholder={t('visitors.all_statuses')}
                 value={statusFilter}
                 onChange={(e) => setStatusFilter((e.target.value || 'ALL') as VisitorStatus | 'ALL')}
                 className="fw-medium text-secondary"
@@ -180,7 +186,7 @@ const VisitorLogPage = () => {
                   style={{ height: '46px', fontSize: '0.875rem', borderRadius: '8px' }}
                 >
                   <i className="bi bi-x-circle me-2" />
-                  Clear
+                  {t('common.clear')}
                 </button>
               </div>
             )}

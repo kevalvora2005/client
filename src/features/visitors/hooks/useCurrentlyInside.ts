@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { visitorApi } from '../api/visitorApi';
 import type { Visitor } from '../types/visitor.types';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { showError } from '../../../utils/toast';
 
 export const useCurrentlyInside = () => {
+  const { t } = useTranslation();
   const [visitors, setVisitors] = useState<Visitor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -14,11 +16,11 @@ export const useCurrentlyInside = () => {
       const data = await visitorApi.getCurrentlyInside();
       setVisitors(data);
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to fetch visitors currently inside'));
+      showError(getErrorMessage(err, t('visitors.fetch_inside_failed')));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -29,7 +31,7 @@ export const useCurrentlyInside = () => {
         const data = await visitorApi.getCurrentlyInside();
         if (!cancelled) setVisitors(data);
       } catch (err: unknown) {
-        if (!cancelled && !silent) showError(getErrorMessage(err, 'Failed to fetch visitors currently inside'));
+        if (!cancelled && !silent) showError(getErrorMessage(err, t('visitors.fetch_inside_failed')));
       } finally {
         if (!cancelled && !silent) setLoading(false);
       }
@@ -46,7 +48,7 @@ export const useCurrentlyInside = () => {
       window.removeEventListener('visitor-updated', handleVisitorUpdate);
       window.removeEventListener('focus', handleVisitorUpdate);
     };
-  }, []);
+  }, [t]);
 
   return { visitors, loading, refetch: fetchVisitors };
 };

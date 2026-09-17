@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useVisitorSearch } from '../hooks/useVisitorSearch';
 import { useVisitorMutations } from '../hooks/useVisitorMutations';
 import type { Visitor } from '../types/visitor.types';
@@ -17,6 +18,7 @@ export const VisitorLookupSearch: React.FC<VisitorLookupSearchProps> = ({
   onCheckInSuccess,
   checkInLoading,
 }) => {
+  const { t } = useTranslation();
   const { setQuery, results, loading, search } = useVisitorSearch();
   const { checkIn, actionId } = useVisitorMutations();
   const [localQuery, setLocalQuery] = useState('');
@@ -75,16 +77,16 @@ export const VisitorLookupSearch: React.FC<VisitorLookupSearchProps> = ({
             </div>
             <div>
               <h6 className="fw-bold mb-0" style={{ fontSize: '0.95rem', color: '#1a1f36' }}>
-                Pre-Registered Visitors
+                {t('visitors.pre_registered_visitors_title')}
               </h6>
               <p className="text-muted mb-0" style={{ fontSize: '0.75rem' }}>
-                Search by name or phone to find expected guests
+                {t('visitors.pre_registered_search_desc')}
               </p>
             </div>
           </div>
           {filteredResults.length > 0 && (
             <span className="badge bg-dark text-white rounded-pill px-2.5 py-1" style={{ fontSize: '0.7rem' }}>
-              {filteredResults.length} found
+              {t('visitors.count_found', { count: filteredResults.length })}
             </span>
           )}
         </div>
@@ -101,7 +103,7 @@ export const VisitorLookupSearch: React.FC<VisitorLookupSearchProps> = ({
             <input
               type="text"
               className="form-control border-0 ps-1 shadow-none bg-white"
-              placeholder="Search guest name or phone number..."
+              placeholder={t('visitors.lookup_search_placeholder')}
               value={localQuery}
               onChange={handleInputChange}
               style={{ fontSize: '0.875rem', height: '44px' }}
@@ -111,7 +113,7 @@ export const VisitorLookupSearch: React.FC<VisitorLookupSearchProps> = ({
                 type="button"
                 className="btn btn-link text-muted text-decoration-none border-0 px-2"
                 onClick={handleClearQuery}
-                aria-label="Clear search"
+                aria-label={t('common.clear')}
               >
                 <X size={16} />
               </button>
@@ -125,7 +127,7 @@ export const VisitorLookupSearch: React.FC<VisitorLookupSearchProps> = ({
               {loading ? (
                 <span className="spinner-border spinner-border-sm" role="status" />
               ) : (
-                'Search'
+                t('common.search')
               )}
             </button>
           </div>
@@ -155,13 +157,13 @@ export const VisitorLookupSearch: React.FC<VisitorLookupSearchProps> = ({
             </div>
             <p className="fw-semibold text-dark mb-1" style={{ fontSize: '0.875rem' }}>
               {localQuery.trim()
-                ? `No visitors found for "${localQuery}"`
-                : 'No pre-registered visitors'}
+                ? t('visitors.no_visitors_found_for', { query: localQuery })
+                : t('visitors.no_pre_registered')}
             </p>
             <p className="text-muted mb-0" style={{ fontSize: '0.78rem' }}>
               {localQuery.trim()
-                ? 'Try a different name or phone number'
-                : 'Pre-registered guests will appear here'}
+                ? t('visitors.try_different_search')
+                : t('visitors.pre_registered_appear_here')}
             </p>
           </div>
         ) : (
@@ -224,7 +226,7 @@ export const VisitorLookupSearch: React.FC<VisitorLookupSearchProps> = ({
                     </div>
                     {visitor.expectedAt && (
                       <div className="mt-1 d-inline-flex align-items-center gap-1 text-muted" style={{ fontSize: '0.7rem' }}>
-                        <Clock size={10} /> Expected: {formatDateOnly(visitor.expectedAt)}
+                        <Clock size={10} /> {t('visitors.expected_prefix', { date: formatDateOnly(visitor.expectedAt) })}
                       </div>
                     )}
                   </div>
@@ -247,7 +249,7 @@ export const VisitorLookupSearch: React.FC<VisitorLookupSearchProps> = ({
                     ) : (
                       <>
                         <Camera size={15} className="me-1.5" />
-                        Check In
+                        {t('visitors.check_in_btn')}
                       </>
                     )}
                   </button>

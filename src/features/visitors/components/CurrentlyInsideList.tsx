@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Visitor } from '../types/visitor.types';
 import { LogIn, LogOut, Phone, User, Tag, Car } from 'lucide-react';
 import { formatDate } from '../../../utils/formatDate';
@@ -10,11 +11,13 @@ interface CurrentlyInsideListProps {
 }
 
 export const CurrentlyInsideList: React.FC<CurrentlyInsideListProps> = ({ visitors, loading, onCheckOut }) => {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
       <div className="p-4 text-center text-muted border rounded-3 bg-white">
         <div className="spinner-border spinner-border-sm me-2 text-primary" role="status"></div>
-        Loading visitors currently inside...
+        {t('visitors.loading_inside')}
       </div>
     );
   }
@@ -23,7 +26,7 @@ export const CurrentlyInsideList: React.FC<CurrentlyInsideListProps> = ({ visito
     return (
       <div className="p-4 text-center text-muted border rounded-3 bg-white">
         <LogIn size={32} className="text-secondary opacity-50 mb-2" />
-        <p className="fw-medium mb-0">No visitors currently inside the premises.</p>
+        <p className="fw-medium mb-0">{t('visitors.no_visitors_inside')}</p>
       </div>
     );
   }
@@ -54,7 +57,7 @@ export const CurrentlyInsideList: React.FC<CurrentlyInsideListProps> = ({ visito
                 <div className="d-flex align-items-center gap-2">
                   <h6 className="fw-bold mb-0 text-dark">{visitor.name}</h6>
                   <span className="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2">
-                    Inside
+                    {t('visitors.inside_badge')}
                   </span>
                 </div>
 
@@ -77,7 +80,7 @@ export const CurrentlyInsideList: React.FC<CurrentlyInsideListProps> = ({ visito
 
                 {visitor.checkedInAt && (
                   <span className="text-secondary small d-block mt-1">
-                    Entered at: {formatDate(visitor.checkedInAt)}
+                    {t('visitors.entered_at', { time: formatDate(visitor.checkedInAt) })}
                   </span>
                 )}
               </div>
@@ -88,7 +91,7 @@ export const CurrentlyInsideList: React.FC<CurrentlyInsideListProps> = ({ visito
               onClick={() => onCheckOut(visitor.id)}
             >
               <LogOut size={16} />
-              Check Out
+              {t('visitors.check_out_btn')}
             </button>
           </div>
         </div>

@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import AppTable, { type TableColumn } from '../../../components/AppTable/AppTable';
 import type { Visitor } from '../types/visitor.types';
 import VisitorStatusBadge from './VisitorStatusBadge';
 import { highlightMatch } from '../../../utils/highlight';
 import { getInitials, getAvatarColor } from '../../residents/components/residentTableHelpers';
+import { formatDate, formatDateOnly } from '../../../utils/formatDate';
 
 interface VisitorTableProps {
   visitors: Visitor[];
@@ -18,36 +20,6 @@ interface VisitorTableProps {
   onCheckOut?: (visitorId: number) => void;
 }
 
-const formatDateTime = (dateStr: string | null) => {
-  if (!dateStr) return '—';
-  try {
-    const d = new Date(dateStr);
-    return d.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
-  } catch {
-    return dateStr;
-  }
-};
-
-const formatDateOnly = (dateStr: string | null) => {
-  if (!dateStr) return '—';
-  try {
-    const d = new Date(dateStr);
-    return d.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  } catch {
-    return dateStr;
-  }
-};
-
 const VisitorTable: React.FC<VisitorTableProps> = ({
   visitors,
   loading,
@@ -55,12 +27,13 @@ const VisitorTable: React.FC<VisitorTableProps> = ({
   isResident,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
-  const columns: TableColumn<Visitor>[] = [
+  const columns: TableColumn<Visitor>[] = useMemo(() => [
     {
       key: 'name',
-      label: 'Visitor Details',
+      label: t('visitors.col_visitor_details'),
       width: '14.28%',
       align: 'start',
       headerAlign: 'start',
@@ -76,7 +49,7 @@ const VisitorTable: React.FC<VisitorTableProps> = ({
                 className="rounded-circle flex-shrink-0 object-fit-cover border border-white shadow-xs"
                 style={{ width: '40px', height: '40px', cursor: 'pointer' }}
                 onClick={() => setSelectedPhoto(v.photoUrl)}
-                title="Click to view photo"
+                title={t('visitors.click_view_photo')}
               />
             ) : (
               <div
@@ -114,7 +87,7 @@ const VisitorTable: React.FC<VisitorTableProps> = ({
     ...(!isResident
       ? [{
           key: 'apartment',
-          label: 'Apartment',
+          label: t('visitors.col_apartment'),
           width: '14.28%',
           align: 'center' as const,
           headerAlign: 'center' as const,
@@ -144,7 +117,7 @@ const VisitorTable: React.FC<VisitorTableProps> = ({
       : []),
     {
       key: 'type',
-      label: 'Type',
+      label: t('visitors.col_type'),
       width: '14.28%',
       align: 'center',
       headerAlign: 'center',
@@ -152,11 +125,11 @@ const VisitorTable: React.FC<VisitorTableProps> = ({
         <div className="d-flex justify-content-center py-1">
           {v.isPreRegistered ? (
             <span className="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill fw-medium px-2.5 py-1" style={{ fontSize: '0.72rem' }}>
-              Pre-Registered
+              {t('visitors.pre_registered_badge')}
             </span>
           ) : (
             <span className="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill fw-medium px-2.5 py-1" style={{ fontSize: '0.72rem' }}>
-              Walk-In
+              {t('visitors.walk_in_badge')}
             </span>
           )}
         </div>
@@ -164,7 +137,7 @@ const VisitorTable: React.FC<VisitorTableProps> = ({
     },
     {
       key: 'purpose',
-      label: 'Purpose',
+      label: t('visitors.col_purpose'),
       width: '14.28%',
       align: 'center',
       headerAlign: 'center',
@@ -176,7 +149,7 @@ const VisitorTable: React.FC<VisitorTableProps> = ({
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('common.status'),
       width: '14.28%',
       align: 'center',
       headerAlign: 'center',
@@ -188,7 +161,7 @@ const VisitorTable: React.FC<VisitorTableProps> = ({
     },
     {
       key: 'checkIn',
-      label: 'Check-In / Expected',
+      label: t('visitors.col_checkin_expected'),
       width: '14.28%',
       align: 'center',
       headerAlign: 'center',
@@ -196,9 +169,9 @@ const VisitorTable: React.FC<VisitorTableProps> = ({
         <div className="d-flex justify-content-center py-1">
           <span className="text-secondary small fw-medium" style={{ fontSize: '0.825rem' }}>
             {v.checkedInAt ? (
-              <span className="text-dark">{formatDateTime(v.checkedInAt)}</span>
+              <span className="text-dark">{formatDate(v.checkedInAt)}</span>
             ) : v.expectedAt ? (
-              <span className="text-primary">Exp: {formatDateOnly(v.expectedAt)}</span>
+              <span className="text-primary">{t('visitors.exp_prefix', { date: formatDateOnly(v.expectedAt) })}</span>
             ) : (
               '—'
             )}
@@ -208,14 +181,14 @@ const VisitorTable: React.FC<VisitorTableProps> = ({
     },
     {
       key: 'checkOut',
-      label: 'Check-Out',
+      label: t('visitors.col_checkout'),
       width: '14.28%',
       align: 'center',
       headerAlign: 'center',
       render: (v) => (
         <div className="d-flex justify-content-center py-1">
           <span className="text-secondary small fw-medium" style={{ fontSize: '0.825rem' }}>
-            {formatDateTime(v.checkedOutAt)}
+            {formatDate(v.checkedOutAt)}
           </span>
         </div>
       ),
@@ -234,14 +207,14 @@ const VisitorTable: React.FC<VisitorTableProps> = ({
                 className="btn btn-sm btn-outline-danger px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1 rounded-2"
                 onClick={() => onCancel(v.id)}
                 style={{ fontSize: '0.78rem' }}
-                title="Cancel pre-registration"
+                title={t('visitors.cancel_pre_registration')}
               >
                 <i className="bi bi-x-lg" />
               </button>
             ) : null,
         }]
       : []),
-  ];
+  ], [t, isResident, search, onCancel]);
 
   return (
     <>
@@ -251,8 +224,8 @@ const VisitorTable: React.FC<VisitorTableProps> = ({
         loading={loading}
         rowKey={(v) => v.id}
         minWidth="960px"
-        emptyTitle="No visitors found"
-        emptySubtitle={search ? 'No visitor records match your search query.' : 'No visitor activity recorded yet.'}
+        emptyTitle={t('visitors.no_visitors_found')}
+        emptySubtitle={search ? t('visitors.no_visitors_match') : t('visitors.no_visitors_recorded')}
         emptyIcon="bi-person-badge"
       />
 
@@ -267,17 +240,18 @@ const VisitorTable: React.FC<VisitorTableProps> = ({
           <div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
             <div className="modal-content border-0 rounded-3 shadow-lg overflow-hidden">
               <div className="modal-header border-bottom p-3 bg-light">
-                <h6 className="modal-title fw-bold text-dark mb-0">Visitor Photo</h6>
+                <h6 className="modal-title fw-bold text-dark mb-0">{t('visitors.visitor_photo_title')}</h6>
                 <button
                   type="button"
                   className="btn-close shadow-none"
                   onClick={() => setSelectedPhoto(null)}
+                  aria-label={t('common.close')}
                 />
               </div>
               <div className="modal-body p-3 text-center bg-white">
                 <img
                   src={selectedPhoto}
-                  alt="Visitor"
+                  alt={t('visitors.photo_preview_alt')}
                   className="img-fluid rounded-2 border shadow-sm"
                   style={{ maxHeight: '400px', objectFit: 'contain' }}
                 />

@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Visitor, VisitorStatus } from '../types/visitor.types';
 import VisitorStatusBadge from './VisitorStatusBadge';
 import { highlightMatch } from '../../../utils/highlight';
 import { getInitials, getAvatarColor } from '../../residents/components/residentTableHelpers';
+import { formatDate, formatDateOnly } from '../../../utils/formatDate';
+import { formatRelativeTime } from '../../../utils/formatRelativeTime';
 
 interface VisitorCardGridProps {
   visitors: Visitor[];
@@ -29,49 +32,6 @@ const getStatusBorderColor = (status: VisitorStatus) => {
   }
 };
 
-const formatDateTime = (dateStr: string | null) => {
-  if (!dateStr) return '—';
-  try {
-    const d = new Date(dateStr);
-    return d.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
-  } catch {
-    return dateStr;
-  }
-};
-
-const formatDateOnly = (dateStr: string | null) => {
-  if (!dateStr) return '—';
-  try {
-    const d = new Date(dateStr);
-    return d.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  } catch {
-    return dateStr;
-  }
-};
-
-const timeAgo = (dateStr: string) => {
-  if (!dateStr) return '';
-  try {
-    const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-    if (diff < 60) return 'Just now';
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    return `${Math.floor(diff / 86400)}d ago`;
-  } catch {
-    return dateStr;
-  }
-};
-
 const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
   visitors,
   loading,
@@ -85,6 +45,7 @@ const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
   onCheckOut,
   onPreRegister,
 }) => {
+  const { t } = useTranslation();
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
   if (loading) {
@@ -116,9 +77,9 @@ const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
         >
           <i className="bi bi-person-badge text-secondary" style={{ fontSize: '1.5rem' }} />
         </div>
-        <h6 className="fw-bold text-dark mb-1">No visitors found</h6>
+        <h6 className="fw-bold text-dark mb-1">{t('visitors.no_visitors_found')}</h6>
         <p className="text-muted small mb-3">
-          {search ? 'No visitor records match your search query.' : 'No visitor activity recorded yet.'}
+          {search ? t('visitors.no_visitors_match') : t('visitors.no_visitors_recorded')}
         </p>
         {isResident && onPreRegister && (
           <button
@@ -126,7 +87,7 @@ const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
             className="btn btn-primary btn-sm rounded-2 px-3 py-1.5 fw-semibold"
             onClick={onPreRegister}
           >
-            Pre-register your first visitor
+            {t('visitors.pre_register_first')}
           </button>
         )}
       </div>
@@ -177,7 +138,7 @@ const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
 
                   <div className="text-end flex-shrink-0 ms-auto">
                     <span className="d-block text-muted small" style={{ fontSize: '0.72rem', whiteSpace: 'nowrap' }}>
-                      Logged {timeAgo(v.createdAt)}
+                      {t('visitors.logged_time', { time: formatRelativeTime(v.createdAt) })}
                     </span>
                   </div>
                 </div>
@@ -188,11 +149,11 @@ const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
                   <div className="d-flex align-items-center gap-2 flex-wrap">
                     {v.isPreRegistered ? (
                       <span className="badge rounded-pill fw-medium px-2.5 py-1" style={{ fontSize: '0.72rem', backgroundColor: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd' }}>
-                        <i className="bi bi-shield-check me-1" /> Pre-Registered
+                        <i className="bi bi-shield-check me-1" /> {t('visitors.pre_registered_badge')}
                       </span>
                     ) : (
                       <span className="badge rounded-pill fw-medium px-2.5 py-1" style={{ fontSize: '0.72rem', backgroundColor: '#f3f4f6', color: '#4b5563', border: '1px solid #e5e7eb' }}>
-                        <i className="bi bi-person-walking me-1" /> Walk-In
+                        <i className="bi bi-person-walking me-1" /> {t('visitors.walk_in_badge')}
                       </span>
                     )}
 
@@ -206,10 +167,10 @@ const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
                   {/* Purpose Box */}
                   <div className="p-3 bg-white rounded-3 border border-light-subtle shadow-xs">
                     <span className="text-uppercase text-muted fw-bold d-block mb-1" style={{ fontSize: '0.66rem', letterSpacing: '0.05em' }}>
-                      <i className="bi bi-chat-left-quote text-primary me-1" /> Purpose of Visit
+                      <i className="bi bi-chat-left-quote text-primary me-1" /> {t('visitors.label_purpose')}
                     </span>
                     <p className="text-dark mb-0" style={{ fontSize: '0.86rem', lineHeight: '1.5', wordBreak: 'break-word' }}>
-                      {v.purpose || 'No purpose specified.'}
+                      {v.purpose || t('visitors.no_purpose')}
                     </p>
                   </div>
 
@@ -217,7 +178,7 @@ const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
                   <div className="row g-2 text-center">
                     <div className="col-4">
                       <div className="p-2 bg-white rounded-2 border border-light-subtle h-100 d-flex flex-column justify-content-center">
-                        <span className="text-muted d-block text-uppercase fw-semibold mb-0.5" style={{ fontSize: '0.6rem', letterSpacing: '0.03em' }}>Expected</span>
+                        <span className="text-muted d-block text-uppercase fw-semibold mb-0.5" style={{ fontSize: '0.6rem', letterSpacing: '0.03em' }}>{t('visitors.stat_expected')}</span>
                         <span className="fw-semibold text-dark d-block" style={{ fontSize: '0.74rem', lineHeight: '1.25', wordBreak: 'break-word' }}>
                           {formatDateOnly(v.expectedAt)}
                         </span>
@@ -225,17 +186,17 @@ const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
                     </div>
                     <div className="col-4">
                       <div className="p-2 bg-white rounded-2 border border-light-subtle h-100 d-flex flex-column justify-content-center">
-                        <span className="text-muted d-block text-uppercase fw-semibold mb-0.5" style={{ fontSize: '0.6rem', letterSpacing: '0.03em' }}>Check-In</span>
+                        <span className="text-muted d-block text-uppercase fw-semibold mb-0.5" style={{ fontSize: '0.6rem', letterSpacing: '0.03em' }}>{t('visitors.stat_checkin')}</span>
                         <span className="fw-semibold text-dark d-block" style={{ fontSize: '0.74rem', lineHeight: '1.25', wordBreak: 'break-word' }}>
-                          {formatDateTime(v.checkedInAt)}
+                          {formatDate(v.checkedInAt)}
                         </span>
                       </div>
                     </div>
                     <div className="col-4">
                       <div className="p-2 bg-white rounded-2 border border-light-subtle h-100 d-flex flex-column justify-content-center">
-                        <span className="text-muted d-block text-uppercase fw-semibold mb-0.5" style={{ fontSize: '0.6rem', letterSpacing: '0.03em' }}>Check-Out</span>
+                        <span className="text-muted d-block text-uppercase fw-semibold mb-0.5" style={{ fontSize: '0.6rem', letterSpacing: '0.03em' }}>{t('visitors.stat_checkout')}</span>
                         <span className="fw-semibold text-dark d-block" style={{ fontSize: '0.74rem', lineHeight: '1.25', wordBreak: 'break-word' }}>
-                          {formatDateTime(v.checkedOutAt)}
+                          {formatDate(v.checkedOutAt)}
                         </span>
                       </div>
                     </div>
@@ -251,10 +212,10 @@ const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
                       onClick={() => setSelectedPhoto(v.photoUrl)}
                       style={{ fontSize: '0.75rem', borderRadius: '6px' }}
                     >
-                      <i className="bi bi-image text-primary" /> View Photo
+                      <i className="bi bi-image text-primary" /> {t('visitors.view_photo')}
                     </button>
                   ) : (
-                    <span className="text-muted small ms-1" style={{ fontSize: '0.75rem' }}>No photo attached</span>
+                    <span className="text-muted small ms-1" style={{ fontSize: '0.75rem' }}>{t('visitors.no_photo_attached')}</span>
                   )}
 
                   {isResident && v.status === 'Pending' && (
@@ -267,7 +228,7 @@ const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
                             onClick={() => onApprove(v.id)}
                             style={{ fontSize: '0.78rem' }}
                           >
-                            <i className="bi bi-check-lg" /> Approve
+                            <i className="bi bi-check-lg" /> {t('visitors.approve')}
                           </button>
                           <button
                             type="button"
@@ -275,7 +236,7 @@ const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
                             onClick={() => onReject(v.id)}
                             style={{ fontSize: '0.78rem' }}
                           >
-                            <i className="bi bi-x-lg" /> Reject
+                            <i className="bi bi-x-lg" /> {t('visitors.reject')}
                           </button>
                         </>
                       )}
@@ -287,7 +248,7 @@ const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
                           onClick={() => onCancel(v.id)}
                           style={{ fontSize: '0.78rem' }}
                         >
-                          <i className="bi bi-trash3" /> Cancel
+                          <i className="bi bi-trash3" /> {t('common.cancel')}
                         </button>
                       )}
                     </div>
@@ -302,7 +263,7 @@ const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
                           onClick={() => onCheckIn(v.id)}
                           style={{ fontSize: '0.78rem' }}
                         >
-                          <i className="bi bi-box-arrow-in-right" /> Check In
+                          <i className="bi bi-box-arrow-in-right" /> {t('visitors.check_in_btn')}
                         </button>
                       )}
                       {v.status === 'CheckedIn' && onCheckOut && (
@@ -312,7 +273,7 @@ const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
                           onClick={() => onCheckOut(v.id)}
                           style={{ fontSize: '0.78rem' }}
                         >
-                          <i className="bi bi-box-arrow-right" /> Check Out
+                          <i className="bi bi-box-arrow-right" /> {t('visitors.check_out_btn')}
                         </button>
                       )}
                     </div>
@@ -337,18 +298,19 @@ const VisitorCardGrid: React.FC<VisitorCardGridProps> = ({
             <div className="modal-content border-0 rounded-3 shadow-lg overflow-hidden">
               <div className="modal-header border-bottom p-3 bg-light">
                 <h6 className="modal-title fw-bold text-dark mb-0 d-flex align-items-center gap-2">
-                  <i className="bi bi-camera text-primary" /> Visitor Photo
+                  <i className="bi bi-camera text-primary" /> {t('visitors.visitor_photo_title')}
                 </h6>
                 <button
                   type="button"
                   className="btn-close shadow-none"
                   onClick={() => setSelectedPhoto(null)}
+                  aria-label={t('common.close')}
                 />
               </div>
               <div className="modal-body p-3 text-center bg-white">
                 <img
                   src={selectedPhoto}
-                  alt="Visitor"
+                  alt={t('visitors.photo_preview_alt')}
                   className="img-fluid rounded-2 border shadow-sm"
                   style={{ maxHeight: '420px', objectFit: 'contain' }}
                 />

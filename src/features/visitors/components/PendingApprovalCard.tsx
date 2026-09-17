@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Visitor } from '../types/visitor.types';
 import { User, Phone, Tag, Car, Check, X, ShieldAlert } from 'lucide-react';
 
@@ -15,6 +16,8 @@ export const PendingApprovalCard: React.FC<PendingApprovalCardProps> = ({
   onReject,
   loading,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div
       className="card border-warning shadow-sm rounded-3 overflow-hidden bg-white mb-3"
@@ -23,9 +26,9 @@ export const PendingApprovalCard: React.FC<PendingApprovalCardProps> = ({
       <div className="card-header bg-warning bg-opacity-10 border-bottom border-warning border-opacity-25 px-3 py-2.5 d-flex align-items-center justify-content-between">
         <div className="d-flex align-items-center gap-2 text-warning-emphasis fw-bold small">
           <ShieldAlert size={18} className="text-warning" />
-          <span>Walk-In Visitor Request at Gate</span>
+          <span>{t('visitors.walkin_request_at_gate')}</span>
         </div>
-        <span className="badge bg-warning text-dark rounded-pill px-2.5">Awaiting Your Response</span>
+        <span className="badge bg-warning text-dark rounded-pill px-2.5">{t('visitors.awaiting_response')}</span>
       </div>
 
       <div className="card-body p-3 p-md-4">
@@ -67,7 +70,7 @@ export const PendingApprovalCard: React.FC<PendingApprovalCardProps> = ({
             <div className="p-2.5 rounded-2 bg-white border text-secondary small">
               <div className="d-flex align-items-center gap-1.5 fw-medium text-dark mb-0.5">
                 <Tag size={14} className="text-muted flex-shrink-0" />
-                <span>Purpose: {visitor.purpose}</span>
+                <span>{t('visitors.purpose_label', { purpose: visitor.purpose })}</span>
               </div>
             </div>
           </div>
@@ -75,20 +78,20 @@ export const PendingApprovalCard: React.FC<PendingApprovalCardProps> = ({
 
         <div className="d-flex align-items-center justify-content-end gap-2 mt-3 pt-2 border-top">
           <button
-            className="btn btn-outline-danger btn-sm rounded-2 d-flex align-items-center gap-1.5 px-3 fw-semibold"
+            className="btn btn-outline-danger btn-sm rounded-2 d-inline-flex align-items-center gap-1.5 px-3 fw-semibold"
             disabled={loading}
             onClick={() => onReject(visitor.id)}
           >
             <X size={16} />
-            Reject Entry
+            {t('visitors.reject_entry')}
           </button>
           <button
-            className="btn btn-success btn-sm rounded-2 d-flex align-items-center gap-1.5 px-4 fw-semibold text-white shadow-sm"
+            className="btn btn-success btn-sm rounded-2 d-inline-flex align-items-center gap-1.5 px-4 fw-semibold text-white shadow-sm"
             disabled={loading}
             onClick={() => onApprove(visitor.id)}
           >
             <Check size={16} />
-            Approve Entry
+            {t('visitors.approve_entry')}
           </button>
         </div>
       </div>

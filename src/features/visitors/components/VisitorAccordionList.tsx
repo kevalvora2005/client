@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Visitor, VisitorStatus } from '../types/visitor.types';
 import VisitorStatusBadge from './VisitorStatusBadge';
 import { highlightMatch } from '../../../utils/highlight';
 import { getInitials, getAvatarColor } from '../../residents/components/residentTableHelpers';
+import { formatDate, formatDateOnly } from '../../../utils/formatDate';
+import { formatRelativeTime } from '../../../utils/formatRelativeTime';
 
 interface VisitorAccordionListProps {
   visitors: Visitor[];
@@ -26,50 +29,6 @@ const getStatusBorderColor = (status: VisitorStatus) => {
   }
 };
 
-const formatDateTime = (dateStr: string | null) => {
-  if (!dateStr) return '—';
-  try {
-    const d = new Date(dateStr);
-    return d.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
-  } catch {
-    return dateStr;
-  }
-};
-
-const formatDateOnly = (dateStr: string | null) => {
-  if (!dateStr) return '—';
-  try {
-    const d = new Date(dateStr);
-    return d.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  } catch {
-    return dateStr;
-  }
-};
-
-const timeAgo = (dateStr: string) => {
-  if (!dateStr) return '';
-  try {
-    const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-    if (diff < 60) return 'Just now';
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    return `${Math.floor(diff / 86400)}d ago`;
-  } catch {
-    return dateStr;
-  }
-};
-
 const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
   visitors,
   loading,
@@ -80,6 +39,7 @@ const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
   onCancel,
   onPreRegister,
 }) => {
+  const { t } = useTranslation();
   const [accordionOpenId, setAccordionOpenId] = useState<number | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
@@ -117,9 +77,9 @@ const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
         >
           <i className="bi bi-person-badge text-secondary" style={{ fontSize: '1.5rem' }} />
         </div>
-        <h6 className="fw-bold text-dark mb-1">No visitors found</h6>
+        <h6 className="fw-bold text-dark mb-1">{t('visitors.no_visitors_found')}</h6>
         <p className="text-muted small mb-3" style={{ maxWidth: '300px', margin: '0 auto' }}>
-          {search ? 'No visitor records match your search query.' : 'No visitor activity recorded yet.'}
+          {search ? t('visitors.no_visitors_match') : t('visitors.no_visitors_recorded')}
         </p>
         {isResident && onPreRegister && (
           <button
@@ -128,7 +88,7 @@ const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
             onClick={onPreRegister}
           >
             <i className="bi bi-plus-lg" />
-            Pre-register your first visitor
+            {t('visitors.pre_register_first')}
           </button>
         )}
       </div>
@@ -207,7 +167,7 @@ const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
                   {/* Right: Logged Time */}
                   <div className="d-flex flex-column align-items-end justify-content-center flex-shrink-0 ms-2 text-end">
                     <span className="text-muted small" style={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
-                      {timeAgo(v.createdAt)}
+                      {formatRelativeTime(v.createdAt)}
                     </span>
                   </div>
                 </div>
@@ -229,7 +189,7 @@ const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
                         style={{ fontSize: '0.72rem', backgroundColor: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd' }}
                       >
                         <i className="bi bi-shield-check me-1" />
-                        Pre-Registered
+                        {t('visitors.pre_registered_badge')}
                       </span>
                     ) : (
                       <span
@@ -237,7 +197,7 @@ const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
                         style={{ fontSize: '0.72rem', backgroundColor: '#f3f4f6', color: '#4b5563', border: '1px solid #e5e7eb' }}
                       >
                         <i className="bi bi-person-walking me-1" />
-                        Walk-In
+                        {t('visitors.walk_in_badge')}
                       </span>
                     )}
 
@@ -257,7 +217,7 @@ const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
                       style={{ fontSize: '0.72rem', borderRadius: '6px' }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <i className="bi bi-telephone text-primary" /> Call
+                      <i className="bi bi-telephone text-primary" /> {t('visitors.call_btn')}
                     </a>
                   </div>
 
@@ -265,10 +225,10 @@ const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
                   <div className="p-3 bg-white rounded-3 border border-light-subtle shadow-xs">
                     <div className="d-flex align-items-center gap-1.5 text-uppercase text-muted fw-bold mb-1.5" style={{ fontSize: '0.68rem', letterSpacing: '0.06em' }}>
                       <i className="bi bi-chat-left-quote text-primary" style={{ fontSize: '0.85rem' }} />
-                      Purpose of Visit
+                      {t('visitors.label_purpose')}
                     </div>
                     <p className="text-dark mb-0 fw-normal" style={{ fontSize: '0.875rem', lineHeight: '1.5' }}>
-                      {v.purpose || 'No purpose specified.'}
+                      {v.purpose || t('visitors.no_purpose')}
                     </p>
                   </div>
 
@@ -277,10 +237,10 @@ const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
                     <div className="col-6">
                       <div className="p-2.5 bg-white rounded-3 border border-light-subtle shadow-xs">
                         <div className="text-uppercase text-muted fw-semibold mb-1" style={{ fontSize: '0.64rem', letterSpacing: '0.05em' }}>
-                          <i className="bi bi-calendar-event text-primary me-1" /> Expected / Check-In
+                          <i className="bi bi-calendar-event text-primary me-1" /> {t('visitors.label_expected_or_checkin')}
                         </div>
                         <span className="fw-bold text-dark d-block" style={{ fontSize: '0.8rem' }}>
-                          {v.checkedInAt ? formatDateTime(v.checkedInAt) : v.expectedAt ? formatDateOnly(v.expectedAt) : '—'}
+                          {v.checkedInAt ? formatDate(v.checkedInAt) : v.expectedAt ? formatDateOnly(v.expectedAt) : '—'}
                         </span>
                       </div>
                     </div>
@@ -288,10 +248,10 @@ const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
                     <div className="col-6">
                       <div className="p-2.5 bg-white rounded-3 border border-light-subtle shadow-xs">
                         <div className="text-uppercase text-muted fw-semibold mb-1" style={{ fontSize: '0.64rem', letterSpacing: '0.05em' }}>
-                          <i className="bi bi-box-arrow-right text-secondary me-1" /> Check-Out Time
+                          <i className="bi bi-box-arrow-right text-secondary me-1" /> {t('visitors.label_checkout_time')}
                         </div>
                         <span className="fw-bold text-dark d-block" style={{ fontSize: '0.8rem' }}>
-                          {formatDateTime(v.checkedOutAt)}
+                          {v.checkedOutAt ? formatDate(v.checkedOutAt) : '—'}
                         </span>
                       </div>
                     </div>
@@ -301,21 +261,21 @@ const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
                   {v.photoUrl && (
                     <div className="p-3 bg-white rounded-3 border border-light-subtle shadow-xs">
                       <div className="d-flex align-items-center gap-1.5 text-uppercase text-muted fw-bold mb-2" style={{ fontSize: '0.68rem', letterSpacing: '0.06em' }}>
-                        <i className="bi bi-camera text-primary" style={{ fontSize: '0.85rem' }} /> Attached Photo
+                        <i className="bi bi-camera text-primary" style={{ fontSize: '0.85rem' }} /> {t('visitors.label_attached_photo')}
                       </div>
                       <div
                         className="d-inline-block rounded-2 overflow-hidden border border-light-subtle shadow-xs position-relative hover-shadow"
                         style={{ width: '100px', height: '100px', cursor: 'pointer' }}
                         onClick={() => setSelectedPhoto(v.photoUrl)}
-                        title="Click to view full photo"
+                        title={t('visitors.click_view_photo')}
                       >
                         <img
                           src={v.photoUrl}
-                          alt="Visitor entry photo"
+                          alt={t('visitors.entry_photo_alt')}
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                         <div className="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-60 text-white text-center py-0.5" style={{ fontSize: '0.65rem' }}>
-                          <i className="bi bi-zoom-in me-1" /> Zoom
+                          <i className="bi bi-zoom-in me-1" /> {t('visitors.zoom')}
                         </div>
                       </div>
                     </div>
@@ -332,7 +292,7 @@ const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
                             onClick={() => onApprove(v.id)}
                             style={{ fontSize: '0.82rem' }}
                           >
-                            <i className="bi bi-check-circle-fill" /> Approve
+                            <i className="bi bi-check-circle-fill" /> {t('visitors.approve')}
                           </button>
                           <button
                             type="button"
@@ -340,7 +300,7 @@ const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
                             onClick={() => onReject(v.id)}
                             style={{ fontSize: '0.82rem' }}
                           >
-                            <i className="bi bi-x-circle" /> Reject
+                            <i className="bi bi-x-circle" /> {t('visitors.reject')}
                           </button>
                         </>
                       )}
@@ -352,7 +312,7 @@ const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
                           onClick={() => onCancel(v.id)}
                           style={{ fontSize: '0.82rem' }}
                         >
-                          <i className="bi bi-trash3" /> Cancel
+                          <i className="bi bi-trash3" /> {t('common.cancel')}
                         </button>
                       )}
                     </div>
@@ -377,18 +337,19 @@ const VisitorAccordionList: React.FC<VisitorAccordionListProps> = ({
             <div className="modal-content border-0 rounded-3 shadow-lg overflow-hidden">
               <div className="modal-header border-bottom p-3 bg-light">
                 <h6 className="modal-title fw-bold text-dark mb-0 d-flex align-items-center gap-2">
-                  <i className="bi bi-camera text-primary" /> Visitor Photo
+                  <i className="bi bi-camera text-primary" /> {t('visitors.visitor_photo_title')}
                 </h6>
                 <button
                   type="button"
                   className="btn-close shadow-none"
                   onClick={() => setSelectedPhoto(null)}
+                  aria-label={t('common.close')}
                 />
               </div>
               <div className="modal-body p-3 text-center bg-white">
                 <img
                   src={selectedPhoto}
-                  alt="Visitor"
+                  alt={t('visitors.photo_preview_alt')}
                   className="img-fluid rounded-2 border shadow-sm"
                   style={{ maxHeight: '420px', objectFit: 'contain' }}
                 />

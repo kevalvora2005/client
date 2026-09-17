@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Visitor } from '../types/visitor.types';
 import { CheckCircle2, User, Phone, MapPin, Car, Camera, RefreshCw, X } from 'lucide-react';
 import { useScrollLock } from '../../../hooks/useScrollLock';
@@ -19,6 +20,7 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  const { t } = useTranslation();
   useScrollLock(show && Boolean(visitor));
 
   const [photo, setPhoto] = useState<File | null>(null);
@@ -55,9 +57,9 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
       streamRef.current = mediaStream;
       setCameraOpen(true);
     } catch {
-      showError('Unable to access camera. Please upload a photo instead.');
+      showError(t('visitors.camera_access_error'));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (cameraOpen && videoRef.current && streamRef.current) {
@@ -98,18 +100,18 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
     setPhotoError('');
   };
 
-  const removePhoto = () => {
+  const removePhoto = useCallback(() => {
     if (photoPreview) URL.revokeObjectURL(photoPreview);
     setPhoto(null);
     setPhotoPreview(null);
-  };
+  }, [photoPreview]);
 
   const handleClose = useCallback(() => {
     stopCamera();
     removePhoto();
     setPhotoError('');
     onClose();
-  }, [onClose, stopCamera]);
+  }, [onClose, stopCamera, removePhoto]);
 
   useEffect(() => {
     if (!show) return;
@@ -125,7 +127,7 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
   const handleCheckIn = async () => {
     if (!visitor) return;
     if (!visitor.photoUrl && !photo) {
-      setPhotoError('Visitor photo is required for security verification');
+      setPhotoError(t('visitors.photo_required_error'));
       return;
     }
 
@@ -158,10 +160,10 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
           <div className="modal-header d-flex align-items-start justify-content-between border-bottom border-light-subtle px-4 py-4 position-relative">
             <div>
               <h5 className="modal-title fw-bold m-0 text-dark" style={{ fontSize: '1rem', color: '#1a1f36' }}>
-                Visitor Gate Check-In
+                {t('visitors.checkin_modal_title')}
               </h5>
               <p className="text-muted m-0 small" style={{ fontSize: '0.8rem' }}>
-                Verify identity and confirm entry.
+                {t('visitors.checkin_modal_desc')}
               </p>
             </div>
             <button
@@ -170,7 +172,7 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
               style={{ top: 22, right: 22, width: 28, height: 28, border: '1px solid #e9ecef', background: '#fff', fontSize: '1.1rem', borderRadius: '6px' }}
               onClick={handleClose}
               disabled={loading}
-              aria-label="Close"
+              aria-label={t('common.close')}
             >
               <i className="bi bi-x" />
             </button>
@@ -202,7 +204,7 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
                     </h6>
                     {visitor.isPreRegistered && (
                       <span className="badge bg-indigo-subtle text-indigo px-2 py-0.5 rounded-pill" style={{ fontSize: '0.68rem', backgroundColor: '#e0e7ff', color: '#3730a3' }}>
-                        Pre-Registered
+                        {t('visitors.pre_registered_badge')}
                       </span>
                     )}
                   </div>
@@ -230,7 +232,7 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
             {/* Photo Capture Section (Identical to WalkInVisitorForm) */}
             <div className="mb-3">
               <label className="form-label fw-medium text-secondary small mb-1">
-                Visitor Photo <span className="text-danger">*</span>
+                {t('visitors.label_visitor_photo')} <span className="text-danger">*</span>
               </label>
 
               {!cameraOpen && !currentDisplayPhoto && (
@@ -249,7 +251,7 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
                     }}
                   >
                     <Camera size={16} />
-                    Open Camera
+                    {t('visitors.open_camera')}
                   </button>
                   <label
                     className="btn fw-medium d-inline-flex align-items-center justify-content-center gap-2 flex-grow-1 mb-0"
@@ -264,7 +266,7 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
                     }}
                   >
                     <i className="bi bi-upload" />
-                    Upload Photo
+                    {t('visitors.upload_photo')}
                     <input
                       type="file"
                       accept="image/*"
@@ -294,7 +296,7 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
                       style={{ borderRadius: '24px', fontSize: '0.85rem' }}
                     >
                       <Camera size={16} />
-                      Capture
+                      {t('visitors.capture_photo')}
                     </button>
                     <button
                       type="button"
@@ -303,7 +305,7 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
                       style={{ borderRadius: '24px', fontSize: '0.85rem' }}
                     >
                       <X size={16} />
-                      Cancel
+                      {t('common.cancel')}
                     </button>
                   </div>
                 </div>
@@ -313,7 +315,7 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
                 <div className="d-flex align-items-center gap-3">
                   <img
                     src={currentDisplayPhoto}
-                    alt="Visitor preview"
+                    alt={t('visitors.photo_preview_alt')}
                     className="rounded-2 border"
                     style={{ width: '80px', height: '80px', objectFit: 'cover' }}
                   />
@@ -327,7 +329,7 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
                       }}
                       style={{ fontSize: '0.78rem' }}
                     >
-                      <RefreshCw size={12} /> Retake
+                      <RefreshCw size={12} /> {t('visitors.retake_photo')}
                     </button>
                     <button
                       type="button"
@@ -335,7 +337,7 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
                       onClick={removePhoto}
                       style={{ fontSize: '0.78rem' }}
                     >
-                      <X size={12} /> Remove
+                      <X size={12} /> {t('visitors.remove_photo')}
                     </button>
                   </div>
                 </div>
@@ -358,7 +360,7 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
               disabled={loading}
               style={{ height: '38px', fontSize: '0.875rem' }}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="button"
@@ -370,12 +372,12 @@ export const CheckInPhotoModal: React.FC<CheckInPhotoModalProps> = ({
               {loading ? (
                 <>
                   <span className="spinner-border spinner-border-sm me-1" role="status" />
-                  Checking In...
+                  {t('visitors.checking_in')}
                 </>
               ) : (
                 <>
                   <CheckCircle2 size={16} />
-                  Confirm Check-In
+                  {t('visitors.confirm_checkin')}
                 </>
               )}
             </button>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { STATUS_CONFIG } from '../constants/visitorStyles';
 import type { VisitorStatus } from '../types/visitor.types';
 
@@ -7,20 +8,21 @@ interface VisitorStatusBadgeProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-const STATUS_LABELS: Record<VisitorStatus, string> = {
-  Pending: 'Pending',
-  Approved: 'Approved',
-  Rejected: 'Rejected',
-  CheckedIn: 'Checked In',
-  CheckedOut: 'Checked Out',
-  Cancelled: 'Cancelled',
+const STATUS_KEY_MAP: Record<VisitorStatus, string> = {
+  Pending: 'status.pending',
+  Approved: 'status.approved',
+  Rejected: 'status.rejected',
+  CheckedIn: 'status.checked_in',
+  CheckedOut: 'status.checked_out',
+  Cancelled: 'status.cancelled',
 };
 
 export const VisitorStatusBadge: React.FC<VisitorStatusBadgeProps> = ({ status, size = 'md' }) => {
+  const { t } = useTranslation();
   const cfg = STATUS_CONFIG[status];
   const isSm = size === 'sm';
   const isLg = size === 'lg';
-  const label = STATUS_LABELS[status] || status;
+  const label = t(STATUS_KEY_MAP[status]);
 
   return (
     <span

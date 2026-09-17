@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Visitor, VisitorStatus, VisitorListParams } from '../types/visitor.types';
 import { visitorApi } from '../api/visitorApi';
+import { getErrorMessage } from '../../../utils/getErrorMessage';
 import { showError } from '../../../utils/toast';
 
 interface UseVisitorsOptions {
@@ -10,6 +12,7 @@ interface UseVisitorsOptions {
 }
 
 export const useVisitors = (options: UseVisitorsOptions = {}) => {
+  const { t } = useTranslation();
   const { userRole = 'security', pageSize = 10, status: initialStatus } = options;
 
   const [visitors, setVisitors] = useState<Visitor[]>([]);
@@ -40,13 +43,11 @@ export const useVisitors = (options: UseVisitorsOptions = {}) => {
       setTotalPages(result.totalPages || 1);
       setTotalCount(result.totalCount || result.items.length);
     } catch (err: unknown) {
-      const axiosError = err as { response?: { data?: { message?: string } } };
-      const msg = axiosError?.response?.data?.message || 'Failed to fetch visitor logs';
-      showError(msg);
+      showError(getErrorMessage(err, t('visitors.fetch_logs_failed')));
     } finally {
       setLoading(false);
     }
-  }, [userRole, pageNumber, pageSize, statusFilter, searchQuery]);
+  }, [userRole, pageNumber, pageSize, statusFilter, searchQuery, t]);
 
   useEffect(() => {
     let isMounted = true;
@@ -73,9 +74,7 @@ export const useVisitors = (options: UseVisitorsOptions = {}) => {
         }
       } catch (err: unknown) {
         if (isMounted && !silent) {
-          const axiosError = err as { response?: { data?: { message?: string } } };
-          const msg = axiosError?.response?.data?.message || 'Failed to fetch visitor logs';
-          showError(msg);
+          showError(getErrorMessage(err, t('visitors.fetch_logs_failed')));
         }
       } finally {
         if (isMounted && !silent) {
@@ -95,7 +94,7 @@ export const useVisitors = (options: UseVisitorsOptions = {}) => {
       window.removeEventListener('visitor-updated', handleVisitorUpdate);
       window.removeEventListener('focus', handleVisitorUpdate);
     };
-  }, [userRole, pageNumber, pageSize, statusFilter, searchQuery]);
+  }, [userRole, pageNumber, pageSize, statusFilter, searchQuery, t]);
 
   const handleFilterChange = (status: VisitorStatus | 'ALL') => {
     setStatusFilter(status);

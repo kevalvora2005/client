@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { visitorApi } from '../api/visitorApi';
 import type { Visitor, LogWalkInPayload } from '../types/visitor.types';
 import { getErrorMessage } from '../../../utils/getErrorMessage';
@@ -13,6 +14,7 @@ interface PreRegisterPayload {
 }
 
 export const useVisitorMutations = (onSuccess?: () => void) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [actionId, setActionId] = useState<number | null>(null);
@@ -22,108 +24,108 @@ export const useVisitorMutations = (onSuccess?: () => void) => {
       setSubmitting(true);
       setLoading(true);
       const visitor = await visitorApi.preRegister(payload, photo);
-      showSuccess('Visitor pre-registered successfully!');
+      showSuccess(t('visitors.pre_register_success'));
       window.dispatchEvent(new CustomEvent('visitor-updated'));
       onSuccess?.();
       return visitor;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to pre-register visitor'));
+      showError(getErrorMessage(err, t('visitors.pre_register_failed')));
       return null;
     } finally {
       setSubmitting(false);
       setLoading(false);
     }
-  }, [onSuccess]);
+  }, [onSuccess, t]);
 
   const logWalkIn = useCallback(async (payload: LogWalkInPayload, photo?: File): Promise<boolean> => {
     try {
       setSubmitting(true);
       setLoading(true);
       await visitorApi.logWalkIn(payload, photo);
-      showSuccess('Walk-in visitor logged successfully!');
+      showSuccess(t('visitors.log_walkin_success'));
       window.dispatchEvent(new CustomEvent('visitor-updated'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to log walk-in visitor'));
+      showError(getErrorMessage(err, t('visitors.log_walkin_failed')));
       return false;
     } finally {
       setSubmitting(false);
       setLoading(false);
     }
-  }, [onSuccess]);
+  }, [onSuccess, t]);
 
   const respond = useCallback(async (visitorId: number, decision: 'Approve' | 'Reject'): Promise<boolean> => {
     try {
       setActionId(visitorId);
       setLoading(true);
       await visitorApi.respond(visitorId, decision);
-      showSuccess(`Visitor entry request ${decision.toLowerCase()}d.`);
+      showSuccess(decision === 'Approve' ? t('visitors.respond_approved_success') : t('visitors.respond_rejected_success'));
       window.dispatchEvent(new CustomEvent('visitor-updated'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, `Failed to ${decision.toLowerCase()} visitor`));
+      showError(getErrorMessage(err, decision === 'Approve' ? t('visitors.respond_approved_failed') : t('visitors.respond_rejected_failed')));
       return false;
     } finally {
       setActionId(null);
       setLoading(false);
     }
-  }, [onSuccess]);
+  }, [onSuccess, t]);
 
   const checkIn = useCallback(async (visitorId: number, photo?: File): Promise<boolean> => {
     try {
       setActionId(visitorId);
       setLoading(true);
       await visitorApi.checkIn(visitorId, photo);
-      showSuccess('Visitor checked in successfully.');
+      showSuccess(t('visitors.checkin_success'));
       window.dispatchEvent(new CustomEvent('visitor-updated'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to check in visitor'));
+      showError(getErrorMessage(err, t('visitors.checkin_failed')));
       return false;
     } finally {
       setActionId(null);
       setLoading(false);
     }
-  }, [onSuccess]);
+  }, [onSuccess, t]);
 
   const checkOut = useCallback(async (visitorId: number): Promise<boolean> => {
     try {
       setActionId(visitorId);
       setLoading(true);
       await visitorApi.checkOut(visitorId);
-      showSuccess('Visitor checked out successfully.');
+      showSuccess(t('visitors.checkout_success'));
       window.dispatchEvent(new CustomEvent('visitor-updated'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to check out visitor'));
+      showError(getErrorMessage(err, t('visitors.checkout_failed')));
       return false;
     } finally {
       setActionId(null);
       setLoading(false);
     }
-  }, [onSuccess]);
+  }, [onSuccess, t]);
 
   const cancel = useCallback(async (visitorId: number): Promise<boolean> => {
     try {
       setActionId(visitorId);
       setLoading(true);
       await visitorApi.cancel(visitorId);
-      showSuccess('Pre-registration cancelled successfully.');
+      showSuccess(t('visitors.cancel_success'));
       window.dispatchEvent(new CustomEvent('visitor-updated'));
       onSuccess?.();
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to cancel pre-registration'));
+      showError(getErrorMessage(err, t('visitors.cancel_failed')));
       return false;
     } finally {
       setActionId(null);
       setLoading(false);
     }
-  }, [onSuccess]);
+  }, [onSuccess, t]);
 
   return {
     loading,
