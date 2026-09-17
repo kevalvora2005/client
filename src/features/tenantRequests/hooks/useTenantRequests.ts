@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { tenantRequestApi } from '../api/tenantRequestApi';
 import type { TenantRequest, TenantRequestFilters } from '../types/tenantRequest.types';
 import type { PaginatedResult } from '../../../types/pagination.types';
@@ -12,6 +13,7 @@ const INITIAL_FILTERS: TenantRequestFilters = {
 };
 
 const useTenantRequests = () => {
+  const { t } = useTranslation();
   const [requests, setRequests] = useState<TenantRequest[]>([]);
   const [pagination, setPagination] = useState<Omit<PaginatedResult<TenantRequest>, 'items'>>({
     totalCount: 0,
@@ -44,7 +46,7 @@ const useTenantRequests = () => {
           });
         }
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, 'Failed to fetch tenant requests'));
+        if (!cancelled) showError(getErrorMessage(err, t('tenantRequests.toast_fetch_list_failed')));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -52,7 +54,7 @@ const useTenantRequests = () => {
 
     fetch();
     return () => { cancelled = true; };
-  }, [filters, refreshKey]);
+  }, [filters, refreshKey, t]);
 
   const updateFilters = (patch: Partial<TenantRequestFilters>) => {
     setFilters((prev) => ({ ...prev, ...patch, pageNumber: 1 }));

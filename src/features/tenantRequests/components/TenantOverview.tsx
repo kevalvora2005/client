@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Receipt, ClipboardList, Calendar, Mail, Phone, Users, CarFront, UserCheck } from "lucide-react";
 import { useComplaints } from "../../complaints/hooks/useComplaints";
 import { useInvoicesPage } from "../../maintenance/hooks/useInvoicesPage";
@@ -12,18 +13,13 @@ import type { TableColumn } from "../../../components/AppTable/AppTable";
 import type { Invoice } from "../../maintenance/types/maintenance.types";
 import type { TenantHistoryItem } from "../../residents/types/resident.types";
 import { getAvatarColor, getInitials } from "../../residents/components/residentTableHelpers";
+import { formatDateOnly } from "../../../utils/formatDate";
 import { showError } from "../../../utils/toast";
 
 interface TenantOverviewProps {
   tenant: TenantHistoryItem;
   onBack: () => void;
 }
-
-const formatDate = (d: string | null): string =>
-  d ? new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : "—";
-
-const formatMonth = (month: number, year: number): string =>
-  new Date(year, month - 1).toLocaleString('en-IN', { month: 'long', year: 'numeric' });
 
 const SectionCard = ({ icon: Icon, title, children }: { icon: typeof Receipt; title: string; children: React.ReactNode }) => (
   <div className="card bg-white border border-light-subtle rounded-3 shadow-sm mt-3">
@@ -37,15 +33,27 @@ const SectionCard = ({ icon: Icon, title, children }: { icon: typeof Receipt; ti
 
 type TabKey = 'family' | 'vehicles' | 'maintenance' | 'complaints';
 
-const TABS: { key: TabKey; label: string; icon: typeof Users }[] = [
-  { key: 'family', label: 'Family', icon: Users },
-  { key: 'vehicles', label: 'Vehicles', icon: CarFront },
-  { key: 'maintenance', label: 'Maintenance', icon: Receipt },
-  { key: 'complaints', label: 'Complaints', icon: ClipboardList },
-];
-
 const TenantOverview = ({ tenant, onBack }: TenantOverviewProps) => {
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabKey>('family');
+
+  const TABS: { key: TabKey; label: string; icon: typeof Users }[] = useMemo(
+    () => [
+      { key: 'family', label: t('tenantRequests.tab_family'), icon: Users },
+      { key: 'vehicles', label: t('tenantRequests.tab_vehicles'), icon: CarFront },
+      { key: 'maintenance', label: t('tenantRequests.tab_maintenance'), icon: Receipt },
+      { key: 'complaints', label: t('tenantRequests.tab_complaints'), icon: ClipboardList },
+    ],
+    [t]
+  );
+
+  const formatMonth = useCallback(
+    (month: number, year: number): string =>
+      new Intl.DateTimeFormat(i18n.language || 'en', { month: 'long', year: 'numeric' }).format(
+        new Date(year, month - 1)
+      ),
+    [i18n.language]
+  );
 
   const { complaints: complaintData, loading: cLoading } = useComplaints({}, false, false);
   const complaintItems = (complaintData?.items ?? []).filter((c) => c.residentId === tenant.id);
@@ -53,105 +61,111 @@ const TenantOverview = ({ tenant, onBack }: TenantOverviewProps) => {
   const { invoices, loading: invLoading } = useInvoicesPage(false, true);
   const invoiceItems = (invoices?.items ?? []).filter((inv) => inv.residentId === tenant.id);
 
-  const handleDownload = async (invoiceId: number) => {
-    try {
-      const blob = await maintenanceApi.downloadReceipt(invoiceId);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `invoice-${invoiceId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch {
-      showError('Failed to download receipt');
-    }
-  };
+  const handleDownload = useCallback(
+    async (invoiceId: number) => {
+      try {
+        const blob = await maintenanceApi.downloadReceipt(invoiceId);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `invoice-${invoiceId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch {
+        showError(t('maintenance.download_failed'));
+      }
+    },
+    [t]
+  );
 
   const isCurrent = tenant.isActive && !tenant.moveOutDate;
   const { bg, color } = getAvatarColor(tenant.user.name);
 
   const infoCards = [
-    { icon: Phone, label: 'PHONE', value: tenant.user.phone, accent: 'info-card--blue' },
-    { icon: Mail, label: 'EMAIL', value: tenant.user.email, accent: 'info-card--green' },
-    { icon: Calendar, label: 'MOVE-IN DATE', value: formatDate(tenant.moveInDate), accent: 'info-card--purple' },
-    { icon: UserCheck, label: 'MOVE-OUT DATE', value: formatDate(tenant.moveOutDate), accent: 'info-card--amber' },
+    { icon: Phone, label: t('tenantRequests.phone_label'), value: tenant.user.phone, accent: 'info-card--blue' },
+    { icon: Mail, label: t('tenantRequests.email_label'), value: tenant.user.email, accent: 'info-card--green' },
+    { icon: Calendar, label: t('tenantRequests.move_in_date_label'), value: formatDateOnly(tenant.moveInDate) || '—', accent: 'info-card--purple' },
+    { icon: UserCheck, label: t('tenantRequests.move_out_date_label'), value: formatDateOnly(tenant.moveOutDate) || '—', accent: 'info-card--amber' },
   ];
 
-  const invoiceColumns: TableColumn<Invoice>[] = [
-    {
-      key: 'monthYear', label: 'Month / Year', width: '10%', align: 'center',
-      render: (inv) => (
-        <span className="fw-medium" style={{ fontSize: '0.875rem', color: '#1a1f36' }}>
-          {formatMonth(inv.month, inv.year)}
-        </span>
-      ),
-    },
-    {
-      key: 'baseAmount', label: 'Base Amount', width: '15%', align: 'center',
-      render: (inv) => (
-        <span className="fw-medium text-dark" style={{ fontSize: '0.875rem' }}>
-          ₹{inv.baseAmount.toFixed(2)}
-        </span>
-      ),
-    },
-    {
-      key: 'extraCharges', label: 'Extra Charges', width: '17%', align: 'center',
-      render: (inv) => {
-        const hasExtra = inv.extraCharges && inv.extraCharges.length > 0;
-        if (!hasExtra) return <span className="text-muted" style={{ fontSize: '0.875rem' }}>—</span>;
-        return (
-          <div className="d-flex flex-wrap justify-content-center gap-1" style={{ maxWidth: '200px', margin: '0 auto' }}>
-            {inv.extraCharges.map((charge, idx) => (
-              <span
-                key={idx}
-                className="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle"
-                style={{ fontSize: '0.65rem', padding: '2px 5px', fontWeight: 500 }}
-              >
-                {charge.label}: ₹{charge.amount}
-              </span>
-            ))}
-          </div>
-        );
+  const invoiceColumns: TableColumn<Invoice>[] = useMemo(
+    () => [
+      {
+        key: 'monthYear', label: t('maintenance.col_month_year'), width: '10%', align: 'center',
+        render: (inv) => (
+          <span className="fw-medium" style={{ fontSize: '0.875rem', color: '#1a1f36' }}>
+            {formatMonth(inv.month, inv.year)}
+          </span>
+        ),
       },
-    },
-    {
-      key: 'totalAmount', label: 'Total Amount', width: '17%', align: 'center',
-      render: (inv) => (
-        <span className="fw-semibold text-dark" style={{ fontSize: '0.875rem' }}>
-          ₹{inv.totalAmount.toFixed(2)}
-        </span>
-      ),
-    },
-    {
-      key: 'dueDate', label: 'Due Date', width: '17%', align: 'center',
-      render: (inv) => (
-        <span style={{ fontSize: '0.875rem', color: '#4b5563' }}>
-          {new Date(inv.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-        </span>
-      ),
-    },
-    {
-      key: 'status', label: 'Status', width: '11%', align: 'center',
-      render: (inv) => <InvoiceStatusBadge status={inv.status} />,
-    },
-    {
-      key: 'actions', label: 'Actions', width: '13%', align: 'center',
-      render: (inv) => inv.status === 'Paid' ? (
-        <button
-          className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
-          onClick={() => handleDownload(inv.id)}
-          style={{ borderRadius: '6px', fontSize: '0.78rem' }}
-          title="Download receipt"
-        >
-          <i className="bi bi-download text-dark" />
-        </button>
-      ) : (
-        <span className="text-muted" style={{ fontSize: '0.78rem' }}>—</span>
-      ),
-    },
-  ];
+      {
+        key: 'baseAmount', label: t('maintenance.col_base_amount'), width: '15%', align: 'center',
+        render: (inv) => (
+          <span className="fw-medium text-dark" style={{ fontSize: '0.875rem' }}>
+            ₹{inv.baseAmount.toFixed(2)}
+          </span>
+        ),
+      },
+      {
+        key: 'extraCharges', label: t('maintenance.col_extra_charges'), width: '17%', align: 'center',
+        render: (inv) => {
+          const hasExtra = inv.extraCharges && inv.extraCharges.length > 0;
+          if (!hasExtra) return <span className="text-muted" style={{ fontSize: '0.875rem' }}>—</span>;
+          return (
+            <div className="d-flex flex-wrap justify-content-center gap-1" style={{ maxWidth: '200px', margin: '0 auto' }}>
+              {inv.extraCharges.map((charge, idx) => (
+                <span
+                  key={idx}
+                  className="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle"
+                  style={{ fontSize: '0.65rem', padding: '2px 5px', fontWeight: 500 }}
+                >
+                  {charge.label}: ₹{charge.amount}
+                </span>
+              ))}
+            </div>
+          );
+        },
+      },
+      {
+        key: 'totalAmount', label: t('maintenance.col_total_amount'), width: '17%', align: 'center',
+        render: (inv) => (
+          <span className="fw-semibold text-dark" style={{ fontSize: '0.875rem' }}>
+            ₹{inv.totalAmount.toFixed(2)}
+          </span>
+        ),
+      },
+      {
+        key: 'dueDate', label: t('maintenance.col_due_date'), width: '17%', align: 'center',
+        render: (inv) => (
+          <span style={{ fontSize: '0.875rem', color: '#4b5563' }}>
+            {formatDateOnly(inv.dueDate)}
+          </span>
+        ),
+      },
+      {
+        key: 'status', label: t('common.status'), width: '11%', align: 'center',
+        render: (inv) => <InvoiceStatusBadge status={inv.status} />,
+      },
+      {
+        key: 'actions', label: t('common.actions'), width: '13%', align: 'center',
+        render: (inv) => inv.status === 'Paid' ? (
+          <button
+            className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
+            onClick={() => handleDownload(inv.id)}
+            style={{ borderRadius: '6px', fontSize: '0.78rem' }}
+            title={t('maintenance.download_receipt')}
+          >
+            <i className="bi bi-download text-dark" />
+          </button>
+        ) : (
+          <span className="text-muted" style={{ fontSize: '0.78rem' }}>—</span>
+        ),
+      },
+    ],
+    [t, formatMonth, handleDownload]
+  );
 
   return (
     <div className="d-flex flex-column gap-4">
@@ -160,7 +174,7 @@ const TenantOverview = ({ tenant, onBack }: TenantOverviewProps) => {
         onClick={onBack}
         className="back-btn"
       >
-        <ArrowLeft size={16} strokeWidth={2} /> Back to tenants
+        <ArrowLeft size={16} strokeWidth={2} /> {t('tenantRequests.back_to_tenants')}
       </button>
 
       {/* ── Current Active Tenant Card (same card layout as tenant history) ── */}
@@ -168,10 +182,10 @@ const TenantOverview = ({ tenant, onBack }: TenantOverviewProps) => {
         <div className="section-card__header d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
           <h6 className="section-card__title d-flex align-items-center gap-2 mb-0" style={{ fontSize: '0.95rem', color: '#111827' }}>
             <UserCheck size={18} className="text-success" />
-            {isCurrent ? "Current Active Tenant" : "Past Tenant Details"}
+            {isCurrent ? t('tenantRequests.current_active_tenant') : t('tenantRequests.past_tenant_details')}
           </h6>
           <span className={`badge-pill badge-pill--${isCurrent ? 'active' : 'inactive'}`}>
-            {isCurrent ? 'Active Occupant' : 'Past Tenant'}
+            {isCurrent ? t('tenantRequests.active_occupant') : t('tenantRequests.past_tenant')}
           </span>
         </div>
 
@@ -190,12 +204,12 @@ const TenantOverview = ({ tenant, onBack }: TenantOverviewProps) => {
                   <div className="detail-header__name-row">
                     <h4 className="detail-header__name text-truncate">{tenant.user.name}</h4>
                     <span className={`badge-pill badge-pill--${isCurrent ? 'active' : 'inactive'}`}>
-                      {isCurrent ? 'Active' : 'Inactive'}
+                      {isCurrent ? t('common.active') : t('common.inactive')}
                     </span>
-                    <span className="badge-pill badge-pill--tenant">Tenant</span>
+                    <span className="badge-pill badge-pill--tenant">{t('roles.tenant')}</span>
                   </div>
                   <div className="detail-header__meta">
-                    <span><Calendar size={13} strokeWidth={1.75} /> Moved in {formatDate(tenant.moveInDate)}</span>
+                    <span><Calendar size={13} strokeWidth={1.75} /> {t('tenantRequests.moved_in_date', { date: formatDateOnly(tenant.moveInDate) || '—' })}</span>
                   </div>
                 </div>
               </div>
@@ -257,7 +271,7 @@ const TenantOverview = ({ tenant, onBack }: TenantOverviewProps) => {
         </div>
 
         <div className={activeTab === 'maintenance' ? 'd-block' : 'd-none'}>
-          <SectionCard icon={Receipt} title="Maintenance">
+          <SectionCard icon={Receipt} title={t('tenantRequests.tab_maintenance')}>
             {invLoading ? (
               <div className="d-flex flex-column gap-3 py-1">
                 {Array.from({ length: 3 }).map((_, i) => (
@@ -272,8 +286,8 @@ const TenantOverview = ({ tenant, onBack }: TenantOverviewProps) => {
                 >
                   <Receipt size={28} style={{ color: '#9ca3af' }} />
                 </div>
-                <p className="fw-semibold mb-1" style={{ fontSize: '0.95rem', color: '#4b5563' }}>No invoices found</p>
-                <p className="text-secondary small mb-0" style={{ fontSize: '0.8rem' }}>No maintenance records for this tenant.</p>
+                <p className="fw-semibold mb-1" style={{ fontSize: '0.95rem', color: '#4b5563' }}>{t('tenantRequests.no_invoices_found')}</p>
+                <p className="text-secondary small mb-0" style={{ fontSize: '0.8rem' }}>{t('tenantRequests.no_maintenance_records')}</p>
               </div>
             ) : (
               <AppTable
@@ -281,8 +295,8 @@ const TenantOverview = ({ tenant, onBack }: TenantOverviewProps) => {
                 data={invoiceItems}
                 loading={invLoading}
                 rowKey={(inv) => inv.id}
-                emptyTitle="No invoices found"
-                emptySubtitle="No maintenance records for this tenant."
+                emptyTitle={t('tenantRequests.no_invoices_found')}
+                emptySubtitle={t('tenantRequests.no_maintenance_records')}
                 skeletonRows={4}
               />
             )}
@@ -290,7 +304,7 @@ const TenantOverview = ({ tenant, onBack }: TenantOverviewProps) => {
         </div>
 
         <div className={activeTab === 'complaints' ? 'd-block' : 'd-none'}>
-          <SectionCard icon={ClipboardList} title="Complaints">
+          <SectionCard icon={ClipboardList} title={t('tenantRequests.tab_complaints')}>
             {cLoading ? (
               <div className="d-flex flex-column gap-3 py-1">
                 {Array.from({ length: 3 }).map((_, i) => (
@@ -305,8 +319,8 @@ const TenantOverview = ({ tenant, onBack }: TenantOverviewProps) => {
                 >
                   <ClipboardList size={28} style={{ color: '#9ca3af' }} />
                 </div>
-                <p className="fw-semibold mb-1" style={{ fontSize: '0.95rem', color: '#4b5563' }}>No complaints found</p>
-                <p className="text-secondary small mb-0" style={{ fontSize: '0.8rem' }}>No complaints raised by this tenant.</p>
+                <p className="fw-semibold mb-1" style={{ fontSize: '0.95rem', color: '#4b5563' }}>{t('tenantRequests.no_complaints_found')}</p>
+                <p className="text-secondary small mb-0" style={{ fontSize: '0.8rem' }}>{t('tenantRequests.no_complaints_for_tenant')}</p>
               </div>
             ) : (
               <ComplaintList

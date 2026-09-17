@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { tenantRequestApi } from '../api/tenantRequestApi';
 import type {
   TenantRequestDetail as TenantRequestDetailData,
@@ -10,6 +11,7 @@ import { showError, showSuccess } from '../../../utils/toast';
 import useAuth from '../../../hooks/useAuth';
 
 const useTenantRequestDetail = (id: number) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const [data, setData] = useState<TenantRequestDetailData | null>(null);
@@ -40,11 +42,11 @@ const useTenantRequestDetail = (id: number) => {
       setDraftVotes(draft);
       setDraftAdminVote(adminVote);
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to fetch tenant request'));
+      showError(getErrorMessage(err, t('tenantRequests.toast_fetch_failed')));
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,7 +70,7 @@ const useTenantRequestDetail = (id: number) => {
         }
       } catch (err: unknown) {
         if (!cancelled) {
-          showError(getErrorMessage(err, 'Failed to fetch tenant request'));
+          showError(getErrorMessage(err, t('tenantRequests.toast_fetch_failed')));
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -77,7 +79,7 @@ const useTenantRequestDetail = (id: number) => {
 
     runLoad();
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, t]);
 
   const setMemberVote = useCallback((committeeMemberId: number, vote: VoteChoice) => {
     setDraftVotes((prev) => ({ ...prev, [committeeMemberId]: vote }));
@@ -106,16 +108,16 @@ const useTenantRequestDetail = (id: number) => {
       // Persist all collected votes first, then finalize (lock) the request.
       await saveVotes();
       const result = await tenantRequestApi.finalizeRequest(id);
-      showSuccess(result.approved ? 'Tenant request approved' : 'Tenant request rejected');
+      showSuccess(result.approved ? t('tenantRequests.toast_request_approved') : t('tenantRequests.toast_request_rejected'));
       await load();
       return result;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, 'Failed to finalize request'));
+      showError(getErrorMessage(err, t('tenantRequests.toast_finalize_failed')));
       throw err;
     } finally {
       setActionLoading(false);
     }
-  }, [id, saveVotes, load]);
+  }, [id, saveVotes, load, t]);
 
   return {
     data,

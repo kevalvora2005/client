@@ -1,9 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
 import useTenantHistory from '../hooks/useTenantHistory';
 import TenantOverview from '../components/TenantOverview';
 
 const TenantDetailPage = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const tenantId = Number(id);
   const navigate = useNavigate();
@@ -46,11 +48,11 @@ const TenantDetailPage = () => {
           className="btn btn-sm btn-link text-decoration-none d-inline-flex align-items-center gap-1 px-0 mb-3 fw-semibold"
           style={{ color: '#4b5563' }}
         >
-          <ArrowLeft size={16} /> Back to tenants
+          <ArrowLeft size={16} /> {t('tenantRequests.back_to_tenants')}
         </button>
         <div className="text-center py-5">
           <i className="bi bi-person-x d-block mb-2" style={{ fontSize: '2rem', color: '#d1d5db' }} />
-          <p className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>Tenant not found</p>
+          <p className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>{t('tenantRequests.tenant_not_found')}</p>
         </div>
       </div>
     );

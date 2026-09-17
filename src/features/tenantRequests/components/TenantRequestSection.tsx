@@ -1,25 +1,15 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { UserPlus, UserCheck, Mail, Phone, Calendar, Clock } from 'lucide-react';
 import { useScrollLock } from '../../../hooks/useScrollLock';
 import { StatusBadge } from '../../../components/StatusBadge/StatusBadge';
 import DatePicker from '../../../components/DatePicker/DatePicker';
+import { formatDateOnly } from '../../../utils/formatDate';
 import type { OwnerTenantStatus, SubmitTenantRequestPayload } from '../types/tenantRequest.types';
 
 const TODAY = new Date().toISOString().split('T')[0];
-
-const tenantRequestSchema = Yup.object({
-  tenantName: Yup.string().trim().required('Tenant name is required'),
-  tenantEmail: Yup.string().trim().email('Invalid email').required('Tenant email is required'),
-  tenantPhone: Yup.string()
-    .matches(/^\d{10}$/, 'Phone must be 10 digits')
-    .required('Tenant phone is required'),
-  moveInDate: Yup.string()
-    .required('Expected move-in date is required')
-    .test('not-past', 'Move-in date cannot be in the past', (value) =>
-      value ? value >= TODAY : false
-    ),
-});
 
 const RequestForm = ({
   loading,
@@ -30,6 +20,28 @@ const RequestForm = ({
   onSubmit: (payload: SubmitTenantRequestPayload) => Promise<void>;
   onCancel: () => void;
 }) => {
+  const { t } = useTranslation();
+
+  const tenantRequestSchema = useMemo(
+    () =>
+      Yup.object({
+        tenantName: Yup.string().trim().required(t('tenantRequests.tenant_name_required')),
+        tenantEmail: Yup.string()
+          .trim()
+          .email(t('tenantRequests.invalid_email'))
+          .required(t('tenantRequests.tenant_email_required')),
+        tenantPhone: Yup.string()
+          .matches(/^\d{10}$/, t('tenantRequests.phone_digits_required'))
+          .required(t('tenantRequests.tenant_phone_required')),
+        moveInDate: Yup.string()
+          .required(t('tenantRequests.move_in_date_required'))
+          .test('not-past', t('tenantRequests.move_in_not_past'), (value) =>
+            value ? value >= TODAY : false
+          ),
+      }),
+    [t]
+  );
+
   const formik = useFormik({
     initialValues: {
       tenantName: '',
@@ -68,18 +80,18 @@ const RequestForm = ({
   return (
     <form onSubmit={formik.handleSubmit}>
       <p className="fw-bold text-muted text-uppercase mb-3" style={{ fontSize: '0.68rem', letterSpacing: '0.08em' }}>
-        Tenant Details
+        {t('tenantRequests.tenant_details')}
       </p>
 
       <div className="row g-3">
         <div className="col-md-6">
-          <label className="form-label fw-medium text-secondary small mb-1">Tenant Full Name <span className="text-danger">*</span></label>
+          <label className="form-label fw-medium text-secondary small mb-1">{t('tenantRequests.tenant_full_name')} <span className="text-danger">*</span></label>
           <input
             type="text"
             name="tenantName"
             autoComplete="name"
             className={fieldClass('tenantName')}
-            placeholder="Enter full name"
+            placeholder={t('tenantRequests.enter_full_name')}
             value={formik.values.tenantName}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -89,13 +101,13 @@ const RequestForm = ({
         </div>
 
         <div className="col-md-6">
-          <label className="form-label fw-medium text-secondary small mb-1">Tenant Email <span className="text-danger">*</span></label>
+          <label className="form-label fw-medium text-secondary small mb-1">{t('tenantRequests.tenant_email')} <span className="text-danger">*</span></label>
           <input
             type="email"
             name="tenantEmail"
             autoComplete="email"
             className={fieldClass('tenantEmail')}
-            placeholder="Enter email address"
+            placeholder={t('tenantRequests.enter_email')}
             value={formik.values.tenantEmail}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -105,13 +117,13 @@ const RequestForm = ({
         </div>
 
         <div className="col-md-6">
-          <label className="form-label fw-medium text-secondary small mb-1">Tenant Phone <span className="text-danger">*</span></label>
+          <label className="form-label fw-medium text-secondary small mb-1">{t('tenantRequests.tenant_phone')} <span className="text-danger">*</span></label>
           <input
             type="text"
             name="tenantPhone"
             autoComplete="tel"
             className={fieldClass('tenantPhone')}
-            placeholder="Enter 10-digit phone number"
+            placeholder={t('tenantRequests.enter_phone')}
             value={formik.values.tenantPhone}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -122,7 +134,7 @@ const RequestForm = ({
 
         <div className="col-md-6">
           <DatePicker
-            label="Expected Move-in Date"
+            label={t('tenantRequests.expected_move_in_date')}
             name="moveInDate"
             required
             direction="auto"
@@ -148,7 +160,7 @@ const RequestForm = ({
           className="btn btn-outline-secondary rounded-2 d-flex align-items-center justify-content-center"
           style={{ height: '38px', fontSize: '0.875rem' }}
         >
-          Cancel
+          {t('common.cancel')}
         </button>
         <button
           type="submit"
@@ -157,7 +169,7 @@ const RequestForm = ({
           style={{ height: '38px', fontSize: '0.875rem', borderRadius: '8px', backgroundColor: '#1a1f36', borderColor: '#1a1f36', opacity: loading ? 0.55 : 1 }}
         >
           {loading ? <span className="spinner-border spinner-border-sm" /> : <UserPlus size={16} />}
-          Submit Request
+          {t('tenantRequests.submit_request')}
         </button>
       </div>
     </form>
@@ -183,6 +195,7 @@ const TenantRequestSection = ({
   setShowForm,
   submitRequest,
 }: TenantRequestSectionProps) => {
+  const { t } = useTranslation();
   useScrollLock(showForm);
 
   const handleSubmit = async (payload: SubmitTenantRequestPayload) => {
@@ -205,10 +218,10 @@ const TenantRequestSection = ({
   if (status.pendingRequest) {
     const r = status.pendingRequest;
     const infoCards = [
-      { icon: UserCheck, label: 'Tenant', value: r.tenantName, accent: 'info-card--blue' },
-      { icon: Mail, label: 'Email', value: r.tenantEmail, accent: 'info-card--green' },
-      { icon: Phone, label: 'Phone', value: r.tenantPhone, accent: 'info-card--purple' },
-      { icon: Calendar, label: 'Move-in', value: new Date(r.moveInDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }), accent: 'info-card--amber' },
+      { icon: UserCheck, label: t('tenantRequests.tenant_label'), value: r.tenantName, accent: 'info-card--blue' },
+      { icon: Mail, label: t('tenantRequests.email_label'), value: r.tenantEmail, accent: 'info-card--green' },
+      { icon: Phone, label: t('tenantRequests.phone_label'), value: r.tenantPhone, accent: 'info-card--purple' },
+      { icon: Calendar, label: t('tenantRequests.move_in_label'), value: formatDateOnly(r.moveInDate), accent: 'info-card--amber' },
     ];
     return (
       <div className="card border-0 shadow-sm mb-4">
@@ -223,13 +236,13 @@ const TenantRequestSection = ({
             }}
           >
             <Clock size={18} className="flex-shrink-0" />
-            <span className="fw-medium">Your tenant request is awaiting committee review.</span>
+            <span className="fw-medium">{t('tenantRequests.awaiting_committee_review')}</span>
           </div>
 
           <div className="d-flex align-items-center gap-2 mb-3">
             <StatusBadge
               variant={r.status === 'Approved' ? 'success' : r.status === 'Rejected' ? 'danger' : 'warning'}
-              label={r.status}
+              label={t(`status.${r.status.toLowerCase()}`)}
             />
           </div>
 
@@ -271,10 +284,10 @@ const TenantRequestSection = ({
               <div className="modal-header border-bottom border-light-subtle px-3 px-sm-4 pt-4 pb-3 align-items-start position-relative">
                 <div>
                   <h5 className="modal-title fw-bold fs-6" style={{ color: '#1a1f36' }}>
-                    Request a Tenant
+                    {t('tenantRequests.request_a_tenant')}
                   </h5>
                   <p className="text-muted mb-0" style={{ fontSize: '0.8rem' }}>
-                    Enter the tenant's details to submit for committee approval.
+                    {t('tenantRequests.request_a_tenant_subtitle')}
                   </p>
                 </div>
                 <button

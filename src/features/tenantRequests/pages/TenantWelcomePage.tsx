@@ -1,27 +1,25 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import useAuth from '../../../hooks/useAuth';
 import { getMeApi } from '../../auth/api/authApi';
+import { formatDateOnly } from '../../../utils/formatDate';
 
 const POLL_INTERVAL_MS = 4000;
 
-const formatDate = (value: string | null): string => {
-  if (!value) return 'soon';
-  const date = new Date(value);
-  if (isNaN(date.getTime())) return 'soon';
-  return date.toLocaleDateString(undefined, {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
-};
-
 const TenantWelcomePage = () => {
+  const { t } = useTranslation();
   const { user, logout, updateUser } = useAuth();
   const navigate = useNavigate();
 
   const resident = user?.resident ?? null;
   const firstName = user?.name?.trim().split(/\s+/)[0] ?? '';
+
+  const formatMoveInDate = (value: string | null): string => {
+    if (!value) return t('tenantRequests.soon');
+    const formatted = formatDateOnly(value);
+    return formatted || t('tenantRequests.soon');
+  };
 
   // Redirect anyone who isn't actually a locked tenant away from this page.
   useEffect(() => {
@@ -67,26 +65,25 @@ const TenantWelcomePage = () => {
           </div>
 
           <h2 className="h4 fw-bold mb-1">
-            Welcome{firstName ? `, ${firstName}` : ''}!
+            {t('tenantRequests.welcome_title', { name: firstName ? `, ${firstName}` : '' })}
           </h2>
           <p className="text-muted mb-4">
-            Your tenancy request has been approved.
+            {t('tenantRequests.request_approved_subtitle')}
           </p>
 
           <div className="alert alert-primary border-0" role="alert">
             <div className="fw-semibold mb-1">
-              You can access all features of Civic Horizon from
+              {t('tenantRequests.access_features_from')}
             </div>
-            <div className="fs-5 fw-bold">{formatDate(resident?.moveInDate ?? null)}</div>
+            <div className="fs-5 fw-bold">{formatMoveInDate(resident?.moveInDate ?? null)}</div>
           </div>
 
           <p className="text-muted small mb-4">
-            We'll take you to your dashboard automatically once access opens.
-            You can also log out and return closer to your move-in date.
+            {t('tenantRequests.access_explanation')}
           </p>
 
           <button className="btn btn-outline-secondary" onClick={handleLogout}>
-            Log out
+            {t('tenantRequests.logout_btn')}
           </button>
         </div>
       </div>
