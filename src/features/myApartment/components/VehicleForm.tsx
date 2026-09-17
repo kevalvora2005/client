@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import Select from "../../../components/Select/Select";
@@ -5,15 +7,6 @@ import type { CreateVehiclePayload, FuelType, UpdateVehiclePayload, Vehicle, Veh
 
 const VEHICLE_TYPES: VehicleType[] = ["Car", "Bike", "Scooter", "Other"];
 const FUEL_TYPES: FuelType[] = ["Petrol", "Diesel", "Electric", "CNG", "Hybrid"];
-
-const schema = Yup.object({
-  plateNumber: Yup.string().trim().required("Plate number is required"),
-  type: Yup.string().oneOf(VEHICLE_TYPES, "Invalid type").required("Type is required"),
-  brandName: Yup.string().trim().required("Brand name is required"),
-  model: Yup.string().trim().required("Model is required"),
-  color: Yup.string().trim().required("Color is required"),
-  fuelType: Yup.string().oneOf(FUEL_TYPES, "Invalid fuel type").required("Fuel type is required"),
-});
 
 interface VehicleFormProps {
   vehicle?: Vehicle | null;
@@ -23,7 +16,39 @@ interface VehicleFormProps {
 }
 
 const VehicleForm = ({ vehicle, loading, onSubmit, onCancel }: VehicleFormProps) => {
+  const { t } = useTranslation();
   const isEdit = !!vehicle;
+
+  const schema = useMemo(
+    () =>
+      Yup.object({
+        plateNumber: Yup.string().trim().required(t('myApartment.plate_req')),
+        type: Yup.string().oneOf(VEHICLE_TYPES, t('myApartment.type_invalid')).required(t('myApartment.type_req')),
+        brandName: Yup.string().trim().required(t('myApartment.brand_req')),
+        model: Yup.string().trim().required(t('myApartment.model_req')),
+        color: Yup.string().trim().required(t('myApartment.color_req')),
+        fuelType: Yup.string().oneOf(FUEL_TYPES, t('myApartment.fuel_invalid')).required(t('myApartment.fuel_req')),
+      }),
+    [t]
+  );
+
+  const vehicleTypeOptions = useMemo(
+    () =>
+      VEHICLE_TYPES.map((type) => ({
+        value: type,
+        label: t(`myApartment.vehicle_type_${type.toLowerCase()}`),
+      })),
+    [t]
+  );
+
+  const fuelTypeOptions = useMemo(
+    () =>
+      FUEL_TYPES.map((fuel) => ({
+        value: fuel,
+        label: t(`myApartment.fuel_type_${fuel.toLowerCase()}`),
+      })),
+    [t]
+  );
 
   const formik = useFormik({
     initialValues: {
@@ -48,13 +73,13 @@ const VehicleForm = ({ vehicle, loading, onSubmit, onCancel }: VehicleFormProps)
         {/* Plate Number */}
         <div className="col-12 col-md-4">
           <label className="form-label fw-medium text-secondary small mb-1">
-            Plate Number <span className="text-danger">*</span>
+            {t('myApartment.plate_number')} <span className="text-danger">*</span>
           </label>
           <input
             type="text"
             name="plateNumber"
             className={`form-control shadow-none ${formik.touched.plateNumber && formik.errors.plateNumber ? "is-invalid" : "border-light-subtle"}`}
-            placeholder="e.g. GJ 01 AB 1234"
+            placeholder={t('myApartment.plate_placeholder')}
             value={formik.values.plateNumber}
             onChange={(e) => formik.setFieldValue("plateNumber", e.target.value.toUpperCase())}
             onBlur={formik.handleBlur}
@@ -68,11 +93,11 @@ const VehicleForm = ({ vehicle, loading, onSubmit, onCancel }: VehicleFormProps)
         {/* Type */}
         <div className="col-12 col-md-4">
           <Select
-            label="Type"
+            label={t('myApartment.vehicle_type')}
             name="type"
             required
-            options={VEHICLE_TYPES}
-            placeholder="Select type"
+            options={vehicleTypeOptions}
+            placeholder={t('myApartment.select_type')}
             value={formik.values.type}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -86,11 +111,11 @@ const VehicleForm = ({ vehicle, loading, onSubmit, onCancel }: VehicleFormProps)
         {/* Fuel Type */}
         <div className="col-12 col-md-4">
           <Select
-            label="Fuel Type"
+            label={t('myApartment.fuel_type')}
             name="fuelType"
             required
-            options={FUEL_TYPES}
-            placeholder="Select fuel type"
+            options={fuelTypeOptions}
+            placeholder={t('myApartment.select_fuel_type')}
             value={formik.values.fuelType}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -104,13 +129,13 @@ const VehicleForm = ({ vehicle, loading, onSubmit, onCancel }: VehicleFormProps)
         {/* Brand Name */}
         <div className="col-12 col-md-4">
           <label className="form-label fw-medium text-secondary small mb-1">
-            Brand Name <span className="text-danger">*</span>
+            {t('myApartment.brand_name')} <span className="text-danger">*</span>
           </label>
           <input
             type="text"
             name="brandName"
             className={`form-control shadow-none ${formik.touched.brandName && formik.errors.brandName ? "is-invalid" : "border-light-subtle"}`}
-            placeholder="e.g. Maruti, Honda"
+            placeholder={t('myApartment.brand_placeholder')}
             value={formik.values.brandName}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -124,13 +149,13 @@ const VehicleForm = ({ vehicle, loading, onSubmit, onCancel }: VehicleFormProps)
         {/* Model */}
         <div className="col-12 col-md-4">
           <label className="form-label fw-medium text-secondary small mb-1">
-            Model <span className="text-danger">*</span>
+            {t('myApartment.model')} <span className="text-danger">*</span>
           </label>
           <input
             type="text"
             name="model"
             className={`form-control shadow-none ${formik.touched.model && formik.errors.model ? "is-invalid" : "border-light-subtle"}`}
-            placeholder="e.g. Swift, Activa"
+            placeholder={t('myApartment.model_placeholder')}
             value={formik.values.model}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -144,13 +169,13 @@ const VehicleForm = ({ vehicle, loading, onSubmit, onCancel }: VehicleFormProps)
         {/* Color */}
         <div className="col-12 col-md-4">
           <label className="form-label fw-medium text-secondary small mb-1">
-            Color <span className="text-danger">*</span>
+            {t('myApartment.color')} <span className="text-danger">*</span>
           </label>
           <input
             type="text"
             name="color"
             className={`form-control shadow-none ${formik.touched.color && formik.errors.color ? "is-invalid" : "border-light-subtle"}`}
-            placeholder="e.g. White, Black"
+            placeholder={t('myApartment.color_placeholder')}
             value={formik.values.color}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -171,7 +196,7 @@ const VehicleForm = ({ vehicle, loading, onSubmit, onCancel }: VehicleFormProps)
               disabled={loading}
               style={{ fontSize: "0.875rem", height: "40px", borderRadius: "8px" }}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
@@ -181,7 +206,7 @@ const VehicleForm = ({ vehicle, loading, onSubmit, onCancel }: VehicleFormProps)
             >
               {loading
                 ? <span className="spinner-border spinner-border-sm" />
-                : <><i className={`bi ${isEdit ? "bi-check-lg" : "bi-plus-lg"}`} /> {isEdit ? "Save" : "Add Vehicle"}</>
+                : <><i className={`bi ${isEdit ? "bi-check-lg" : "bi-plus-lg"}`} /> {isEdit ? t('common.save') : t('myApartment.add_vehicle_btn')}</>
               }
             </button>
           </div>

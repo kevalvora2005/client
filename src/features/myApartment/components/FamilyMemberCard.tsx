@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { FamilyMember } from "../types/familyMember.types";
 
 interface FamilyMemberCardProps {
@@ -16,6 +17,7 @@ const relationIcons: Record<string, string> = {
 };
 
 const FamilyMemberCard = ({ member, onEdit, onDelete, readOnly = false }: FamilyMemberCardProps) => {
+  const { t } = useTranslation();
   return (
     <div className="d-flex align-items-center justify-content-between p-3 rounded-3 border border-light-subtle bg-white gap-3 flex-wrap">
       {/* ── Left — icon + info ── */}
@@ -35,11 +37,11 @@ const FamilyMemberCard = ({ member, onEdit, onDelete, readOnly = false }: Family
               className="badge rounded-pill fw-medium px-2 py-1"
               style={{ fontSize: "0.75rem", background: "#eef2ff", color: "#4338ca" }}
             >
-              {member.relation}
+              {t(`myApartment.relation_${member.relation.toLowerCase()}`)}
             </span>
             {member.age != null && (
               <span className="text-muted" style={{ fontSize: "0.8rem" }}>
-                {member.age} yrs
+                {member.age} {t('myApartment.yrs')}
               </span>
             )}
           </div>
@@ -54,14 +56,14 @@ const FamilyMemberCard = ({ member, onEdit, onDelete, readOnly = false }: Family
             style={{ fontSize: "0.8rem", borderRadius: "8px" }}
             onClick={() => onEdit(member)}
           >
-            <i className="bi bi-pencil" /> Edit
+            <i className="bi bi-pencil" /> {t('common.edit')}
           </button>
           <button
             className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1"
             style={{ fontSize: "0.8rem", borderRadius: "8px" }}
             onClick={() => onDelete(member)}
           >
-            <i className="bi bi-trash3" /> Remove
+            <i className="bi bi-trash3" /> {t('myApartment.remove')}
           </button>
         </div>
       )}

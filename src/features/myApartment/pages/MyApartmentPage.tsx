@@ -1,8 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import useAuth from '../../../hooks/useAuth';
 import FamilyMembersSection from './FamilyMembersSection';
 import VehiclesSection from './VehiclesSection';
 
 const MyApartmentPage = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   const residentId = user?.residentId ?? 0;
@@ -12,8 +14,8 @@ const MyApartmentPage = () => {
       <div className="container-fluid p-3 p-md-4">
         <div className="error-state">
           <i className="bi bi-exclamation-circle error-state__icon" />
-          <p className="error-state__title">Resident profile not found</p>
-          <p className="error-state__sub">Your account is not linked to a resident profile.</p>
+          <p className="error-state__title">{t('myApartment.resident_not_found_title')}</p>
+          <p className="error-state__sub">{t('myApartment.resident_not_found_desc')}</p>
         </div>
       </div>
     );
@@ -26,10 +28,10 @@ const MyApartmentPage = () => {
       <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
         <div>
           <h4 className="fw-bold mb-2 fs-4 fs-sm-3" style={{ color: '#1a1f36' }}>
-            My Apartment
+            {t('myApartment.page_title')}
           </h4>
           <p className="text-muted mb-0 small">
-            Manage your family members and vehicles.
+            {t('myApartment.page_desc')}
           </p>
         </div>
       </div>

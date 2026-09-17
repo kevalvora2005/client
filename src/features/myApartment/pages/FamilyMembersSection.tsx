@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Users } from "lucide-react";
 import { useFamilyMembers } from "../hooks/useFamilyMembers";
 import useMyResident from "../../residents/hooks/useMyResident";
@@ -15,6 +16,7 @@ interface FamilyMembersSectionProps {
 }
 
 const FamilyMembersSection = ({ residentId, readOnly = false, tenantResidentId = null, onTenantChange }: FamilyMembersSectionProps) => {
+  const { t } = useTranslation();
   const { isOwner, isCurrentOccupant } = useMyResident(!readOnly);
   const [viewingTenantId, setViewingTenantId] = useState<number | null>(tenantResidentId);
   const targetResidentId = viewingTenantId ?? residentId;
@@ -81,7 +83,7 @@ const FamilyMembersSection = ({ residentId, readOnly = false, tenantResidentId =
         <div className="card-header bg-white border-bottom border-light-subtle px-3 px-sm-4 py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
           <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3">
             <h6 className="fw-bold mb-0 text-nowrap d-flex align-items-center gap-2" style={{ color: '#1a1f36' }}>
-              <Users size={18} className="text-dark" /> Family Members
+              <Users size={18} className="text-dark" /> {t('myApartment.family_members')}
             </h6>
             {showTenantSelector && (
               <select
@@ -90,9 +92,9 @@ const FamilyMembersSection = ({ residentId, readOnly = false, tenantResidentId =
                 value={viewingTenantId ?? ''}
                 onChange={(e) => handleTenantChange(e.target.value ? Number(e.target.value) : null)}
               >
-                <option value="">Your Family Members</option>
+                <option value="">{t('myApartment.your_family_members')}</option>
                 {tenantResidentId && (
-                  <option value={tenantResidentId}>Tenant's Family Members</option>
+                  <option value={tenantResidentId}>{t('myApartment.tenant_family_members')}</option>
                 )}
               </select>
             )}
@@ -103,7 +105,7 @@ const FamilyMembersSection = ({ residentId, readOnly = false, tenantResidentId =
               onClick={openAddModal}
               style={{ fontSize: "0.875rem", borderRadius: "8px", backgroundColor: "#1a1f36", borderColor: "#1a1f36" }}
             >
-              <i className="bi bi-plus-lg" /> Add Member
+              <i className="bi bi-plus-lg" /> {t('myApartment.add_member_btn')}
             </button>
           )}
         </div>
@@ -125,9 +127,9 @@ const FamilyMembersSection = ({ residentId, readOnly = false, tenantResidentId =
               >
                 <Users size={28} style={{ color: '#9ca3af' }} />
               </div>
-              <p className="fw-semibold mb-1" style={{ fontSize: '0.95rem', color: '#4b5563' }}>No family members found</p>
+              <p className="fw-semibold mb-1" style={{ fontSize: '0.95rem', color: '#4b5563' }}>{t('myApartment.no_family_found')}</p>
               <p className="text-secondary small mb-0" style={{ fontSize: '0.8rem' }}>
-                {isViewingOwn ? 'No family members added yet' : 'Tenant has no family members added'}
+                {isViewingOwn ? t('myApartment.no_family_added') : t('myApartment.no_tenant_family_added')}
               </p>
             </div>
           ) : (
@@ -160,9 +162,10 @@ const FamilyMembersSection = ({ residentId, readOnly = false, tenantResidentId =
       {/* ── Delete Confirm ── */}
       <ConfirmDialog
         show={!!deletingMember}
-        title="Remove Family Member"
-        message={deletingMember ? `Are you sure you want to remove ${deletingMember.name}?` : ""}
-        confirmLabel="Yes, Remove"
+        title={t('myApartment.remove_family_title')}
+        message={deletingMember ? t('myApartment.remove_family_msg', { name: deletingMember.name }) : ""}
+        confirmLabel={t('myApartment.yes_remove')}
+        cancelLabel={t('common.cancel')}
         variant="danger"
         loading={mutationLoading}
         onConfirm={handleDelete}

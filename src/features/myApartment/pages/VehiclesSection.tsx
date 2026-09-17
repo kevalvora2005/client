@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { CarFront } from "lucide-react";
 import { useVehicles } from "../hooks/useVehicles";
 import useMyResident from "../../residents/hooks/useMyResident";
@@ -15,6 +16,7 @@ interface VehiclesSectionProps {
 }
 
 const VehiclesSection = ({ residentId, readOnly = false, tenantResidentId = null, onTenantChange }: VehiclesSectionProps) => {
+  const { t } = useTranslation();
   const { isOwner, isCurrentOccupant } = useMyResident(!readOnly);
   const [viewingTenantId, setViewingTenantId] = useState<number | null>(tenantResidentId);
   const targetResidentId = viewingTenantId ?? residentId;
@@ -80,7 +82,7 @@ const VehiclesSection = ({ residentId, readOnly = false, tenantResidentId = null
         <div className="card-header bg-white border-bottom border-light-subtle px-3 px-sm-4 py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
           <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3">
             <h6 className="fw-bold mb-0 text-nowrap d-flex align-items-center gap-2" style={{ color: '#1a1f36' }}>
-              <CarFront size={18} className="text-dark" /> Vehicles
+              <CarFront size={18} className="text-dark" /> {t('myApartment.vehicles')}
             </h6>
             {showTenantSelector && (
               <select
@@ -89,9 +91,9 @@ const VehiclesSection = ({ residentId, readOnly = false, tenantResidentId = null
                 value={viewingTenantId ?? ''}
                 onChange={(e) => handleTenantChange(e.target.value ? Number(e.target.value) : null)}
               >
-                <option value="">Your Vehicles</option>
+                <option value="">{t('myApartment.your_vehicles')}</option>
                 {tenantResidentId && (
-                  <option value={tenantResidentId}>Tenant's Vehicles</option>
+                  <option value={tenantResidentId}>{t('myApartment.tenant_vehicles')}</option>
                 )}
               </select>
             )}
@@ -102,7 +104,7 @@ const VehiclesSection = ({ residentId, readOnly = false, tenantResidentId = null
               onClick={openAddModal}
               style={{ fontSize: "0.875rem", borderRadius: "8px", backgroundColor: "#1a1f36", borderColor: "#1a1f36" }}
             >
-              <i className="bi bi-car-front" /> Add Vehicle
+              <i className="bi bi-car-front" /> {t('myApartment.add_vehicle_btn')}
             </button>
           )}
         </div>
@@ -124,9 +126,9 @@ const VehiclesSection = ({ residentId, readOnly = false, tenantResidentId = null
               >
                 <CarFront size={28} style={{ color: '#9ca3af' }} />
               </div>
-              <p className="fw-semibold mb-1" style={{ fontSize: '0.95rem', color: '#4b5563' }}>No vehicles found</p>
+              <p className="fw-semibold mb-1" style={{ fontSize: '0.95rem', color: '#4b5563' }}>{t('myApartment.no_vehicles_found')}</p>
               <p className="text-secondary small mb-0" style={{ fontSize: '0.8rem' }}>
-                {isViewingOwn ? 'No vehicles added yet' : "Tenant has no vehicles added"}
+                {isViewingOwn ? t('myApartment.no_vehicles_added') : t('myApartment.no_tenant_vehicles_added')}
               </p>
             </div>
           ) : (
@@ -159,9 +161,10 @@ const VehiclesSection = ({ residentId, readOnly = false, tenantResidentId = null
       {/* ── Delete Confirm ── */}
       <ConfirmDialog
         show={!!deletingVehicle}
-        title="Remove Vehicle"
-        message={deletingVehicle ? `Are you sure you want to remove ${deletingVehicle.brandName} ${deletingVehicle.model} (${deletingVehicle.plateNumber})?` : ""}
-        confirmLabel="Yes, Remove"
+        title={t('myApartment.remove_vehicle_title')}
+        message={deletingVehicle ? t('myApartment.remove_vehicle_msg', { name: `${deletingVehicle.brandName} ${deletingVehicle.model}`, plate: deletingVehicle.plateNumber }) : ""}
+        confirmLabel={t('myApartment.yes_remove')}
+        cancelLabel={t('common.cancel')}
         variant="danger"
         loading={mutationLoading}
         onConfirm={handleDelete}

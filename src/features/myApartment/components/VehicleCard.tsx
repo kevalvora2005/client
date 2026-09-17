@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { Vehicle } from "../types/vehicle.types";
 
 interface VehicleCardProps {
@@ -23,6 +24,7 @@ const fuelColors: Record<string, { bg: string; color: string }> = {
 };
 
 const VehicleCard = ({ vehicle, onEdit, onDelete, readOnly = false }: VehicleCardProps) => {
+  const { t } = useTranslation();
   const fuelStyle = fuelColors[vehicle.fuelType] ?? { bg: "#f3f4f6", color: "#374151" };
 
   return (
@@ -44,7 +46,7 @@ const VehicleCard = ({ vehicle, onEdit, onDelete, readOnly = false }: VehicleCar
               className="badge rounded-pill fw-medium px-2 py-1"
               style={{ fontSize: "0.72rem", background: fuelStyle.bg, color: fuelStyle.color }}
             >
-              {vehicle.fuelType}
+              {t(`myApartment.fuel_type_${vehicle.fuelType.toLowerCase()}`)}
             </span>
           </div>
           <div className="d-flex align-items-center gap-2">
@@ -55,7 +57,7 @@ const VehicleCard = ({ vehicle, onEdit, onDelete, readOnly = false }: VehicleCar
               {vehicle.plateNumber}
             </span>
             <span className="text-muted" style={{ fontSize: "0.8rem" }}>
-              {vehicle.color} · {vehicle.type}
+              {vehicle.color} · {t(`myApartment.vehicle_type_${vehicle.type.toLowerCase()}`)}
             </span>
           </div>
         </div>
@@ -70,14 +72,14 @@ const VehicleCard = ({ vehicle, onEdit, onDelete, readOnly = false }: VehicleCar
             style={{ fontSize: "0.8rem", borderRadius: "8px" }}
             onClick={() => onEdit(vehicle)}
           >
-            <i className="bi bi-pencil" /> Edit
+            <i className="bi bi-pencil" /> {t('common.edit')}
           </button>
           <button
             className="btn btn-sm btn-outline-danger d-flex align-items-center gap-1"
             style={{ fontSize: "0.8rem", borderRadius: "8px" }}
             onClick={() => onDelete(vehicle)}
           >
-            <i className="bi bi-trash3" /> Remove
+            <i className="bi bi-trash3" /> {t('myApartment.remove')}
           </button>
         </div>
       )}

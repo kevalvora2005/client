@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { vehicleApi } from "../api/vehicleApi";
 import type { Vehicle, CreateVehiclePayload, UpdateVehiclePayload } from "../types/vehicle.types";
 import { getErrorMessage } from "../../../utils/getErrorMessage";
 import { showError, showSuccess } from "../../../utils/toast";
 
 export const useVehicles = (residentId: number) => {
+  const { t } = useTranslation();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -17,7 +19,7 @@ export const useVehicles = (residentId: number) => {
         const data = await vehicleApi.getVehicles(residentId);
         if (!cancelled) setVehicles(data);
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, "Failed to fetch vehicles"));
+        if (!cancelled) showError(getErrorMessage(err, t('myApartment.fetch_vehicles_failed')));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -25,16 +27,16 @@ export const useVehicles = (residentId: number) => {
 
     fetch();
     return () => { cancelled = true; };
-  }, [residentId]);
+  }, [residentId, t]);
 
   const addVehicle = async (payload: CreateVehiclePayload): Promise<boolean> => {
     try {
       const newVehicle = await vehicleApi.createVehicle(residentId, payload);
       setVehicles((prev) => [...prev, newVehicle]);
-      showSuccess("Vehicle added successfully");
+      showSuccess(t('myApartment.add_vehicle_success'));
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to add vehicle"));
+      showError(getErrorMessage(err, t('myApartment.add_vehicle_failed')));
       return false;
     }
   };
@@ -43,10 +45,10 @@ export const useVehicles = (residentId: number) => {
     try {
       const updated = await vehicleApi.updateVehicle(residentId, id, payload);
       setVehicles((prev) => prev.map((v) => v.id === id ? updated : v));
-      showSuccess("Vehicle updated successfully");
+      showSuccess(t('myApartment.update_vehicle_success'));
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to update vehicle"));
+      showError(getErrorMessage(err, t('myApartment.update_vehicle_failed')));
       return false;
     }
   };
@@ -55,10 +57,10 @@ export const useVehicles = (residentId: number) => {
     try {
       await vehicleApi.deleteVehicle(residentId, id);
       setVehicles((prev) => prev.filter((v) => v.id !== id));
-      showSuccess("Vehicle removed successfully");
+      showSuccess(t('myApartment.remove_vehicle_success'));
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to remove vehicle"));
+      showError(getErrorMessage(err, t('myApartment.remove_vehicle_failed')));
       return false;
     }
   };

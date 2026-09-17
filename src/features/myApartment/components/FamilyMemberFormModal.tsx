@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useScrollLock } from "../../../hooks/useScrollLock";
 import FamilyMemberForm from "./FamilyMemberForm";
 import type { FamilyMember, CreateFamilyMemberPayload, UpdateFamilyMemberPayload } from "../types/familyMember.types";
@@ -12,6 +13,7 @@ interface FamilyMemberFormModalProps {
 }
 
 const FamilyMemberFormModal = ({ show, mode, member, loading, onClose, onSubmit }: FamilyMemberFormModalProps) => {
+  const { t } = useTranslation();
   const isEdit = mode === "edit";
   useScrollLock(show);
 
@@ -32,10 +34,10 @@ const FamilyMemberFormModal = ({ show, mode, member, loading, onClose, onSubmit 
           <div className="modal-header border-bottom border-light-subtle px-3 px-sm-4 pt-4 pb-3 align-items-start position-relative">
             <div>
               <h5 className="modal-title fw-bold fs-6" style={{ color: "#1a1f36" }}>
-                {isEdit ? `Edit Family Member — ${member?.name}` : "Add Family Member"}
+                {isEdit ? t('myApartment.edit_family_title', { name: member?.name }) : t('myApartment.add_family_title')}
               </h5>
               <p className="text-muted mb-0" style={{ fontSize: "0.8rem" }}>
-                {isEdit ? "Update the family member's details below." : "Fill in the details to add a family member."}
+                {isEdit ? t('myApartment.edit_family_desc') : t('myApartment.add_family_desc')}
               </p>
             </div>
             <button
@@ -44,7 +46,7 @@ const FamilyMemberFormModal = ({ show, mode, member, loading, onClose, onSubmit 
               style={{ top: 22, right: 22, width: 28, height: 28, border: '1px solid #e9ecef', background: '#fff', fontSize: '1.1rem', borderRadius: '6px' }}
               onClick={onClose}
               disabled={loading}
-              aria-label="Close"
+              aria-label={t('common.close')}
             >
               <i className="bi bi-x" />
             </button>

@@ -1,15 +1,11 @@
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import Select from "../../../components/Select/Select";
 import type { FamilyMember, CreateFamilyMemberPayload, UpdateFamilyMemberPayload, FamilyRelation } from "../types/familyMember.types";
 
 const RELATIONS: FamilyRelation[] = ["Spouse", "Child", "Parent", "Sibling", "Other"];
-
-const schema = Yup.object({
-  name: Yup.string().trim().min(2, "Min 2 characters").required("Name is required"),
-  relation: Yup.string().oneOf(RELATIONS, "Invalid relation").required("Relation is required"),
-  age: Yup.number().integer().min(0).max(120).nullable().optional(),
-});
 
 interface FamilyMemberFormProps {
   member?: FamilyMember | null;
@@ -19,7 +15,27 @@ interface FamilyMemberFormProps {
 }
 
 const FamilyMemberForm = ({ member, loading, onSubmit, onCancel }: FamilyMemberFormProps) => {
+  const { t } = useTranslation();
   const isEdit = !!member;
+
+  const schema = useMemo(
+    () =>
+      Yup.object({
+        name: Yup.string().trim().min(2, t('myApartment.name_min2')).required(t('myApartment.name_req')),
+        relation: Yup.string().oneOf(RELATIONS, t('myApartment.relation_invalid')).required(t('myApartment.relation_req')),
+        age: Yup.number().integer().min(0, t('myApartment.age_invalid')).max(120, t('myApartment.age_invalid')).nullable().optional(),
+      }),
+    [t]
+  );
+
+  const relationOptions = useMemo(
+    () =>
+      RELATIONS.map((rel) => ({
+        value: rel,
+        label: t(`myApartment.relation_${rel.toLowerCase()}`),
+      })),
+    [t]
+  );
 
   const formik = useFormik({
     initialValues: {
@@ -46,13 +62,13 @@ const FamilyMemberForm = ({ member, loading, onSubmit, onCancel }: FamilyMemberF
         {/* Name */}
         <div className="col-12 col-md-4">
           <label className="form-label fw-medium text-secondary small mb-1">
-            Full name <span className="text-danger">*</span>
+            {t('myApartment.full_name')} <span className="text-danger">*</span>
           </label>
           <input
             type="text"
             name="name"
             className={`form-control shadow-none ${formik.touched.name && formik.errors.name ? "is-invalid" : "border-light-subtle"}`}
-            placeholder="Enter full name"
+            placeholder={t('myApartment.full_name_placeholder')}
             value={formik.values.name}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -66,11 +82,11 @@ const FamilyMemberForm = ({ member, loading, onSubmit, onCancel }: FamilyMemberF
         {/* Relation */}
         <div className="col-12 col-md-4">
           <Select
-            label="Relation"
+            label={t('myApartment.relation')}
             name="relation"
             required
-            options={RELATIONS}
-            placeholder="Select relation"
+            options={relationOptions}
+            placeholder={t('myApartment.select_relation')}
             value={formik.values.relation}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -83,12 +99,12 @@ const FamilyMemberForm = ({ member, loading, onSubmit, onCancel }: FamilyMemberF
 
         {/* Age */}
         <div className="col-12 col-md-2">
-          <label className="form-label fw-medium text-secondary small mb-1">Age</label>
+          <label className="form-label fw-medium text-secondary small mb-1">{t('myApartment.age')}</label>
           <input
             type="number"
             name="age"
             className="form-control border-light-subtle shadow-none"
-            placeholder="Age"
+            placeholder={t('myApartment.age_placeholder')}
             value={formik.values.age}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -108,7 +124,7 @@ const FamilyMemberForm = ({ member, loading, onSubmit, onCancel }: FamilyMemberF
               disabled={loading}
               style={{ fontSize: "0.875rem", height: "40px", borderRadius: "8px" }}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
@@ -118,7 +134,7 @@ const FamilyMemberForm = ({ member, loading, onSubmit, onCancel }: FamilyMemberF
             >
               {loading
                 ? <span className="spinner-border spinner-border-sm" />
-                : <><i className={`bi ${isEdit ? "bi-check-lg" : "bi-plus-lg"}`} /> {isEdit ? "Save" : "Add"}</>
+                : <><i className={`bi ${isEdit ? "bi-check-lg" : "bi-plus-lg"}`} /> {isEdit ? t('common.save') : t('myApartment.add_btn')}</>
               }
             </button>
           </div>

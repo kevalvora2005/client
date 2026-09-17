@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import PendingApprovalCard from '../../visitors/components/PendingApprovalCard';
 import VisitorCard from '../../visitors/components/VisitorCard';
 import { useVisitors } from '../../visitors/hooks/useVisitors';
@@ -7,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { useVisitorMutations } from '../../visitors/hooks/useVisitorMutations';
 
 export const VisitorsSection: React.FC = () => {
+  const { t } = useTranslation();
   const { visitors, loading, refetch: fetchVisitors } = useVisitors({ userRole: 'resident', pageSize: 10 });
   const { respond, cancel } = useVisitorMutations();
 
@@ -37,14 +39,14 @@ export const VisitorsSection: React.FC = () => {
             <UserCheck size={20} />
           </div>
           <div>
-            <h5 className="fw-bold mb-0 text-dark">Visitors & Gate Approvals</h5>
-            <p className="text-muted small mb-0">Manage walk-in entry requests and view recent visitor activity</p>
+            <h5 className="fw-bold mb-0 text-dark">{t('myApartment.visitors_header')}</h5>
+            <p className="text-muted small mb-0">{t('myApartment.visitors_desc')}</p>
           </div>
         </div>
 
         <div className="d-flex align-items-center gap-2">
           <Link to="/my-visitors" className="btn btn-primary btn-sm rounded-2 d-flex align-items-center gap-1 px-3 fw-semibold shadow-xs">
-            Go to My Visitors
+            {t('myApartment.go_to_visitors_btn')}
             <ArrowRight size={14} />
           </Link>
         </div>
@@ -54,7 +56,7 @@ export const VisitorsSection: React.FC = () => {
       {pendingVisitors.length > 0 && (
         <div className="mb-4">
           <h6 className="fw-bold text-warning-emphasis mb-2 small text-uppercase" style={{ letterSpacing: '0.05em' }}>
-            Action Required — Walk-In Approvals ({pendingVisitors.length})
+            {t('myApartment.action_required_approvals', { count: pendingVisitors.length })}
           </h6>
           {pendingVisitors.map((visitor) => (
             <PendingApprovalCard
@@ -71,13 +73,13 @@ export const VisitorsSection: React.FC = () => {
       {loading ? (
         <div className="p-3 text-center text-muted small">
           <div className="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-          Loading visitors...
+          {t('myApartment.loading_visitors')}
         </div>
       ) : recentVisitors.length === 0 && pendingVisitors.length === 0 ? (
         <div className="p-4 text-center text-muted bg-light rounded-3">
-          <p className="small mb-2 fw-medium">No visitor logs recorded yet for your apartment.</p>
+          <p className="small mb-2 fw-medium">{t('myApartment.no_visitors_recorded')}</p>
           <Link to="/my-visitors" className="btn btn-sm btn-outline-primary rounded-2 fw-semibold">
-            View My Visitors
+            {t('myApartment.view_visitors_btn')}
           </Link>
         </div>
       ) : (

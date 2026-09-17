@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { familyApi } from "../api/familyApi";
 import type { FamilyMember, CreateFamilyMemberPayload, UpdateFamilyMemberPayload } from "../types/familyMember.types";
 import { getErrorMessage } from "../../../utils/getErrorMessage";
 import { showError, showSuccess } from "../../../utils/toast";
 
 export const useFamilyMembers = (residentId: number) => {
+  const { t } = useTranslation();
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -17,7 +19,7 @@ export const useFamilyMembers = (residentId: number) => {
         const data = await familyApi.getFamilyMembers(residentId);
         if (!cancelled) setFamilyMembers(data);
       } catch (err: unknown) {
-        if (!cancelled) showError(getErrorMessage(err, "Failed to fetch family members"));
+        if (!cancelled) showError(getErrorMessage(err, t('myApartment.fetch_family_failed')));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -25,16 +27,16 @@ export const useFamilyMembers = (residentId: number) => {
 
     fetch();
     return () => { cancelled = true; };
-  }, [residentId]);
+  }, [residentId, t]);
 
   const addFamilyMember = async (payload: CreateFamilyMemberPayload): Promise<boolean> => {
     try {
       const newMember = await familyApi.createFamilyMember(residentId, payload);
       setFamilyMembers((prev) => [...prev, newMember]);
-      showSuccess("Family member added successfully");
+      showSuccess(t('myApartment.add_family_success'));
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to add family member"));
+      showError(getErrorMessage(err, t('myApartment.add_family_failed')));
       return false;
     }
   };
@@ -43,10 +45,10 @@ export const useFamilyMembers = (residentId: number) => {
     try {
       const updated = await familyApi.updateFamilyMember(residentId, id, payload);
       setFamilyMembers((prev) => prev.map((fm) => fm.id === id ? updated : fm));
-      showSuccess("Family member updated successfully");
+      showSuccess(t('myApartment.update_family_success'));
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to update family member"));
+      showError(getErrorMessage(err, t('myApartment.update_family_failed')));
       return false;
     }
   };
@@ -55,10 +57,10 @@ export const useFamilyMembers = (residentId: number) => {
     try {
       await familyApi.deleteFamilyMember(residentId, id);
       setFamilyMembers((prev) => prev.filter((fm) => fm.id !== id));
-      showSuccess("Family member removed successfully");
+      showSuccess(t('myApartment.remove_family_success'));
       return true;
     } catch (err: unknown) {
-      showError(getErrorMessage(err, "Failed to remove family member"));
+      showError(getErrorMessage(err, t('myApartment.remove_family_failed')));
       return false;
     }
   };
