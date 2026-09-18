@@ -7,7 +7,12 @@ export interface NotificationItem {
   type: string;
   title: string;
   body: string;
-  data: Record<string, unknown>;
+  messageKey?: string;
+  data: {
+    key?: string;
+    params?: Record<string, unknown>;
+    [key: string]: unknown;
+  };
   isRead: boolean;
   createdAt: string;
 }

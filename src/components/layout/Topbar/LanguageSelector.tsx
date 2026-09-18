@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe, ChevronDown, Check } from 'lucide-react';
+import useAuth from '../../../hooks/useAuth';
+import { profileApi } from '../../../features/profile/api/profileApi';
 
 interface LanguageOption {
   code: string;
@@ -16,6 +18,7 @@ const LANGUAGES: LanguageOption[] = [
 
 export const LanguageSelector: React.FC = () => {
   const { i18n } = useTranslation();
+  const { isAuthenticated, updateUser } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -31,9 +34,19 @@ export const LanguageSelector: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSelect = (code: string) => {
+  const handleSelect = async (code: string) => {
     i18n.changeLanguage(code);
     setIsOpen(false);
+
+    if (isAuthenticated) {
+      const locale = code === 'gu' ? 'gu-IN' : code === 'hi' ? 'hi-IN' : 'en-IN';
+      try {
+        await profileApi.updateProfile({ preferredLanguage: code, locale });
+        updateUser({ preferredLanguage: code, locale });
+      } catch (err) {
+        console.error('Failed to update language preference in database', err);
+      }
+    }
   };
 
   return (

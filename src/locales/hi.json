@@ -1,5 +1,52 @@
 {
   "locale": "hi-IN",
+  "errors": {
+    "common": {
+      "ERR_NOT_FOUND": "अनुरोधित संसाधन नहीं मिला।",
+      "ERR_UNAUTHORIZED": "प्रमाणीकरण आवश्यक है। कृपया साइन इन करें।",
+      "ERR_FORBIDDEN": "आपको इस क्रिया को करने की अनुमति नहीं है।",
+      "ERR_VALIDATION_FAILED": "कृपया दर्ज किए गए विवरण की जाँच करें और पुनः प्रयास करें।",
+      "ERR_INTERNAL_SERVER_ERROR": "आंतरिक सर्वर त्रुटि। कृपया बाद में पुन: प्रयास करें।"
+    },
+    "auth": {
+      "ERR_INVALID_CREDENTIALS": "अमान्य ईमेल या पासवर्ड।",
+      "ERR_USER_NOT_FOUND": "उपयोगकर्ता खाता नहीं मिला।",
+      "ERR_USER_ALREADY_EXISTS": "इस ईमेल के साथ उपयोगकर्ता पहले से मौजूद है।",
+      "ERR_INACTIVE_USER": "आपका खाता वर्तमान में निष्क्रिय है।",
+      "ERR_REFRESH_TOKEN_NOT_FOUND": "सत्र समाप्त हो गया। कृपया दोबारा लॉगिन करें।"
+    },
+    "visitors": {
+      "ERR_VISITOR_NOT_FOUND": "आगंतुक रिकॉर्ड नहीं मिला।",
+      "ERR_VISITOR_EXPIRED": "आगंतुक पास समाप्त हो गया है।",
+      "ERR_VISITOR_ALREADY_CHECKED_IN": "आगंतुक पहले से ही चेक इन है।",
+      "ERR_VISITOR_ALREADY_CHECKED_OUT": "आगंतुक पहले ही चेक आउट कर चुका है।"
+    },
+    "maintenance": {
+      "ERR_INVOICE_NOT_FOUND": "रखरखाव चालान नहीं मिला।",
+      "ERR_INVOICE_ALREADY_PAID": "इस चालान का भुगतान पहले ही किया जा चुका है।",
+      "ERR_INSUFFICIENT_FUNDS": "अपर्याप्त भुगतान राशि।",
+      "ERR_INVALID_UPI_REF": "अमान्य यूपीआई संदर्भ संख्या प्रदान की गई।"
+    },
+    "amenities": {
+      "ERR_AMENITY_NOT_FOUND": "सुविधा नहीं मिली।",
+      "ERR_BOOKING_NOT_FOUND": "बुकिंग रिकॉर्ड नहीं मिला।",
+      "ERR_BOOKING_SLOT_CONFLICT": "यह स्लॉट पहले से ही बुक है।",
+      "ERR_PAST_BOOKING": "बीते समय के लिए स्लॉट बुक नहीं कर सकते।"
+    },
+    "apartments": {
+      "ERR_APARTMENT_NOT_FOUND": "अपार्टमेंट रिकॉर्ड नहीं मिला।",
+      "ERR_APARTMENT_ALREADY_OCCUPIED": "यह अपार्टमेंट पहले से ही भरा हुआ है।",
+      "ERR_APARTMENT_ALREADY_EXISTS": "इस ब्लॉक और यूनिट वाला अपार्टमेंट पहले से मौजूद है।"
+    },
+    "residents": {
+      "ERR_RESIDENT_NOT_FOUND": "निवासी प्रोफ़ाइल नहीं मिली।",
+      "ERR_RESIDENT_ALREADY_INACTIVE": "निवासी को पहले ही निष्क्रिय चिह्नित किया जा चुका है।"
+    },
+    "complaints": {
+      "ERR_COMPLAINT_NOT_FOUND": "शिकायत नहीं मिली।",
+      "ERR_COMPLAINT_ALREADY_RESOLVED": "इस शिकायत का पहले ही समाधान हो चुका है।"
+    }
+  },
   "nav": {
     "dashboard": "डैशबोर्ड",
     "residents": "निवासी",
@@ -135,6 +182,7 @@
     "full_name_placeholder": "अपना नाम दर्ज करें",
     "phone": "फ़ोन नंबर",
     "phone_placeholder": "10 अंकों का नंबर",
+    "preferred_language": "पसंदीदा भाषा",
     "email_address": "ईमेल पता",
     "email_readonly_note": "ईमेल बदला नहीं जा सकता। यदि आवश्यक हो तो सहायता से संपर्क करें।",
     "save_changes": "परिवर्तन सहेजें",
@@ -732,6 +780,71 @@
     "entry_rejected": "प्रवेश अस्वीकृत",
     "dismiss": "हटाएं",
     "load_more": "और लोड करें"
+  },
+  "notification": {
+    "tenancy_approved": "आपका किरायेदारी अनुरोध स्वीकृत हो गया है। किरायेदार अब अपना खाता सेट कर सकता है।",
+    "tenancy_rejected": "समिति द्वारा आपका किरायेदारी अनुरोध अस्वीकार कर दिया गया।",
+    "tenancy_revoked": "अपार्टमेंट मालिक ने आपकी किरायेदारी समाप्त कर दी है। आपकी खाता पहुंच रद्द कर दी गई है।",
+    "visitor_gate": "{{name}} {{purpose}} के लिए मुख्य द्वार पर है।",
+    "visitor_timeout": "{{name}} के लिए अनुमोदन अनुरोध का समय समाप्त हो गया।",
+    "visitor_checked_in": "{{name}} ने मुख्य द्वार पर चेक-इन किया है।",
+    "visitor_rejected": "{{name}} का प्रवेश अनुरोध अस्वीकार कर दिया गया।",
+    "complaint_lodged": "शिकायत {{ticketNumber}} दर्ज की गई: {{title}}।",
+    "complaint_assigned": "शिकायत {{ticketNumber}} तकनीशियन को सौंपी गई।",
+    "complaint_resolved": "शिकायत {{ticketNumber}} का समाधान हो गया है।",
+    "complaint_status_changed": "शिकायत {{ticketNumber}} की स्थिति {{status}} में अपडेट की गई।",
+    "complaint_comment": "शिकायत {{ticketNumber}} पर {{sender}} का नया संदेश: {{preview}}।",
+    "maintenance_due_soon": "{{dueDate}} को {{amount}} का रखरखाव बकाया देय है।",
+    "maintenance_due_today": "{{amount}} का रखरखाव बकाया आज ही देय है।",
+    "maintenance_overdue": "{{month}} के लिए {{amount}} का रखरखाव बकाया अतिदेय है।",
+    "payment_receipt": "चालान {{invoiceNumber}} के लिए {{amount}} का भुगतान प्राप्त हुआ।",
+    "booking_requested": "निवासी द्वारा {{date}} के लिए {{amenityName}} का अनुरोध किया गया था।",
+    "booking_confirmed": "{{date}} को {{amenityName}} के लिए आपकी बुकिंग की पुष्टि हो गई है।",
+    "booking_rejected": "{{amenityName}} के लिए आपकी बुकिंग अस्वीकार कर दी गई।",
+    "booking_cancelled": "{{date}} को {{amenityName}} की बुकिंग रद्द कर दी गई।",
+    "booking_reminder": "अनुस्मारक: {{amenityName}} के लिए आपकी बुकिंग {{date}} को {{time}} बजे है।",
+    "booking_payment_succeeded": "{{date}} को आपकी {{amenityName}} बुकिंग का भुगतान पूर्ण हो गया है।",
+    "booking_paid_admin": "एक निवासी ने {{date}} को {{amenityName}} बुकिंग के लिए भुगतान किया।",
+    "tenant_request_submitted": "{{tenantName}} को किरायेदार के रूप में प्रस्तावित किया गया है। समिति के वोटों की समीक्षा करें और दर्ज करें।",
+    "notice_created": "नई सूचना जारी: {{title}}",
+    "document_request_created_tenant": "एक किरायेदार ने \"{{docName}}\" के लिए अनुरोध सबमिट किया है।",
+    "document_request_created_owner": "एक मालिक ने \"{{docName}}\" के लिए अनुरोध सबमिट किया है। समीक्षा करें और वोट दर्ज करें।",
+    "document_request_status_changed": "\"{{docName}}\" के लिए आपका दस्तावेज़ अनुरोध बदलकर {{status}} हो गया है।",
+    "document_request_approved": "\"{{docName}}\" के लिए आपका अनुरोध स्वीकृत हो गया है।",
+    "document_request_uploaded": "आपका अनुरोधित दस्तावेज़ \"{{docName}}\" अपलोड हो गया है और डाउनलोड के लिए तैयार है।",
+    "document_request_rejected": "\"{{docName}}\" के लिए आपका अनुरोध अस्वीकार कर दिया गया।",
+    "title": {
+      "visitor_approval_needed": "गेट पर आगंतुक",
+      "visitor_approval_timed_out": "आगंतुक अनुरोध समाप्त",
+      "visitor_checked_in": "आगंतुक आ गए",
+      "visitor_approved": "आगंतुक स्वीकृत",
+      "visitor_rejected": "आगंतुक प्रवेश अस्वीकृत",
+      "complaint_status_changed": "शिकायत अपडेट की गई",
+      "complaint_created": "नई शिकायत",
+      "complaint_comment_added": "शिकायत पर नया संदेश",
+      "notice_created": "नई सूचना",
+      "maintenance_due_soon": "रखरखाव 3 दिनों में देय",
+      "maintenance_due_today": "रखरखाव आज देय है",
+      "maintenance_overdue": "रखरखाव बकाया अतिदेय",
+      "maintenance_overdue_reminder": "रखरखाव अभी भी बकाया",
+      "maintenance_payment_succeeded": "भुगतान सफल",
+      "tenant_request_submitted": "नया किरायेदार अनुरोध",
+      "tenant_request_approved": "किरायेदार अनुरोध स्वीकृत",
+      "tenant_request_rejected": "किरायेदार अनुरोध अस्वीकृत",
+      "tenancy_revoked": "किरायेदारी समाप्त",
+      "document_request_created": "नया दस्तावेज़ अनुरोध",
+      "document_request_status_changed": "दस्तावेज़ अनुरोध अपडेट",
+      "document_request_approved": "दस्तावेज़ अनुरोध स्वीकृत",
+      "document_request_uploaded": "दस्तावेज़ तैयार",
+      "document_request_rejected": "दस्तावेज़ अनुरोध अस्वीकृत",
+      "document_request_cancelled": "दस्तावेज़ अनुरोध रद्द",
+      "booking_requested": "नया बुकिंग अनुरोध",
+      "booking_confirmed": "बुकिंग की पुष्टि हुई",
+      "booking_rejected": "बुकिंग अस्वीकृत",
+      "booking_cancelled": "बुकिंग रद्द",
+      "booking_reminder": "बुकिंग अनुस्मारक",
+      "booking_payment_succeeded": "भुगतान सफल"
+    }
   },
   "notices": {
     "title": "सूचना प्रबंधन",

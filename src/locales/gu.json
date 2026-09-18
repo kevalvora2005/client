@@ -1,5 +1,52 @@
 {
   "locale": "gu-IN",
+  "errors": {
+    "common": {
+      "ERR_NOT_FOUND": "વિનંતી કરેલ સંસાધન મળ્યું નથી.",
+      "ERR_UNAUTHORIZED": "પ્રમાણીકરણ જરૂરી છે. કૃપા કરીને સાઇન ઇન કરો.",
+      "ERR_FORBIDDEN": "તમારી પાસે આ ક્રિયા કરવાની પરવાનગી નથી.",
+      "ERR_VALIDATION_FAILED": "કૃપા કરીને દાખલ કરેલી વિગતો તપાસો અને ફરી પ્રયાસ કરો.",
+      "ERR_INTERNAL_SERVER_ERROR": "આંતરિક સર્વર ભૂલ. કૃપા કરીને પછીથી ફરી પ્રયાસ કરો."
+    },
+    "auth": {
+      "ERR_INVALID_CREDENTIALS": "અમાન્ય ઈમેલ અથવા પાસવર્ડ.",
+      "ERR_USER_NOT_FOUND": "વપરાશકર્તા ખાતું મળ્યું નથી.",
+      "ERR_USER_ALREADY_EXISTS": "આ ઈમેલ સાથે વપરાશકર્તા પહેલેથી જ અસ્તિત્વમાં છે.",
+      "ERR_INACTIVE_USER": "તમારું ખાતું હાલમાં નિષ્ક્રિય છે.",
+      "ERR_REFRESH_TOKEN_NOT_FOUND": "સત્ર સમાપ્ત થઈ ગયું છે. કૃપા કરીને ફરી લૉગિન કરો."
+    },
+    "visitors": {
+      "ERR_VISITOR_NOT_FOUND": "મુલાકાતી રેકોર્ડ મળ્યો નથી.",
+      "ERR_VISITOR_EXPIRED": "મુલાકાતી પાસ સમાપ્ત થઈ ગયો છે.",
+      "ERR_VISITOR_ALREADY_CHECKED_IN": "મુલાકાતી પહેલેથી જ ચેક ઇન થયેલ છે.",
+      "ERR_VISITOR_ALREADY_CHECKED_OUT": "મુલાકાતી પહેલાથી જ ચેક આઉટ થઈ ગયા છે."
+    },
+    "maintenance": {
+      "ERR_INVOICE_NOT_FOUND": "મેન્ટેનન્સ ઇનવોઇસ મળ્યું નથી.",
+      "ERR_INVOICE_ALREADY_PAID": "આ ઇનવોઇસ પહેલેથી જ ચૂકવવામાં આવ્યું છે.",
+      "ERR_INSUFFICIENT_FUNDS": "અપૂરતી ચુકવણી રકમ.",
+      "ERR_INVALID_UPI_REF": "અમાન્ય યુપીઆઈ સંદર્ભ નંબર આપવામાં આવ્યો છે."
+    },
+    "amenities": {
+      "ERR_AMENITY_NOT_FOUND": "સુવિધા મળી નથી.",
+      "ERR_BOOKING_NOT_FOUND": "બુકિંગ રેકોર્ડ મળ્યો નથી.",
+      "ERR_BOOKING_SLOT_CONFLICT": "આ સ્લોટ પહેલેથી જ બુક થયેલ છે.",
+      "ERR_PAST_BOOKING": "ભૂતકાળના સમય માટે સ્લોટ બુક કરી શકાતો નથી."
+    },
+    "apartments": {
+      "ERR_APARTMENT_NOT_FOUND": "એપાર્ટમેન્ટ રેકોર્ડ મળ્યો નથી.",
+      "ERR_APARTMENT_ALREADY_OCCUPIED": "આ એપાર્ટમેન્ટ પહેલેથી જ રોકાયેલું છે.",
+      "ERR_APARTMENT_ALREADY_EXISTS": "આ બ્લોક અને યુનિટ સાથેનું એપાર્ટમેન્ટ પહેલેથી જ અસ્તિત્વમાં છે."
+    },
+    "residents": {
+      "ERR_RESIDENT_NOT_FOUND": "રહેવાસી પ્રોફાઇલ મળી નથી.",
+      "ERR_RESIDENT_ALREADY_INACTIVE": "રહેવાસી પહેલેથી જ નિષ્ક્રિય તરીકે ચિહ્નિત થયેલ છે."
+    },
+    "complaints": {
+      "ERR_COMPLAINT_NOT_FOUND": "ફરિયાદ મળી નથી.",
+      "ERR_COMPLAINT_ALREADY_RESOLVED": "આ ફરિયાદનો ઉકેલ પહેલેથી જ આવી ગયો છે."
+    }
+  },
   "nav": {
     "dashboard": "ડેશબોર્ડ",
     "residents": "રહેવાસીઓ",
@@ -135,6 +182,7 @@
     "full_name_placeholder": "તમારું નામ દાખલ કરો",
     "phone": "ફોન નંબર",
     "phone_placeholder": "10 અંકનો નંબર",
+    "preferred_language": "પસંદગીની ભાષા",
     "email_address": "ઇમેઇલ સરનામું",
     "email_readonly_note": "ઇમેઇલ બદલી શકાતો નથી. જો જરૂર હોય તો સપોર્ટનો સંપર્ક કરો.",
     "save_changes": "ફેરફારો સાચવો",
@@ -732,6 +780,71 @@
     "entry_rejected": "પ્રવેશ અસ્વીકાર",
     "dismiss": "દૂર કરો",
     "load_more": "વધુ લોડ કરો"
+  },
+  "notification": {
+    "tenancy_approved": "તમારી ભાડુઆત વિનંતી મંજૂર કરવામાં આવી છે. ભાડુઆત હવે તેમનું એકાઉન્ટ સેટ કરી શકે છે.",
+    "tenancy_rejected": "સમિતિ દ્વારા તમારી ભાડુઆત વિનંતી નકારવામાં આવી હતી.",
+    "tenancy_revoked": "એપાર્ટમેન્ટ માલિકે તમારી ભાડુઆત સમાપ્ત કરી દીધી છે. તમારો એકાઉન્ટ એક્સેસ રદ કરવામાં આવ્યો છે.",
+    "visitor_gate": "{{name}} {{purpose}} માટે મુખ્ય દરવાજે છે.",
+    "visitor_timeout": "{{name}} માટે મંજૂરી વિનંતીનો સમય સમાપ્ત થઈ ગયો છે.",
+    "visitor_checked_in": "{{name}} એ મુખ્ય દરવાજે ચેક-ઇન કર્યું છે.",
+    "visitor_rejected": "{{name}} ની પ્રવેશ વિનંતી નકારવામાં આવી હતી.",
+    "complaint_lodged": "ફરિયાદ {{ticketNumber}} નોંધાઈ: {{title}}.",
+    "complaint_assigned": "ફરિયાદ {{ticketNumber}} ટેકનિશિયનને સોંપવામાં આવી.",
+    "complaint_resolved": "ફરિયાદ {{ticketNumber}} નો ઉકેલ આવ્યો છે.",
+    "complaint_status_changed": "ફરિયાદ {{ticketNumber}} ની સ્થિતિ {{status}} કરવામાં આવી છે.",
+    "complaint_comment": "ફરિયાદ {{ticketNumber}} પર {{sender}} નો નવો સંદેશ: {{preview}}.",
+    "maintenance_due_soon": "{{dueDate}} ના રોજ {{amount}} નું મેન્ટેનન્સ બાકી છે.",
+    "maintenance_due_today": "{{amount}} નું મેન્ટેનન્સ આજે જ ભરવાનું છે.",
+    "maintenance_overdue": "{{month}} માટે {{amount}} નું મેન્ટેનન્સ બાકી મુદત વીતી ગઈ છે.",
+    "payment_receipt": "ઇનવોઇસ {{invoiceNumber}} માટે {{amount}} ની ચુકવણી પ્રાપ્ત થઈ છે.",
+    "booking_requested": "રહેવાસી દ્વારા {{date}} માટે {{amenityName}} ની વિનંતી કરવામાં આવી હતી.",
+    "booking_confirmed": "{{date}} ના રોજ {{amenityName}} માટે તમારું બુકિંગ કન્ફર્મ થયું છે.",
+    "booking_rejected": "{{amenityName}} માટે તમારું બુકિંગ નકારવામાં આવ્યું હતું.",
+    "booking_cancelled": "{{date}} ના રોજ {{amenityName}} નું બુકિંગ રદ કરવામાં આવ્યું હતું.",
+    "booking_reminder": "યાદ અપાવવા માટે: {{amenityName}} માટે તમારું બુકિંગ {{date}} ના રોજ {{time}} વાગ્યે છે.",
+    "booking_payment_succeeded": "{{date}} ના રોજ તમારા {{amenityName}} બુકિંગની ચુકવણી સફળતાપૂર્વક પૂર્ણ થઈ ગઈ છે.",
+    "booking_paid_admin": "એક રહેવાસીએ {{date}} ના રોજ {{amenityName}} બુકિંગ માટે ચુકવણી કરી.",
+    "tenant_request_submitted": "{{tenantName}} ને ભાડુઆત તરીકે પ્રસ્તાવિત કરવામાં આવ્યા છે. સમિતિના મતોની સમીક્ષા કરો અને રેકોર્ડ કરો.",
+    "notice_created": "નવી સૂચના પ્રસિદ્ધ થઈ: {{title}}",
+    "document_request_created_tenant": "એક ભાડુઆતે \"{{docName}}\" માટે વિનંતી સબમિટ કરી છે.",
+    "document_request_created_owner": "એક માલિકે \"{{docName}}\" માટે વિનંતી સબમિટ કરી છે. સમીક્ષા કરો અને મત રેકોર્ડ કરો.",
+    "document_request_status_changed": "\"{{docName}}\" માટેની તમારી દસ્તાવેજ વિનંતી બદલાઈને {{status}} થઈ છે.",
+    "document_request_approved": "\"{{docName}}\" માટેની તમારી વિનંતી સ્વીકારવામાં આવી છે.",
+    "document_request_uploaded": "તમારો વિનંતી કરેલ દસ્તાવેજ \"{{docName}}\" અપલોડ થઈ ગયો છે અને ડાઉનલોડ માટે તૈયાર છે.",
+    "document_request_rejected": "\"{{docName}}\" માટેની તમારી વિનંતી નકારવામાં આવી હતી.",
+    "title": {
+      "visitor_approval_needed": "ગેટ પર મુલાકાતી",
+      "visitor_approval_timed_out": "મુલાકાતી વિનંતી સમયસમાપ્ત",
+      "visitor_checked_in": "મુલાકાતી આવી ગયા",
+      "visitor_approved": "મુલાકાતી સ્વીકૃત",
+      "visitor_rejected": "મુલાકાતી પ્રવેશ અસ્વીકૃત",
+      "complaint_status_changed": "ફરિયાદ અપડેટ કરવામાં આવી",
+      "complaint_created": "નવી ફરિયાદ",
+      "complaint_comment_added": "ફરિયાદ પર નવો સંદેશ",
+      "notice_created": "નવી સૂચના",
+      "maintenance_due_soon": "મેન્ટેનન્સ 3 દિવસમાં બાકી",
+      "maintenance_due_today": "મેન્ટેનન્સ આજે બાકી છે",
+      "maintenance_overdue": "મેન્ટેનન્સ અતિદેય છે",
+      "maintenance_overdue_reminder": "મેન્ટેનન્સ હજુ પણ બાકી છે",
+      "maintenance_payment_succeeded": "ચુકવણી સફળ",
+      "tenant_request_submitted": "નવો ભાડુઆત અનુરોધ",
+      "tenant_request_approved": "ભાડુઆત અનુરોધ સ્વીકૃત",
+      "tenant_request_rejected": "ભાડુઆત અનુરોધ અસ્વીકૃત",
+      "tenancy_revoked": "ભાડુઆત પદ રદ",
+      "document_request_created": "નવો દસ્તાવેજ અનુરોધ",
+      "document_request_status_changed": "દસ્તાવેજ અનુરોધ અપડેટ",
+      "document_request_approved": "દસ્તાવેજ અનુરોધ સ્વીકૃત",
+      "document_request_uploaded": "દસ્તાવેજ તૈયાર",
+      "document_request_rejected": "દસ્તાવેજ અનુરોધ અસ્વીકૃત",
+      "document_request_cancelled": "દસ્તાવેજ અનુરોધ રદ",
+      "booking_requested": "નવો બુકિંગ અનુરોધ",
+      "booking_confirmed": "બુકિંગ કન્ફર્મ થયું",
+      "booking_rejected": "બુકિંગ અસ્વીકૃત",
+      "booking_cancelled": "બુકિંગ રદ થયું",
+      "booking_reminder": "બુકિંગ યાદ અપાવનાર",
+      "booking_payment_succeeded": "ચુકવણી સફળ"
+    }
   },
   "notices": {
     "title": "સૂચના સંચાલન",

@@ -24,6 +24,7 @@ import useAuth from '../../../hooks/useAuth';
 import { notificationApi, type NotificationItem } from '../../../features/notifications/api/notificationApi';
 import VisitorApprovalDialog from '../../../features/visitors/components/VisitorApprovalDialog';
 import { formatRelativeTime } from '../../../utils/formatRelativeTime';
+import { getDocTypeLabel } from '../../../features/documents/utils/getDocTypeLabel';
 
 const ICON_MAP: Record<string, typeof FileText> = {
   visitor_approval_needed: ShieldAlert,
@@ -448,6 +449,22 @@ const NotificationBell = () => {
     setLoadingMore(false);
   };
 
+  const localizeNotificationParams = (params?: Record<string, unknown>): Record<string, unknown> => {
+    if (!params) return {};
+    const localized = { ...params };
+    if (typeof localized.docName === 'string') {
+      localized.docName = getDocTypeLabel(localized.docName, t);
+    }
+    if (typeof localized.status === 'string') {
+      const statusKey = `documents.status_${localized.status.toLowerCase()}`;
+      const translated = t(statusKey, { defaultValue: localized.status });
+      if (translated !== statusKey) {
+        localized.status = translated;
+      }
+    }
+    return localized;
+  };
+
   const iconFor = (type: string) => ICON_MAP[type] ?? FileText;
   const classesFor = (type: string) => CLASS_MAP[type] ?? 'bg-body-secondary text-body-secondary';
 
@@ -544,10 +561,12 @@ const NotificationBell = () => {
 
                     <div className="flex-grow-1 min-w-0">
                       <p className="mb-0 fw-semibold text-dark text-truncate" style={{ fontSize: '0.85rem' }}>
-                        {n.title}
+                        {t(`notification.title.${n.type}`, { defaultValue: n.title })}
                       </p>
                       <p className="mb-0 text-secondary" style={{ fontSize: '0.78rem', lineHeight: '1.4', marginTop: '2px', wordBreak: 'break-word' }}>
-                        {n.body}
+                        {n.messageKey
+                          ? t(n.messageKey, { ...localizeNotificationParams(n.data?.params), defaultValue: n.body })
+                          : n.body}
                       </p>
                       <p className="mb-0 text-muted" style={{ fontSize: '0.7rem', marginTop: '4px' }}>
                         {formatRelativeTime(n.createdAt, i18n.language)}

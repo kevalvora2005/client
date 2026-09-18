@@ -1,5 +1,52 @@
 {
   "locale": "en-IN",
+  "errors": {
+    "common": {
+      "ERR_NOT_FOUND": "Requested resource was not found.",
+      "ERR_UNAUTHORIZED": "Authentication required. Please sign in.",
+      "ERR_FORBIDDEN": "You do not have permission to perform this action.",
+      "ERR_VALIDATION_FAILED": "Please check the entered details and try again.",
+      "ERR_INTERNAL_SERVER_ERROR": "Internal server error. Please try again later."
+    },
+    "auth": {
+      "ERR_INVALID_CREDENTIALS": "Invalid email or password.",
+      "ERR_USER_NOT_FOUND": "User account not found.",
+      "ERR_USER_ALREADY_EXISTS": "User already exists with this email.",
+      "ERR_INACTIVE_USER": "Your account is currently inactive.",
+      "ERR_REFRESH_TOKEN_NOT_FOUND": "Session expired. Please log in again."
+    },
+    "visitors": {
+      "ERR_VISITOR_NOT_FOUND": "Visitor record not found.",
+      "ERR_VISITOR_EXPIRED": "Visitor pass has expired.",
+      "ERR_VISITOR_ALREADY_CHECKED_IN": "Visitor is already checked in.",
+      "ERR_VISITOR_ALREADY_CHECKED_OUT": "Visitor has already checked out."
+    },
+    "maintenance": {
+      "ERR_INVOICE_NOT_FOUND": "Maintenance invoice not found.",
+      "ERR_INVOICE_ALREADY_PAID": "This invoice has already been paid.",
+      "ERR_INSUFFICIENT_FUNDS": "Insufficient payment amount.",
+      "ERR_INVALID_UPI_REF": "Invalid UPI reference number provided."
+    },
+    "amenities": {
+      "ERR_AMENITY_NOT_FOUND": "Amenity not found.",
+      "ERR_BOOKING_NOT_FOUND": "Booking record not found.",
+      "ERR_BOOKING_SLOT_CONFLICT": "This slot is already booked.",
+      "ERR_PAST_BOOKING": "Cannot book slots in the past."
+    },
+    "apartments": {
+      "ERR_APARTMENT_NOT_FOUND": "Apartment not found.",
+      "ERR_APARTMENT_ALREADY_OCCUPIED": "This apartment is already occupied.",
+      "ERR_APARTMENT_ALREADY_EXISTS": "An apartment with this block and unit already exists."
+    },
+    "residents": {
+      "ERR_RESIDENT_NOT_FOUND": "Resident profile not found.",
+      "ERR_RESIDENT_ALREADY_INACTIVE": "Resident is already marked inactive."
+    },
+    "complaints": {
+      "ERR_COMPLAINT_NOT_FOUND": "Complaint not found.",
+      "ERR_COMPLAINT_ALREADY_RESOLVED": "This complaint has already been resolved."
+    }
+  },
   "nav": {
     "dashboard": "Dashboard",
     "residents": "Residents",
@@ -135,6 +182,7 @@
     "full_name_placeholder": "Enter your name",
     "phone": "Phone",
     "phone_placeholder": "10 digit number",
+    "preferred_language": "Preferred Language",
     "email_address": "Email address",
     "email_readonly_note": "Email cannot be changed. Contact support if needed.",
     "save_changes": "Save changes",
@@ -732,6 +780,71 @@
     "entry_rejected": "Entry Rejected",
     "dismiss": "Dismiss",
     "load_more": "Load more"
+  },
+  "notification": {
+    "tenancy_approved": "Your tenant request was approved. The tenant can now set up their account.",
+    "tenancy_rejected": "Your tenant request was rejected by the committee.",
+    "tenancy_revoked": "The apartment owner has ended your tenancy. Your account access has been revoked.",
+    "visitor_gate": "{{name}} is at the gate for {{purpose}}.",
+    "visitor_timeout": "Approval request for {{name}} timed out.",
+    "visitor_checked_in": "{{name}} has checked in at the gate.",
+    "visitor_rejected": "{{name}}'s entry request was rejected.",
+    "complaint_lodged": "Complaint {{ticketNumber}} lodged: {{title}}.",
+    "complaint_assigned": "Complaint {{ticketNumber}} assigned to technician.",
+    "complaint_resolved": "Complaint {{ticketNumber}} has been resolved.",
+    "complaint_status_changed": "Complaint {{ticketNumber}} status updated to {{status}}.",
+    "complaint_comment": "New message on complaint {{ticketNumber}} from {{sender}}: {{preview}}.",
+    "maintenance_due_soon": "Maintenance dues of {{amount}} are due on {{dueDate}}.",
+    "maintenance_due_today": "Maintenance dues of {{amount}} are due today.",
+    "maintenance_overdue": "Maintenance dues of {{amount}} for {{month}} are overdue.",
+    "payment_receipt": "Payment of {{amount}} received for invoice {{invoiceNumber}}.",
+    "booking_requested": "{{amenityName}} was requested by a resident for {{date}}.",
+    "booking_confirmed": "Your booking for {{amenityName}} on {{date}} is confirmed.",
+    "booking_rejected": "Your booking for {{amenityName}} was rejected.",
+    "booking_cancelled": "A booking for {{amenityName}} on {{date}} was cancelled.",
+    "booking_reminder": "Reminder: your booking for {{amenityName}} is on {{date}} at {{time}}.",
+    "booking_payment_succeeded": "Payment for your {{amenityName}} booking on {{date}} is complete.",
+    "booking_paid_admin": "A resident paid for the {{amenityName}} booking on {{date}}.",
+    "tenant_request_submitted": "{{tenantName}} has been proposed as a tenant. Review and record committee votes.",
+    "notice_created": "New notice posted: {{title}}",
+    "document_request_created_tenant": "A tenant has submitted a request for \"{{docName}}\".",
+    "document_request_created_owner": "An owner has submitted a request for \"{{docName}}\". Review and record votes.",
+    "document_request_status_changed": "Your document request for \"{{docName}}\" status changed to {{status}}.",
+    "document_request_approved": "Your request for \"{{docName}}\" has been approved.",
+    "document_request_uploaded": "Your requested document \"{{docName}}\" has been uploaded and is ready to download.",
+    "document_request_rejected": "Your request for \"{{docName}}\" was rejected.",
+    "title": {
+      "visitor_approval_needed": "Visitor at the gate",
+      "visitor_approval_timed_out": "Visitor request expired",
+      "visitor_checked_in": "Visitor arrived",
+      "visitor_approved": "Visitor Approved",
+      "visitor_rejected": "Visitor Entry Rejected",
+      "complaint_status_changed": "Complaint Updated",
+      "complaint_created": "New Complaint",
+      "complaint_comment_added": "New Complaint Message",
+      "notice_created": "New Notice",
+      "maintenance_due_soon": "Maintenance due in 3 days",
+      "maintenance_due_today": "Maintenance due today",
+      "maintenance_overdue": "Maintenance overdue",
+      "maintenance_overdue_reminder": "Maintenance still overdue",
+      "maintenance_payment_succeeded": "Payment Successful",
+      "tenant_request_submitted": "New Tenant Request",
+      "tenant_request_approved": "Tenant Request Approved",
+      "tenant_request_rejected": "Tenant Request Rejected",
+      "tenancy_revoked": "Tenancy Revoked",
+      "document_request_created": "New Document Request",
+      "document_request_status_changed": "Document Request Updated",
+      "document_request_approved": "Document Request Approved",
+      "document_request_uploaded": "Document Ready",
+      "document_request_rejected": "Document Request Rejected",
+      "document_request_cancelled": "Document Request Cancelled",
+      "booking_requested": "New Booking Request",
+      "booking_confirmed": "Booking Confirmed",
+      "booking_rejected": "Booking Rejected",
+      "booking_cancelled": "Booking Cancelled",
+      "booking_reminder": "Booking Reminder",
+      "booking_payment_succeeded": "Payment Successful"
+    }
   },
   "notices": {
     "title": "Notices Management",
