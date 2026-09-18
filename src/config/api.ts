@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosResponse } from 'axios';
 import { connectSocket } from '../services/socket';
+import i18n from '../config/i18n';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -44,6 +45,7 @@ api.interceptors.request.use(
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+    config.headers['Accept-Language'] = i18n.language || 'en';
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type'];
     }
