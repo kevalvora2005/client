@@ -28,7 +28,7 @@ export const useDocumentRequestMutations = (onSuccess?: () => void) => {
   const uploadDocument = async (requestId: number, file: File): Promise<boolean> => {
     setUploading(true);
     try {
-      await documentRequestApi.uploadDocument(requestId, file);
+      await documentRequestApi.uploadDocumentViaS3(requestId, file);
       showSuccess(t("documents.toast_upload_success"));
       onSuccess?.();
       return true;

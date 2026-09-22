@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import useAuth from "../../../hooks/useAuth";
 import { useDocumentRequests } from "../hooks/useDocumentRequests";
 import { useDocumentRequestMutations } from "../hooks/useDocumentRequestMutations";
+import { documentRequestApi } from "../api/documentRequestApi";
 import DocumentRequestTable from "../components/DocumentRequestTable";
 import RequestDocumentModal from "../components/RequestDocumentModal";
 import UploadDocumentModal from "../components/UploadDocumentModal";
@@ -33,6 +34,16 @@ const DocumentsPage = () => {
   const [uploadTarget, setUploadTarget] = useState<DocumentRequestItem | null>(null);
   const [rejectTarget, setRejectTarget] = useState<DocumentRequestItem | null>(null);
   const [cancelTargetId, setCancelTargetId] = useState<number | null>(null);
+
+  const handleDownload = async (item: DocumentRequestItem) => {
+    try {
+      const downloadUrl = await documentRequestApi.getDownloadUrl(item.id);
+      window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      console.error('Failed to get download URL:', error);
+      alert('Failed to generate download link. Please try again.');
+    }
+  };
 
   const currentList = isAdmin ? receivedRequests : (activeTab === "my-requests" ? myRequests : receivedRequests);
   const totalCount = currentList.length;
@@ -97,6 +108,7 @@ const DocumentsPage = () => {
           onReject={setRejectTarget}
           onCancel={setCancelTargetId}
           onViewDetail={(item) => navigate(`/documents/${item.id}`)}
+          onDownload={handleDownload}
         />
 
         {(!loading && totalCount > 0) && (

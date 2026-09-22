@@ -49,6 +49,16 @@ export interface CreateDocumentRequestPayload {
   note?: string;
 }
 
+export interface PresignedPostResponse {
+  url: string;
+  fields: Record<string, string>;
+  key: string;
+}
+
+export interface DownloadUrlResponse {
+  downloadUrl: string;
+}
+
 export interface CommitteeMember {
   id: number;
   fullName: string;

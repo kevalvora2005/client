@@ -10,6 +10,7 @@ interface DocumentRowActionsProps {
   onReject: (item: DocumentRequestItem) => void;
   onCancel: (id: number) => void;
   onViewDetail: (item: DocumentRequestItem) => void;
+  onDownload: (item: DocumentRequestItem) => Promise<void>;
 }
 
 const DocumentRowActions = ({
@@ -20,6 +21,7 @@ const DocumentRowActions = ({
   onReject,
   onCancel,
   onViewDetail,
+  onDownload,
 }: DocumentRowActionsProps) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -106,16 +108,17 @@ const DocumentRowActions = ({
 
           {showDownload && item.documentUrl && (
             <li>
-              <a
-                href={item.documentUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="dropdown-item d-flex align-items-center gap-2 px-3 py-2 rounded-2 small text-dark text-decoration-none"
-                onClick={() => setIsOpen(false)}
-                style={{ fontSize: '0.85rem' }}
+              <button
+                type="button"
+                className="dropdown-item d-flex align-items-center gap-2 px-3 py-2 rounded-2 small text-dark"
+                onClick={async () => {
+                  setIsOpen(false);
+                  await onDownload(item);
+                }}
+                style={{ fontSize: '0.85rem', background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}
               >
                 <i className="bi bi-download text-muted" /> {t('documents.download')}
-              </a>
+              </button>
             </li>
           )}
 

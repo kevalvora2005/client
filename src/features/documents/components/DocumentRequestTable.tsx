@@ -16,6 +16,7 @@ interface DocumentRequestTableProps {
   onReject: (item: DocumentRequestItem) => void;
   onCancel: (id: number) => void;
   onViewDetail: (item: DocumentRequestItem) => void;
+  onDownload: (item: DocumentRequestItem) => Promise<void>;
 }
 
 const DocumentRequestTable = ({
@@ -27,6 +28,7 @@ const DocumentRequestTable = ({
   onReject,
   onCancel,
   onViewDetail,
+  onDownload,
 }: DocumentRequestTableProps) => {
   const { t } = useTranslation();
 
@@ -172,12 +174,13 @@ const DocumentRequestTable = ({
               onReject={onReject}
               onCancel={onCancel}
               onViewDetail={onViewDetail}
+              onDownload={onDownload}
             />
           </div>
         ),
       },
     ],
-    [t, equalWidth, isSent, isAdmin, onUpload, onReject, onCancel, onViewDetail, statusBadgeMap]
+    [t, equalWidth, isSent, isAdmin, onUpload, onReject, onCancel, onViewDetail, onDownload, statusBadgeMap]
   );
 
   return (
