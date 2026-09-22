@@ -28,8 +28,6 @@ export const documentRequestApi = {
     return res.data.data;
   },
 
-  // ─── S3 Direct Upload (Presigned POST) ──────────────────────────
-
   getUploadUrl: async (requestId: number, fileName: string, contentType: string): Promise<PresignedPostResponse> => {
     const res = await api.post<{ success: boolean; data: PresignedPostResponse }>(
       `/document-requests/${requestId}/upload-url`,
